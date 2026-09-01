@@ -116,7 +116,7 @@ function Home() {
                             {humanTime(openedAt)}
                           </span>
                         }
-                        onOpen={() =>
+                        onActivate={() =>
                           void navigate({ to: "/page/$pageId", params: { pageId: page.id } })
                         }
                       />

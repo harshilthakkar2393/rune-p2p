@@ -1,11 +1,19 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Add01Icon, Delete02Icon, FilterMailIcon, Sorting01Icon } from "@hugeicons/core-free-icons";
+import {
+  Add01Icon,
+  ArrowUpRight01Icon,
+  CheckmarkCircle02Icon,
+  Delete02Icon,
+  FilterMailIcon,
+  Sorting01Icon,
+} from "@hugeicons/core-free-icons";
 
 import { FolderGlyph } from "@/components/folder-glyph";
-import { PageCard } from "@/components/page-card";
+import { PageCard, type CardAction } from "@/components/page-card";
 import { useNodes } from "@/hooks/use-index";
+import { useSelection } from "@/hooks/use-selection";
 import { composeTargetFolderId } from "@/lib/compose-target";
 import { getDeviceName } from "@/lib/device";
 import { folderColorValue } from "@/lib/folder-colors";
@@ -56,7 +64,6 @@ function LibraryView() {
   const nodes = useNodes();
   const navigate = useNavigate();
   const [prefs, setPrefs] = useState<LibraryPrefs>(() => readLibraryPrefs());
-  const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [folderFilter, setFolderFilter] = useState<string | null>(null);
   const [dateFilter, setDateFilter] = useState<DatePresetId | null>(null);
   const [randomSeed] = useState(() => Date.now() % 233280);
@@ -91,25 +98,17 @@ function LibraryView() {
     return seededShuffle(live, randomSeed);
   }, [nodes, folderFilter, dateFilter, prefs.sort, randomSeed]);
 
-  const toggleSelect = (id: string) => {
-    setSelected((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
-
-  const clearSelection = () => setSelected(new Set());
+  const selection = useSelection(pages.map((page) => page.id));
+  const { selected, selecting } = selection;
 
   const trashSelected = () => {
     for (const id of selected) trashNode(getNodesMap(), id);
-    clearSelection();
+    selection.clear();
   };
 
   const moveSelected = (folderId: string) => {
     for (const id of selected) moveNode(getNodesMap(), id, folderId);
-    clearSelection();
+    selection.clear();
   };
 
   const newPage = () => {
@@ -126,6 +125,17 @@ function LibraryView() {
     void navigate({ to: "/page/$pageId", params: { pageId } });
   };
 
+  const pageActions = (pageId: string): CardAction[] => [
+    { label: "Open", icon: ArrowUpRight01Icon, onSelect: () => openPage(pageId) },
+    "separator",
+    {
+      label: "Move to trash",
+      icon: Delete02Icon,
+      destructive: true,
+      onSelect: () => void trashNode(getNodesMap(), pageId),
+    },
+  ];
+
   const activeFolder = folderFilter !== null ? folderById.get(folderFilter) : undefined;
 
   return (
@@ -136,6 +146,15 @@ function LibraryView() {
           {pages.length} {pages.length === 1 ? "page" : "pages"}
         </span>
         <div className="ml-auto flex items-center gap-1.5 self-center">
+          <Button
+            variant={selecting ? "secondary" : "ghost"}
+            size="icon"
+            aria-label="Select"
+            className={selecting ? undefined : "text-muted-foreground"}
+            onClick={selection.toggleMode}
+          >
+            <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={1.75} />
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
@@ -254,14 +273,17 @@ function LibraryView() {
                   page={page}
                   folder={page.folderId !== null ? folderById.get(page.folderId) : undefined}
                   selected={selected.has(page.id)}
-                  selecting={selected.size > 0}
+                  selecting={selecting}
                   trailing={
                     <span className="font-mono text-[11px] text-muted-foreground">
                       {humanTime(page.updatedAt)}
                     </span>
                   }
-                  onSelectToggle={() => toggleSelect(page.id)}
-                  onOpen={() => openPage(page.id)}
+                  actions={pageActions(page.id)}
+                  onSelectToggle={() => selection.toggle(page.id)}
+                  onActivate={(event) =>
+                    selection.handleCardClick(page.id, event, () => openPage(page.id))
+                  }
                 />
               ))}
               <Card
@@ -317,7 +339,7 @@ function LibraryView() {
             variant="ghost"
             size="sm"
             className="font-normal text-muted-foreground"
-            onClick={clearSelection}
+            onClick={selection.clear}
           >
             Clear
           </Button>

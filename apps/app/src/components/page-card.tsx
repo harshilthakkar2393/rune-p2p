@@ -1,17 +1,65 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Tick02Icon } from "@hugeicons/core-free-icons";
+import type { IconSvgElement } from "@hugeicons/react";
+import { MoreHorizontalIcon, Tick02Icon } from "@hugeicons/core-free-icons";
 
 import { getPageExcerpt } from "@/lib/excerpt";
 import { folderColorValue } from "@/lib/folder-colors";
 import type { Folder, Page } from "@/lib/schema";
 import { Card } from "@rune/ui/components/card";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuGroup,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@rune/ui/components/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@rune/ui/components/dropdown-menu";
 import { cn } from "@rune/ui/lib/utils";
 
+export type CardAction =
+  | {
+      label: string;
+      icon: IconSvgElement;
+      onSelect: () => void;
+      destructive?: boolean;
+    }
+  | "separator";
+
+function actionItems(actions: CardAction[], kind: "context" | "dropdown"): ReactNode {
+  const Item = kind === "context" ? ContextMenuItem : DropdownMenuItem;
+  const Separator = kind === "context" ? ContextMenuSeparator : DropdownMenuSeparator;
+  return actions.map((action, index) =>
+    action === "separator" ? (
+      <Separator key={`sep-${index}`} />
+    ) : (
+      <Item
+        key={action.label}
+        variant={action.destructive ? "destructive" : "default"}
+        onClick={action.onSelect}
+      >
+        <HugeiconsIcon icon={action.icon} strokeWidth={1.75} />
+        {action.label}
+      </Item>
+    ),
+  );
+}
+
 /**
- * THE page card, app-wide (home, library, trash): fixed 144px, uniform
- * p-4, title 1 line, excerpt exactly 2 reserved lines, bottom row =
- * folder tag left + trailing meta right, pinned to the bottom edge.
+ * THE page card, app-wide: fixed 144px, uniform p-4, 1-line title,
+ * 2 reserved excerpt lines, folder tag + pinned trailing meta.
+ * Interactions: hover check circle (top-left) enters selection; hover ⋯
+ * (top-right) and right-click open the same quick-action menu; the card
+ * click goes to onActivate with the raw event so pages can implement
+ * ⌘-click toggle and shift-click ranges.
  */
 export function PageCard({
   page,
@@ -20,8 +68,9 @@ export function PageCard({
   selected = false,
   selecting = false,
   dim = false,
+  actions,
   onSelectToggle,
-  onOpen,
+  onActivate,
 }: {
   page: Page;
   folder: Folder | undefined;
@@ -29,8 +78,9 @@ export function PageCard({
   selected?: boolean;
   selecting?: boolean;
   dim?: boolean;
+  actions?: CardAction[];
   onSelectToggle?: () => void;
-  onOpen?: () => void;
+  onActivate?: (event: MouseEvent) => void;
 }) {
   const [excerpt, setExcerpt] = useState<string | null>(null);
 
@@ -46,23 +96,22 @@ export function PageCard({
 
   const title = page.title === "" ? "Untitled" : page.title;
   const folderTint = folderColorValue(folder?.color);
-  const activate = selecting ? onSelectToggle : onOpen;
 
-  return (
+  const card = (
     <Card
       className={cn(
-        "relative flex h-36 flex-col gap-1.5 overflow-hidden p-4 text-left shadow-none transition-colors",
-        activate && "cursor-pointer hover:bg-accent/40",
+        "group/card relative flex h-36 flex-col gap-1.5 overflow-hidden p-4 text-left shadow-none transition-colors",
+        onActivate && "cursor-pointer hover:bg-accent/40",
         selected && "border-foreground/50",
       )}
-      role={activate ? "button" : undefined}
-      tabIndex={activate ? 0 : undefined}
-      onClick={activate}
+      role={onActivate ? "button" : undefined}
+      tabIndex={onActivate ? 0 : undefined}
+      onClick={onActivate}
       onKeyDown={(event) => {
-        if (event.key === "Enter") activate?.();
+        if (event.key === "Enter") onActivate?.(event as unknown as MouseEvent);
       }}
     >
-      {(selecting || selected) && onSelectToggle && (
+      {onSelectToggle && (
         <button
           type="button"
           aria-label={selected ? "Deselect" : "Select"}
@@ -71,18 +120,42 @@ export function PageCard({
             onSelectToggle();
           }}
           className={cn(
-            "absolute top-3 right-3 z-10 flex size-[18px] items-center justify-center rounded-[5px]",
-            selected ? "bg-primary text-primary-foreground" : "border border-foreground/20",
+            "absolute top-3 left-3 z-10 flex size-[18px] items-center justify-center rounded-[5px] transition-opacity",
+            selected
+              ? "bg-primary text-primary-foreground opacity-100"
+              : "border border-foreground/25 opacity-0 group-hover/card:opacity-100",
+            selecting && "opacity-100",
           )}
         >
           {selected && <HugeiconsIcon icon={Tick02Icon} strokeWidth={2.5} className="size-3!" />}
         </button>
       )}
 
+      {actions && !selecting && (
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <button
+                type="button"
+                aria-label="Page actions"
+                onClick={(event) => event.stopPropagation()}
+                className="absolute top-2.5 right-2.5 z-10 flex size-6 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity group-hover/card:opacity-100 hover:bg-secondary data-popup-open:bg-secondary data-popup-open:opacity-100"
+              >
+                <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={1.75} className="size-4!" />
+              </button>
+            }
+          />
+          <DropdownMenuContent align="start" onClick={(event) => event.stopPropagation()}>
+            <DropdownMenuGroup>{actionItems(actions, "dropdown")}</DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+
       <span
         className={cn(
           "h-5 shrink-0 truncate pr-6 text-sm leading-5",
           dim && "text-muted-foreground",
+          onSelectToggle && (selecting || selected) && "pl-6",
         )}
       >
         {title}
@@ -107,5 +180,16 @@ export function PageCard({
         <span className="ml-auto shrink-0">{trailing}</span>
       </span>
     </Card>
+  );
+
+  if (!actions) return card;
+
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger render={card} />
+      <ContextMenuContent>
+        <ContextMenuGroup>{actionItems(actions, "context")}</ContextMenuGroup>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }

@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { ArrowTurnBackwardIcon, Delete02Icon } from "@hugeicons/core-free-icons";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { PageCard } from "@/components/page-card";
+import { PageCard, type CardAction } from "@/components/page-card";
 import { useNodes } from "@/hooks/use-index";
 import { folderColorValue } from "@/lib/folder-colors";
 import { getNodesMap } from "@/lib/index-doc";
@@ -64,6 +65,24 @@ function TrashView() {
       return next;
     });
   };
+
+  const trashActions = (pageId: string): CardAction[] => [
+    {
+      label: "Restore",
+      icon: ArrowTurnBackwardIcon,
+      onSelect: () => void restoreNode(getNodesMap(), pageId),
+    },
+    "separator",
+    {
+      label: "Delete forever",
+      icon: Delete02Icon,
+      destructive: true,
+      onSelect: () => {
+        setSelected(new Set([pageId]));
+        setConfirming("selection");
+      },
+    },
+  ];
 
   const restoreSelected = () => {
     for (const id of selected) restoreNode(getNodesMap(), id);
@@ -158,6 +177,7 @@ function TrashView() {
                   selected={selected.has(page.id)}
                   selecting
                   dim
+                  actions={trashActions(page.id)}
                   trailing={
                     <span className="rounded-full border px-2 py-0.5 font-mono text-[11px] text-foreground/85">
                       {daysLeft(page.deletedAt ?? 0)}d left

@@ -3,6 +3,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Add01Icon,
+  ArrowUpRight01Icon,
+  CheckmarkCircle02Icon,
   Delete02Icon,
   MoreHorizontalIcon,
   PencilEdit01Icon,
@@ -10,8 +12,9 @@ import {
 } from "@hugeicons/core-free-icons";
 
 import { FolderGlyph } from "@/components/folder-glyph";
-import { PageCard } from "@/components/page-card";
+import { PageCard, type CardAction } from "@/components/page-card";
 import { useNodes } from "@/hooks/use-index";
+import { useSelection } from "@/hooks/use-selection";
 import { rememberFolder } from "@/lib/compose-target";
 import { getDeviceName } from "@/lib/device";
 import { FOLDER_COLOR_VALUES, folderColorValue } from "@/lib/folder-colors";
@@ -45,12 +48,10 @@ function FolderView() {
   const nodes = useNodes();
   const navigate = useNavigate();
   const [prefs, setPrefs] = useState<LibraryPrefs>(() => readLibraryPrefs());
-  const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [renaming, setRenaming] = useState(false);
 
   useEffect(() => {
     rememberFolder(folderId);
-    setSelected(new Set());
     setRenaming(false);
   }, [folderId]);
 
@@ -72,6 +73,9 @@ function FolderView() {
     return inFolder.toSorted((a, b) => b.createdAt - a.createdAt);
   }, [nodes, folderId, prefs.sort]);
 
+  const selection = useSelection(pages.map((page) => page.id));
+  const { selected, selecting } = selection;
+
   if (!folder) {
     return (
       <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
@@ -86,15 +90,6 @@ function FolderView() {
     const next = { ...prefs, ...patch };
     setPrefs(next);
     writeLibraryPrefs(next);
-  };
-
-  const toggleSelect = (id: string) => {
-    setSelected((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
   };
 
   const newPage = () => {
@@ -113,13 +108,28 @@ function FolderView() {
 
   const moveSelected = (targetId: string) => {
     for (const id of selected) moveNode(getNodesMap(), id, targetId);
-    setSelected(new Set());
+    selection.clear();
   };
 
   const trashSelected = () => {
     for (const id of selected) trashNode(getNodesMap(), id);
-    setSelected(new Set());
+    selection.clear();
   };
+
+  const openPage = (pageId: string) => {
+    void navigate({ to: "/page/$pageId", params: { pageId } });
+  };
+
+  const pageActions = (pageId: string): CardAction[] => [
+    { label: "Open", icon: ArrowUpRight01Icon, onSelect: () => openPage(pageId) },
+    "separator",
+    {
+      label: "Move to trash",
+      icon: Delete02Icon,
+      destructive: true,
+      onSelect: () => void trashNode(getNodesMap(), pageId),
+    },
+  ];
 
   return (
     <div className="relative flex h-full flex-col">
@@ -152,6 +162,15 @@ function FolderView() {
           {pages.length} {pages.length === 1 ? "page" : "pages"}
         </span>
         <div className="ml-auto flex items-center gap-1.5 self-center">
+          <Button
+            variant={selecting ? "secondary" : "ghost"}
+            size="icon"
+            aria-label="Select"
+            className={selecting ? undefined : "text-muted-foreground"}
+            onClick={selection.toggleMode}
+          >
+            <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={1.75} />
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
@@ -234,14 +253,17 @@ function FolderView() {
                 page={page}
                 folder={undefined}
                 selected={selected.has(page.id)}
-                selecting={selected.size > 0}
+                selecting={selecting}
                 trailing={
                   <span className="font-mono text-[11px] text-muted-foreground">
                     {humanTime(page.updatedAt)}
                   </span>
                 }
-                onSelectToggle={() => toggleSelect(page.id)}
-                onOpen={() => void navigate({ to: "/page/$pageId", params: { pageId: page.id } })}
+                actions={pageActions(page.id)}
+                onSelectToggle={() => selection.toggle(page.id)}
+                onActivate={(event) =>
+                  selection.handleCardClick(page.id, event, () => openPage(page.id))
+                }
               />
             ))}
             <Card
@@ -299,7 +321,7 @@ function FolderView() {
             variant="ghost"
             size="sm"
             className="font-normal text-muted-foreground"
-            onClick={() => setSelected(new Set())}
+            onClick={selection.clear}
           >
             Clear
           </Button>
