@@ -36,9 +36,9 @@ export function RootMenu() {
               variant="ghost"
               size="icon-lg"
               aria-label="More"
-              className="size-11 text-muted-foreground md:hidden"
+              className="text-muted-foreground md:hidden"
             >
-              <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={1.75} className="size-5!" />
+              <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={1.75} />
             </Button>
           }
         />
