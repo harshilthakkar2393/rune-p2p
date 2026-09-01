@@ -227,7 +227,7 @@ export function AppSidebar() {
                     render={<Link to="/folder/$folderId" params={{ folderId: folder.id }} />}
                   >
                     <FolderGlyph
-                      className="size-4.5"
+                      className="size-4.5!"
                       color={folderColorValue(folder.color) ?? "var(--muted-foreground)"}
                     />
                     <span className="truncate">{folder.name}</span>
