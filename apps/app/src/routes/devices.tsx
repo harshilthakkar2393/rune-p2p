@@ -22,35 +22,38 @@ import {
 import { Input } from "@rune/ui/components/input";
 import { ScrollArea } from "@rune/ui/components/scroll-area";
 
+import { PairQr } from "@/components/pair-qr";
+import { QrScanDialog } from "@/components/qr-scan-dialog";
+import { useNodes } from "@/hooks/use-index";
 import { getDeviceName } from "@/lib/device";
 import { pairWithSecret, unpair } from "@/lib/sync/manager";
-import {
-  generateSecret,
-  phraseToSecret,
-  readStoredSecret,
-  secretToPhrase,
-} from "@/lib/sync/secret";
+import { buildPairLink, parsePairInput } from "@/lib/sync/pair-link";
+import { generateSecret, readStoredSecret, secretToPhrase } from "@/lib/sync/secret";
 import { useSyncStatus } from "@/lib/sync/status";
+import type { Page } from "@/lib/schema";
 
 export const Route = createFileRoute("/devices")({ component: DevicesView });
 
 function DevicesView() {
   const status = useSyncStatus();
+  const nodes = useNodes();
   const [phraseInput, setPhraseInput] = useState("");
   const [phraseError, setPhraseError] = useState<string | null>(null);
-  const [revealedPhrase, setRevealedPhrase] = useState<string | null>(null);
+  const [revealedSecret, setRevealedSecret] = useState<Uint8Array | null>(null);
   const [copied, setCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const [confirmUnpair, setConfirmUnpair] = useState(false);
+  const [scanOpen, setScanOpen] = useState(false);
 
   const handleCreate = () => {
     const secret = generateSecret();
-    setRevealedPhrase(secretToPhrase(secret));
+    setRevealedSecret(secret);
     void pairWithSecret(secret);
   };
 
   const handlePairSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const result = phraseToSecret(phraseInput);
+    const result = parsePairInput(phraseInput);
     if (result.isErr()) {
       setPhraseError(result.error.message);
       return;
@@ -60,21 +63,32 @@ function DevicesView() {
     void pairWithSecret(result.value);
   };
 
+  const handleScannedSecret = (secret: Uint8Array) => {
+    void pairWithSecret(secret);
+  };
+
   const handleShowPhrase = () => {
     const secret = readStoredSecret();
-    if (secret) setRevealedPhrase(secretToPhrase(secret));
+    if (secret) setRevealedSecret(secret);
   };
 
   const handleCopy = () => {
-    if (!revealedPhrase) return;
-    void navigator.clipboard.writeText(revealedPhrase);
+    if (!revealedSecret) return;
+    void navigator.clipboard.writeText(secretToPhrase(revealedSecret));
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
 
+  const handleCopyLink = () => {
+    if (!revealedSecret) return;
+    void navigator.clipboard.writeText(buildPairLink(revealedSecret, window.location.origin));
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 1500);
+  };
+
   const handleUnpair = () => {
     unpair();
-    setRevealedPhrase(null);
+    setRevealedSecret(null);
     setConfirmUnpair(false);
   };
 
@@ -100,12 +114,15 @@ function DevicesView() {
                 <span className="text-small text-muted-foreground">Have a code?</span>
                 <form onSubmit={handlePairSubmit} className="flex gap-2">
                   <Input
-                    placeholder="twelve words"
+                    placeholder="twelve words or a pairing link"
                     value={phraseInput}
                     onChange={(event) => setPhraseInput(event.target.value)}
                   />
                   <Button type="submit" variant="secondary">
                     Pair
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => setScanOpen(true)}>
+                    Scan
                   </Button>
                 </form>
                 {phraseError && <span className="text-destructive text-small">{phraseError}</span>}
@@ -121,15 +138,29 @@ function DevicesView() {
                   <span className="text-sm">{getDeviceName()}</span>
                   <Badge variant="secondary">this device</Badge>
                 </div>
-                {status.peers.map((peer) => (
-                  <div key={peer.deviceId} className="flex items-center gap-2">
-                    <span className="size-2 rounded-full bg-primary" />
-                    <span className="text-sm">{peer.name}</span>
-                    <span className="text-small text-muted-foreground">
-                      {peer.pageId ? "editing" : "online"}
-                    </span>
-                  </div>
-                ))}
+                {status.peers.map((peer) => {
+                  const page = peer.pageId
+                    ? nodes.find(
+                        (node): node is Page => node.id === peer.pageId && node.type === "page",
+                      )
+                    : undefined;
+                  return (
+                    <div key={peer.deviceId} className="flex items-center gap-2">
+                      <span className="size-2 rounded-full bg-primary" />
+                      <span className="text-sm">{peer.name}</span>
+                      {peer.pageId === null ? (
+                        <span className="text-small text-muted-foreground">online</span>
+                      ) : page ? (
+                        <span className="text-small text-muted-foreground">
+                          editing{" "}
+                          <span className="text-foreground">{page.title || "Untitled"}</span>
+                        </span>
+                      ) : (
+                        <span className="text-small text-muted-foreground">editing</span>
+                      )}
+                    </div>
+                  );
+                })}
                 <span className="font-mono text-tiny text-muted-foreground">
                   {status.connected ? "connected" : "connecting…"}
                   {status.pendingDocs > 0 ? ` · syncing ${status.pendingDocs}` : ""}
@@ -142,14 +173,27 @@ function DevicesView() {
 
             <Card className="p-6">
               <CardContent className="flex flex-col gap-3 px-0">
-                {revealedPhrase ? (
+                {revealedSecret ? (
                   <>
-                    <div className="rounded-2xl border bg-muted/40 p-3 font-mono text-small">
-                      {revealedPhrase}
+                    <PairQr secret={revealedSecret} />
+                    <div className="grid grid-cols-3 gap-x-5 gap-y-1.5 rounded-2xl border bg-muted/40 p-3 font-mono text-small tabular-nums">
+                      {secretToPhrase(revealedSecret)
+                        .split(" ")
+                        .map((word, index) => (
+                          <span key={word + index}>
+                            <span className="text-muted-foreground">{index + 1}. </span>
+                            {word}
+                          </span>
+                        ))}
                     </div>
-                    <Button variant="outline" size="sm" className="self-start" onClick={handleCopy}>
-                      {copied ? "Copied" : "Copy"}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={handleCopy}>
+                        {copied ? "Copied" : "Copy"}
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={handleCopyLink}>
+                        {linkCopied ? "Copied" : "Copy link"}
+                      </Button>
+                    </div>
                   </>
                 ) : (
                   <Button variant="outline" className="self-start" onClick={handleShowPhrase}>
@@ -188,6 +232,8 @@ function DevicesView() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        <QrScanDialog open={scanOpen} onOpenChange={setScanOpen} onSecret={handleScannedSecret} />
       </main>
     </ScrollArea>
   );

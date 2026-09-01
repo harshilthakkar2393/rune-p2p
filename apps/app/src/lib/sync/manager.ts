@@ -1,3 +1,4 @@
+import type { Awareness } from "y-protocols/awareness";
 import type * as Y from "yjs";
 
 import { getDeviceName } from "@/lib/device";
@@ -119,6 +120,16 @@ export class SyncManager {
   /** Pages queued or mid-open, not yet registered. */
   pendingCount(): number {
     return this.pageQueue.length + this.inFlight.size;
+  }
+
+  /** Publishes which page (if any) this device is currently editing. */
+  setPage(pageId: string | null): void {
+    this.presence?.setLocal({ pageId });
+  }
+
+  /** The shared Awareness instance, for binding editor cursors. */
+  awareness(): Awareness | null {
+    return this.presence?.awareness ?? null;
   }
 
   private observeIndex(): () => void {
@@ -265,6 +276,16 @@ export function startSyncIfPaired(): void {
 export function stopSync(): void {
   currentManager?.stop();
   currentManager = null;
+}
+
+/** Publishes the page this device is currently editing, for peers' presence. */
+export function setPresencePage(pageId: string | null): void {
+  currentManager?.setPage(pageId);
+}
+
+/** The shared Awareness instance for the active sync session, if any. */
+export function getSyncAwareness(): Awareness | null {
+  return currentManager?.awareness() ?? null;
 }
 
 export async function pairWithSecret(secret: Uint8Array): Promise<void> {

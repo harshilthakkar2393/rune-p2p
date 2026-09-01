@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DevicesRouteImport } from './routes/devices'
 import { Route as LibraryRouteImport } from './routes/library'
+import { Route as PairRouteImport } from './routes/pair'
 import { Route as TrashRouteImport } from './routes/trash'
 import { Route as TypeRouteImport } from './routes/type'
 import { Route as FolderFolderIdRouteImport } from './routes/folder.$folderId'
@@ -30,6 +31,11 @@ const DevicesRoute = DevicesRouteImport.update({
 const LibraryRoute = LibraryRouteImport.update({
   id: '/library',
   path: '/library',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PairRoute = PairRouteImport.update({
+  id: '/pair',
+  path: '/pair',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TrashRoute = TrashRouteImport.update({
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/devices': typeof DevicesRoute
   '/library': typeof LibraryRoute
+  '/pair': typeof PairRoute
   '/trash': typeof TrashRoute
   '/type': typeof TypeRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/devices': typeof DevicesRoute
   '/library': typeof LibraryRoute
+  '/pair': typeof PairRoute
   '/trash': typeof TrashRoute
   '/type': typeof TypeRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/devices': typeof DevicesRoute
   '/library': typeof LibraryRoute
+  '/pair': typeof PairRoute
   '/trash': typeof TrashRoute
   '/type': typeof TypeRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/devices'
     | '/library'
+    | '/pair'
     | '/trash'
     | '/type'
     | '/folder/$folderId'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/devices'
     | '/library'
+    | '/pair'
     | '/trash'
     | '/type'
     | '/folder/$folderId'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/devices'
     | '/library'
+    | '/pair'
     | '/trash'
     | '/type'
     | '/folder/$folderId'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DevicesRoute: typeof DevicesRoute
   LibraryRoute: typeof LibraryRoute
+  PairRoute: typeof PairRoute
   TrashRoute: typeof TrashRoute
   TypeRoute: typeof TypeRoute
   FolderFolderIdRoute: typeof FolderFolderIdRoute
@@ -142,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/library'
       fullPath: '/library'
       preLoaderRoute: typeof LibraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pair': {
+      id: '/pair'
+      path: '/pair'
+      fullPath: '/pair'
+      preLoaderRoute: typeof PairRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/trash': {
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DevicesRoute: DevicesRoute,
   LibraryRoute: LibraryRoute,
+  PairRoute: PairRoute,
   TrashRoute: TrashRoute,
   TypeRoute: TypeRoute,
   FolderFolderIdRoute: FolderFolderIdRoute,

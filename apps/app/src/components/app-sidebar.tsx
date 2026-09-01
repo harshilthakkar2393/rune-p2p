@@ -25,6 +25,7 @@ import { createFolder, createPage } from "@/lib/nodes";
 import { modLabel } from "@/lib/platform";
 import { setPaletteOpen } from "@/lib/palette";
 import { FOLDER_COLORS, type Folder, type FolderColor } from "@/lib/schema";
+import { useSyncStatus } from "@/lib/sync/status";
 import { Button } from "@rune/ui/components/button";
 import { Kbd } from "@rune/ui/components/kbd";
 import { Popover, PopoverContent, PopoverTrigger } from "@rune/ui/components/popover";
@@ -192,6 +193,7 @@ function NewPageButton({ onClick }: { onClick: () => void }) {
 export function AppSidebar() {
   const nodes = useNodes();
   const compose = useComposePage();
+  const { peers } = useSyncStatus();
 
   const folders = nodes
     .filter(
@@ -252,9 +254,17 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Devices" render={<Link to="/devices" />}>
+            <SidebarMenuButton
+              tooltip={peers.length > 0 ? `Devices · ${peers.length} online` : "Devices"}
+              render={<Link to="/devices" />}
+            >
               <Icon icon={ComputerPhoneSyncIcon} />
               Devices
+              {peers.length > 0 && (
+                <span className="ml-auto font-mono text-tiny text-muted-foreground group-data-[collapsible=icon]:hidden">
+                  {peers.length} online
+                </span>
+              )}
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
