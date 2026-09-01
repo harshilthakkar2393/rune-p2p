@@ -6,9 +6,13 @@ import {
   createFolder,
   createPage,
   listChildren,
+  listTrashed,
   moveNode,
+  purgeExpired,
   removeNode,
   renameNode,
+  restoreNode,
+  trashNode,
   type NodesMap,
 } from "@/lib/nodes";
 
@@ -161,5 +165,64 @@ describe("dangling references", () => {
     map.delete(folder.id);
     const rootIds = listChildren(map, null).map((node) => node.id);
     expect(rootIds).toContain(page.id);
+  });
+});
+
+describe("trash", () => {
+  test("trashNode hides subtree from listChildren, listTrashed shows it", () => {
+    const map = freshMap();
+    const folder = unwrap(createFolder(map, null, "Doomed"));
+    const page = unwrap(createPage(map, folder.id));
+    unwrap(trashNode(map, folder.id));
+    expect(listChildren(map, null)).toHaveLength(0);
+    const trashed = listTrashed(map).map((node) => node.id);
+    expect(trashed).toContain(folder.id);
+    expect(trashed).toContain(page.id);
+  });
+
+  test("restoreNode brings a page back; vanished folder falls to root", () => {
+    const map = freshMap();
+    const p2 = unwrap(createPage(map, null));
+    unwrap(trashNode(map, p2.id));
+    const restored = unwrap(restoreNode(map, p2.id));
+    expect(restored.deletedAt).toBeUndefined();
+    expect(listChildren(map, null).map((n) => n.id)).toContain(p2.id);
+  });
+
+  test("purgeExpired removes only nodes past retention", () => {
+    const map = freshMap();
+    const oldPage = unwrap(createPage(map, null));
+    const newPage = unwrap(createPage(map, null));
+    unwrap(trashNode(map, oldPage.id));
+    unwrap(trashNode(map, newPage.id));
+    const node = map.get(oldPage.id);
+    if (node) map.set(oldPage.id, { ...node, deletedAt: Date.now() - 31 * 24 * 60 * 60 * 1000 });
+    const { removedPageIds } = purgeExpired(map);
+    expect(removedPageIds).toEqual([oldPage.id]);
+    expect(map.get(newPage.id)).toBeDefined();
+  });
+
+  test("permanent removeNode takes trashed descendants too", () => {
+    const map = freshMap();
+    const folder = unwrap(createFolder(map, null, "Nest"));
+    const page = unwrap(createPage(map, folder.id));
+    unwrap(trashNode(map, folder.id));
+    const { removedPageIds } = unwrap(removeNode(map, folder.id));
+    expect(removedPageIds).toEqual([page.id]);
+    expect(map.size).toBe(0);
+  });
+});
+
+describe("folder color + page attribution", () => {
+  test("createFolder stores a preset color", () => {
+    const map = freshMap();
+    const folder = unwrap(createFolder(map, null, "Work", "blue"));
+    expect(folder.color).toBe("blue");
+  });
+
+  test("createPage stores creating device", () => {
+    const map = freshMap();
+    const page = unwrap(createPage(map, null, { createdOn: "MacBook Pro" }));
+    expect(page.createdOn).toBe("MacBook Pro");
   });
 });

@@ -3,7 +3,14 @@ import { nanoid } from "nanoid";
 import { Result, TaggedError } from "better-result";
 import type * as Y from "yjs";
 
-import { NodeSchema, type Folder, type Node, type Page } from "@/lib/schema";
+import {
+  NodeSchema,
+  TRASH_RETENTION_MS,
+  type Folder,
+  type FolderColor,
+  type Node,
+  type Page,
+} from "@/lib/schema";
 
 /**
  * CRUD over the index Y.Map. All mutations go through here so the two
@@ -70,9 +77,22 @@ function resolvedParentId(map: NodesMap, node: Node): string | null {
 export function listChildren(map: NodesMap, parentId: string | null): Node[] {
   const children: Node[] = [];
   for (const node of map.values()) {
+    if (node.deletedAt !== undefined) continue;
     if (resolvedParentId(map, node) === parentId) children.push(node);
   }
   return children.toSorted((a, b) => a.sortKey.localeCompare(b.sortKey));
+}
+
+/** Every live (non-trashed) node. */
+export function listLive(map: NodesMap): Node[] {
+  return Array.from(map.values()).filter((node) => node.deletedAt === undefined);
+}
+
+/** Trashed nodes, most recently deleted first. */
+export function listTrashed(map: NodesMap): Node[] {
+  return Array.from(map.values())
+    .filter((node) => node.deletedAt !== undefined)
+    .toSorted((a, b) => (b.deletedAt ?? 0) - (a.deletedAt ?? 0));
 }
 
 function nextSortKey(map: NodesMap, parentId: string | null): string {
@@ -101,6 +121,7 @@ function validateAndSet(map: NodesMap, node: Node): Result<Node, InvalidNodeErro
 export function createPage(
   map: NodesMap,
   folderId: string | null,
+  options?: { createdOn?: string },
 ): Result<Page, NotAFolderError | InvalidNodeError> {
   if (folderId !== null) {
     const folder = requireFolder(map, folderId);
@@ -115,6 +136,7 @@ export function createPage(
     sortKey: nextSortKey(map, folderId),
     createdAt: now,
     updatedAt: now,
+    ...(options?.createdOn ? { createdOn: options.createdOn } : {}),
   };
   return validateAndSet(map, page) as Result<Page, InvalidNodeError>;
 }
@@ -123,6 +145,7 @@ export function createFolder(
   map: NodesMap,
   parentId: string | null,
   name: string,
+  color?: FolderColor,
 ): Result<Folder, NotAFolderError | InvalidNodeError> {
   if (parentId !== null) {
     const parent = requireFolder(map, parentId);
@@ -137,6 +160,7 @@ export function createFolder(
     sortKey: nextSortKey(map, parentId),
     createdAt: now,
     updatedAt: now,
+    ...(color ? { color } : {}),
   };
   return validateAndSet(map, folder) as Result<Folder, InvalidNodeError>;
 }
@@ -188,7 +212,58 @@ export function moveNode(
   return validateAndSet(map, moved);
 }
 
-/** Recursive delete. Returns removed page ids so the caller can drop their content DBs. */
+/** Move a node (and, for folders, everything inside) to the trash. Recoverable. */
+export function trashNode(
+  map: NodesMap,
+  id: string,
+): Result<void, NodeNotFoundError> {
+  const node = map.get(id);
+  if (!node || node.deletedAt !== undefined)
+    return Result.err(new NodeNotFoundError({ id }));
+
+  const now = Date.now();
+  const mark = (target: Node) => {
+    if (target.type === "folder") {
+      for (const child of listChildren(map, target.id)) mark(child);
+    }
+    map.set(target.id, { ...target, deletedAt: now, updatedAt: now });
+  };
+  const transact = (fn: () => void) => (map.doc ? map.doc.transact(fn) : fn());
+  transact(() => mark(node));
+  return Result.ok(undefined);
+}
+
+/** Bring a trashed node back. Pages land in their original folder, or root if it's gone. */
+export function restoreNode(
+  map: NodesMap,
+  id: string,
+): Result<Node, NodeNotFoundError | InvalidNodeError> {
+  const node = map.get(id);
+  if (!node || node.deletedAt === undefined)
+    return Result.err(new NodeNotFoundError({ id }));
+  const { deletedAt: _dropped, ...rest } = node;
+  return validateAndSet(map, { ...rest, updatedAt: Date.now() } as Node);
+}
+
+/** Permanently delete trashed nodes older than the retention window. */
+export function purgeExpired(
+  map: NodesMap,
+  now = Date.now(),
+): { removedPageIds: string[] } {
+  const removedPageIds: string[] = [];
+  const transact = (fn: () => void) => (map.doc ? map.doc.transact(fn) : fn());
+  transact(() => {
+    for (const node of Array.from(map.values())) {
+      if (node.deletedAt !== undefined && now - node.deletedAt > TRASH_RETENTION_MS) {
+        if (node.type === "page") removedPageIds.push(node.id);
+        map.delete(node.id);
+      }
+    }
+  });
+  return { removedPageIds };
+}
+
+/** PERMANENT recursive delete. Returns removed page ids so the caller can drop their content DBs. */
 export function removeNode(
   map: NodesMap,
   id: string,
@@ -197,9 +272,16 @@ export function removeNode(
   if (!node) return Result.err(new NodeNotFoundError({ id }));
 
   const removedPageIds: string[] = [];
+  // Raw parent match, trashed included — a permanent delete takes everything.
+  const allChildren = (parentId: string): Node[] =>
+    Array.from(map.values()).filter((candidate) => {
+      const parent =
+        candidate.type === "folder" ? candidate.parentId : candidate.folderId;
+      return parent === parentId;
+    });
   const removeRecursive = (target: Node) => {
     if (target.type === "folder") {
-      for (const child of listChildren(map, target.id)) removeRecursive(child);
+      for (const child of allChildren(target.id)) removeRecursive(child);
     } else {
       removedPageIds.push(target.id);
     }
