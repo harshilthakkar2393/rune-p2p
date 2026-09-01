@@ -11,7 +11,7 @@ import {
 
 import { useSyncStatus } from "@/lib/sync/status";
 import { Button } from "@rune/ui/components/button";
-import { ButtonGroup } from "@rune/ui/components/button-group";
+import { cn } from "@rune/ui/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,9 +23,10 @@ import {
 import { useTheme } from "@rune/ui/components/theme-provider";
 
 /**
- * Phone header actions, Linear-style: at most one page action plus ⋯ in a
- * single outline button group. Page-specific menu items go first via
- * `children`; the sidebar entries that are not dock tabs follow.
+ * Phone header actions, Linear-style: at most one page action plus ⋯
+ * floating inside one capsule (same pill as the dock, no seams between
+ * buttons). Page-specific menu items go first via `children`; the sidebar
+ * entries that are not dock tabs follow.
  */
 export function RootMenu({ action, children }: { action?: ReactNode; children?: ReactNode }) {
   const { peers } = useSyncStatus();
@@ -33,12 +34,12 @@ export function RootMenu({ action, children }: { action?: ReactNode; children?: 
   const dark = resolvedTheme === "dark";
 
   return (
-    <ButtonGroup className="md:hidden">
+    <div className="ml-auto flex items-center gap-0.5 self-center rounded-full border bg-card p-1 md:hidden">
       {action}
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button variant="outline" size="icon-lg" aria-label="More">
+            <Button variant="ghost" size="icon-lg" aria-label="More" className="rounded-full">
               <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={1.75} />
             </Button>
           }
@@ -74,7 +75,7 @@ export function RootMenu({ action, children }: { action?: ReactNode; children?: 
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
-    </ButtonGroup>
+    </div>
   );
 }
 
@@ -92,12 +93,12 @@ export function PhoneAction({
 }) {
   return (
     <Button
-      variant="outline"
+      variant="ghost"
       size="icon-lg"
       aria-label={label}
       aria-pressed={active}
       onClick={onClick}
-      className={active ? "bg-accent" : "text-muted-foreground"}
+      className={cn("rounded-full", active ? "bg-accent" : "text-muted-foreground")}
     >
       {children}
     </Button>
