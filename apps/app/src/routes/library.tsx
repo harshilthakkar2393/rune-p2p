@@ -4,7 +4,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Add01Icon,
   Delete02Icon,
-  FilterHorizontalIcon,
+  FilterMailIcon,
   Folder01Icon,
   GridViewIcon,
   LeftToRightListBulletIcon,
@@ -21,7 +21,7 @@ import { createPage, moveNode, trashNode } from "@/lib/nodes";
 import { readLibraryPrefs, writeLibraryPrefs, type LibraryPrefs } from "@/lib/library-prefs";
 import type { Folder, Page } from "@/lib/schema";
 import { Badge } from "@rune/ui/components/badge";
-import { ToggleGroup, ToggleGroupItem } from "@rune/ui/components/toggle-group";
+import { Tabs, TabsList, TabsTrigger } from "@rune/ui/components/tabs";
 import { Button } from "@rune/ui/components/button";
 import {
   DropdownMenu,
@@ -150,7 +150,7 @@ function LibraryView() {
                   aria-label="Filter"
                   className="text-muted-foreground"
                 >
-                  <HugeiconsIcon icon={FilterHorizontalIcon} strokeWidth={1.75} />
+                  <HugeiconsIcon icon={FilterMailIcon} strokeWidth={1.75} />
                 </Button>
               }
             />
@@ -216,23 +216,19 @@ function LibraryView() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <ToggleGroup
-            variant="outline"
-            size="sm"
-            spacing={0}
-            value={[prefs.layout]}
-            onValueChange={(value) => {
-              const layout = value[0] as LibraryPrefs["layout"] | undefined;
-              if (layout) updatePrefs({ layout });
-            }}
+          <Tabs
+            value={prefs.layout}
+            onValueChange={(value) => updatePrefs({ layout: value as LibraryPrefs["layout"] })}
           >
-            <ToggleGroupItem value="gallery" aria-label="Gallery layout">
-              <HugeiconsIcon icon={GridViewIcon} strokeWidth={1.75} />
-            </ToggleGroupItem>
-            <ToggleGroupItem value="list" aria-label="List layout">
-              <HugeiconsIcon icon={LeftToRightListBulletIcon} strokeWidth={1.75} />
-            </ToggleGroupItem>
-          </ToggleGroup>
+            <TabsList>
+              <TabsTrigger value="gallery" aria-label="Gallery layout">
+                <HugeiconsIcon icon={GridViewIcon} strokeWidth={1.75} />
+              </TabsTrigger>
+              <TabsTrigger value="list" aria-label="List layout">
+                <HugeiconsIcon icon={LeftToRightListBulletIcon} strokeWidth={1.75} />
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </header>
 
