@@ -6,18 +6,25 @@ import type * as Y from "yjs";
 
 import { setActiveEditor } from "@/lib/editor-ref";
 import { usePageDoc } from "@/hooks/use-page-doc";
+import { getDeviceName } from "@/lib/device";
+import { getSyncAwareness } from "@/lib/sync/manager";
 import { useTheme } from "@rune/ui/components/theme-provider";
 
 const PAGE_FRAGMENT = "blocknote";
 
 function BoundEditor({ doc }: { doc: Y.Doc }) {
   const { resolvedTheme } = useTheme();
+  const awareness = getSyncAwareness();
   const editor = useCreateBlockNote(
     withCollaboration({
       collaboration: {
         fragment: doc.getXmlFragment(PAGE_FRAGMENT),
-        // No provider: local-only for now. Awareness/cursors arrive with sync.
-        user: { name: "me", color: "#737373" },
+        // Awareness is shared across all pages by the sync manager; the
+        // cursor plugin only renders positions that resolve inside this
+        // page's doc, so peers editing elsewhere show no cursor here.
+        provider: awareness ? { awareness } : undefined,
+        user: { name: getDeviceName(), color: "#737373" },
+        showCursorLabels: "activity",
       },
     }),
     [doc],
