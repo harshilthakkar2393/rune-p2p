@@ -6,6 +6,7 @@ import { useNodes } from "@/hooks/use-index";
 import { setPaletteOpen, usePaletteOpen } from "@/lib/palette";
 import type { Folder, Page } from "@/lib/schema";
 import {
+  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -29,36 +30,36 @@ export function SearchPalette() {
   };
 
   const pages = nodes.filter((node): node is Page => node.type === "page");
-  const folders = nodes.filter(
-    (node): node is Folder => node.type === "folder",
-  );
+  const folders = nodes.filter((node): node is Folder => node.type === "folder");
 
   return (
     <CommandDialog open={open} onOpenChange={setPaletteOpen}>
-      <CommandInput placeholder="Search pages and folders…" />
-      <CommandList>
-        <CommandEmpty>No results.</CommandEmpty>
-        <CommandGroup heading="Pages">
-          {pages.map((page) => (
-            <CommandItem
-              key={page.id}
-              value={`${page.title || "Untitled"} ${page.id}`}
-              onSelect={() => openPage(page.id)}
-            >
-              <HugeiconsIcon icon={File02Icon} />
-              {page.title === "" ? "Untitled" : page.title}
-            </CommandItem>
-          ))}
-        </CommandGroup>
-        <CommandGroup heading="Folders">
-          {folders.map((folder) => (
-            <CommandItem key={folder.id} value={`${folder.name} ${folder.id}`} disabled>
-              <HugeiconsIcon icon={Folder01Icon} />
-              {folder.name}
-            </CommandItem>
-          ))}
-        </CommandGroup>
-      </CommandList>
+      <Command>
+        <CommandInput placeholder="Search pages and folders…" />
+        <CommandList>
+          <CommandEmpty>No results.</CommandEmpty>
+          <CommandGroup heading="Pages">
+            {pages.map((page) => (
+              <CommandItem
+                key={page.id}
+                value={`${page.title || "Untitled"} ${page.id}`}
+                onSelect={() => openPage(page.id)}
+              >
+                <HugeiconsIcon icon={File02Icon} />
+                {page.title === "" ? "Untitled" : page.title}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+          <CommandGroup heading="Folders">
+            {folders.map((folder) => (
+              <CommandItem key={folder.id} value={`${folder.name} ${folder.id}`} disabled>
+                <HugeiconsIcon icon={Folder01Icon} />
+                {folder.name}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </Command>
     </CommandDialog>
   );
 }
