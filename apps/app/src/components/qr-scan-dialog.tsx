@@ -20,63 +20,59 @@ export function QrScanDialog({
   onOpenChange: (open: boolean) => void;
   onSecret: (secret: Uint8Array) => void;
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  // Callback ref → state: the dialog mounts its children a render after
+  // `open` flips, so an effect keyed on `open` alone sees no <video> yet.
+  const [video, setVideo] = useState<HTMLVideoElement | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  // Keep the latest callbacks without re-running the effect below on every
-  // render — devices.tsx passes onSecret/onOpenChange as fresh closures each
-  // time, and re-running the effect would tear down and restart the camera.
+  // Keep the latest callbacks without restarting the camera on every render.
   const onSecretRef = useRef(onSecret);
   const onOpenChangeRef = useRef(onOpenChange);
   onSecretRef.current = onSecret;
   onOpenChangeRef.current = onOpenChange;
 
   useEffect(() => {
-    if (!open) return;
-    const video = videoRef.current;
-    if (!video) return;
+    if (!open || !video) return;
 
     let cancelled = false;
-    let scanner: QrScanner | null = null;
     setMessage(null);
 
-    void QrScanner.hasCamera().then((hasCamera) => {
-      if (cancelled) return;
-      if (!hasCamera) {
-        setMessage("No camera found on this device.");
-        return;
-      }
-
-      scanner = new QrScanner(
-        video,
-        ({ data }) => {
-          const result = parsePairInput(data);
-          if (result.isOk()) {
-            scanner?.stop();
-            onSecretRef.current(result.value);
-            onOpenChangeRef.current(false);
-          }
-        },
-        {
-          returnDetailedScanResult: true,
-          highlightScanRegion: true,
-          preferredCamera: "environment",
-        },
-      );
-
-      scanner.start().catch(() => {
-        if (!cancelled) {
-          setMessage("Camera access was denied. Allow it in your browser settings and try again.");
+    const scanner = new QrScanner(
+      video,
+      ({ data }) => {
+        const result = parsePairInput(data);
+        if (result.isOk()) {
+          scanner.stop();
+          onSecretRef.current(result.value);
+          onOpenChangeRef.current(false);
         }
-      });
+      },
+      {
+        returnDetailedScanResult: true,
+        highlightScanRegion: true,
+        preferredCamera: "environment",
+      },
+    );
+
+    scanner.start().catch((error: unknown) => {
+      if (cancelled) return;
+      console.warn("qr-scan: camera failed to start", error);
+      const name = error instanceof Error ? error.name : "";
+      setMessage(
+        name === "NotAllowedError"
+          ? "Camera access was denied. Allow it in your browser settings and try again."
+          : name === "NotFoundError"
+            ? "No camera found on this device."
+            : `Camera failed to start${name ? ` (${name})` : ""}. Reload and try again.`,
+      );
     });
 
     return () => {
       cancelled = true;
-      scanner?.stop();
-      scanner?.destroy();
+      scanner.stop();
+      scanner.destroy();
     };
-  }, [open]);
+  }, [open, video]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -86,7 +82,7 @@ export function QrScanDialog({
           <DialogDescription>Point the camera at the QR on your other device.</DialogDescription>
         </DialogHeader>
         <video
-          ref={videoRef}
+          ref={setVideo}
           playsInline
           muted
           className="aspect-square w-full rounded-2xl bg-muted object-cover"
