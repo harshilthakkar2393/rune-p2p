@@ -6,7 +6,6 @@ export type LibraryLayout = "gallery" | "list";
 export type LibraryPrefs = {
   sort: LibrarySort;
   layout: LibraryLayout;
-  showPreviews: boolean;
 };
 
 const KEY = "rune-library-prefs";
@@ -14,15 +13,19 @@ const KEY = "rune-library-prefs";
 const DEFAULTS: LibraryPrefs = {
   sort: "newest",
   layout: "gallery",
-  showPreviews: true,
 };
 
 export function readLibraryPrefs(): LibraryPrefs {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return DEFAULTS;
-    const parsed = JSON.parse(raw) as Partial<LibraryPrefs>;
-    return { ...DEFAULTS, ...parsed };
+    const parsed = JSON.parse(raw) as Partial<LibraryPrefs> & {
+      showPreviews?: boolean; // legacy key, ignored
+    };
+    return {
+      sort: parsed.sort ?? DEFAULTS.sort,
+      layout: parsed.layout ?? DEFAULTS.layout,
+    };
   } catch {
     return DEFAULTS;
   }

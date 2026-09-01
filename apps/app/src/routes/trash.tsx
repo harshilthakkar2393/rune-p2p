@@ -155,7 +155,7 @@ function TrashView() {
                 folder={page.folderId !== null ? folderById.get(page.folderId) : undefined}
                 selected={selected.has(page.id)}
                 selecting
-                dimPreview
+                dim
                 trailing={
                   <span className="rounded-full border px-2 py-0.5 font-mono text-[11px] text-foreground/85">
                     {daysLeft(page.deletedAt ?? 0)}d left

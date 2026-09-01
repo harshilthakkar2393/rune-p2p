@@ -6,6 +6,9 @@ import {
   Delete02Icon,
   FilterHorizontalIcon,
   Folder01Icon,
+  GridViewIcon,
+  LeftToRightListBulletIcon,
+  Sorting01Icon,
 } from "@hugeicons/core-free-icons";
 
 import { PageCard } from "@/components/page-card";
@@ -18,6 +21,7 @@ import { createPage, moveNode, trashNode } from "@/lib/nodes";
 import { readLibraryPrefs, writeLibraryPrefs, type LibraryPrefs } from "@/lib/library-prefs";
 import type { Folder, Page } from "@/lib/schema";
 import { Badge } from "@rune/ui/components/badge";
+import { ToggleGroup, ToggleGroupItem } from "@rune/ui/components/toggle-group";
 import { Button } from "@rune/ui/components/button";
 import {
   DropdownMenu,
@@ -140,9 +144,13 @@ function LibraryView() {
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <Button variant="ghost" size="sm" className="text-muted-foreground">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Filter"
+                  className="text-muted-foreground"
+                >
                   <HugeiconsIcon icon={FilterHorizontalIcon} strokeWidth={1.75} />
-                  Filter
                 </Button>
               }
             />
@@ -185,15 +193,17 @@ function LibraryView() {
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
-                <Button variant="secondary" size="sm">
-                  Display
-                  <span className="rounded border bg-background px-1 font-mono text-[11px] text-muted-foreground">
-                    ⇧⌘D
-                  </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Sort"
+                  className="text-muted-foreground"
+                >
+                  <HugeiconsIcon icon={Sorting01Icon} strokeWidth={1.75} />
                 </Button>
               }
             />
-            <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuRadioGroup
                 value={prefs.sort}
                 onValueChange={(value) => updatePrefs({ sort: value as LibraryPrefs["sort"] })}
@@ -203,26 +213,26 @@ function LibraryView() {
                 <DropdownMenuRadioItem value="updated">Recently updated</DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="random">Random</DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuRadioGroup
-                value={prefs.layout}
-                onValueChange={(value) => updatePrefs({ layout: value as LibraryPrefs["layout"] })}
-              >
-                <DropdownMenuLabel>Layout</DropdownMenuLabel>
-                <DropdownMenuRadioItem value="gallery">Gallery</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="list">List</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuCheckboxItem
-                  checked={prefs.showPreviews}
-                  onCheckedChange={(checked) => updatePrefs({ showPreviews: checked === true })}
-                >
-                  Show previews
-                </DropdownMenuCheckboxItem>
-              </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <ToggleGroup
+            variant="outline"
+            size="sm"
+            spacing={0}
+            value={[prefs.layout]}
+            onValueChange={(value) => {
+              const layout = value[0] as LibraryPrefs["layout"] | undefined;
+              if (layout) updatePrefs({ layout });
+            }}
+          >
+            <ToggleGroupItem value="gallery" aria-label="Gallery layout">
+              <HugeiconsIcon icon={GridViewIcon} strokeWidth={1.75} />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="list" aria-label="List layout">
+              <HugeiconsIcon icon={LeftToRightListBulletIcon} strokeWidth={1.75} />
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
       </header>
 
@@ -268,7 +278,6 @@ function LibraryView() {
                   folder={page.folderId !== null ? folderById.get(page.folderId) : undefined}
                   selected={selected.has(page.id)}
                   selecting={selected.size > 0}
-                  showPreview={prefs.showPreviews}
                   trailing={
                     <span className="font-mono text-[11px] text-muted-foreground">
                       {humanTime(page.updatedAt)}
@@ -284,7 +293,7 @@ function LibraryView() {
                 className={cn(
                   "flex items-center justify-center gap-2 rounded-[10px] border border-dashed text-[13px] text-muted-foreground",
                   "hover:border-foreground/25 hover:text-foreground",
-                  prefs.showPreviews ? "min-h-[166px]" : "min-h-[62px]",
+                  "h-36",
                 )}
               >
                 <HugeiconsIcon icon={Add01Icon} strokeWidth={1.75} className="size-4!" />
