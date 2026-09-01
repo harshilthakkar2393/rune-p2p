@@ -147,8 +147,8 @@ function LibraryView() {
               }
             />
             <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuLabel>Date</DropdownMenuLabel>
               <DropdownMenuGroup>
+                <DropdownMenuLabel>Date</DropdownMenuLabel>
                 {DATE_PRESETS.map((preset) => (
                   <DropdownMenuCheckboxItem
                     key={preset.id}
@@ -162,8 +162,8 @@ function LibraryView() {
                 ))}
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuLabel>Folder</DropdownMenuLabel>
               <DropdownMenuGroup>
+                <DropdownMenuLabel>Folder</DropdownMenuLabel>
                 {folders.map((folder) => (
                   <DropdownMenuCheckboxItem
                     key={folder.id}
@@ -194,31 +194,33 @@ function LibraryView() {
               }
             />
             <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuLabel>Sort</DropdownMenuLabel>
               <DropdownMenuRadioGroup
                 value={prefs.sort}
                 onValueChange={(value) => updatePrefs({ sort: value as LibraryPrefs["sort"] })}
               >
+                <DropdownMenuLabel>Sort</DropdownMenuLabel>
                 <DropdownMenuRadioItem value="newest">Newest first</DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="updated">Recently updated</DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="random">Random</DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuLabel>Layout</DropdownMenuLabel>
               <DropdownMenuRadioGroup
                 value={prefs.layout}
                 onValueChange={(value) => updatePrefs({ layout: value as LibraryPrefs["layout"] })}
               >
+                <DropdownMenuLabel>Layout</DropdownMenuLabel>
                 <DropdownMenuRadioItem value="gallery">Gallery</DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="list">List</DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuCheckboxItem
-                checked={prefs.showPreviews}
-                onCheckedChange={(checked) => updatePrefs({ showPreviews: checked === true })}
-              >
-                Show previews
-              </DropdownMenuCheckboxItem>
+              <DropdownMenuGroup>
+                <DropdownMenuCheckboxItem
+                  checked={prefs.showPreviews}
+                  onCheckedChange={(checked) => updatePrefs({ showPreviews: checked === true })}
+                >
+                  Show previews
+                </DropdownMenuCheckboxItem>
+              </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
