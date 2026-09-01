@@ -54,6 +54,8 @@ export function QrScanDialog({
       },
     );
 
+    // Belt and braces for codes shown on dark screens.
+    scanner.setInversionMode("both");
     scanner.start().catch((error: unknown) => {
       if (cancelled) return;
       console.warn("qr-scan: camera failed to start", error);
