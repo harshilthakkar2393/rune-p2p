@@ -85,12 +85,12 @@ function TrashView() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex h-[52px] shrink-0 items-center gap-3 border-b px-6">
-        <span className="text-[15px]">Trash</span>
+      <header className="flex shrink-0 items-baseline gap-3.5 px-8 pt-6 pb-2">
+        <h1 className="text-h1">Trash</h1>
         <span className="font-mono text-[11px] text-muted-foreground">
           deleted forever after 30 days
         </span>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-2 self-center">
           {selected.size > 0 && (
             <>
               <span className="font-mono text-xs text-muted-foreground">
@@ -112,7 +112,7 @@ function TrashView() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-6 py-5">
+      <main className="flex-1 overflow-y-auto px-8 py-4">
         {trashed.length === 0 ? (
           <Empty>
             <EmptyHeader>

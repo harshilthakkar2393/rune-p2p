@@ -135,12 +135,12 @@ function LibraryView() {
 
   return (
     <div className="relative flex h-full flex-col">
-      <header className="flex h-[52px] shrink-0 items-center gap-3 border-b px-6">
-        <span className="text-[15px]">Library</span>
+      <header className="flex shrink-0 items-baseline gap-3.5 px-8 pt-6 pb-2">
+        <h1 className="text-h1">Library</h1>
         <span className="font-mono text-[11px] text-muted-foreground">
           {pages.length} {pages.length === 1 ? "page" : "pages"}
         </span>
-        <div className="ml-auto flex items-center gap-1.5">
+        <div className="ml-auto flex items-center gap-1.5 self-center">
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
@@ -237,7 +237,7 @@ function LibraryView() {
       </header>
 
       {(activeFolder !== undefined || dateFilter !== null) && (
-        <div className="mx-auto flex w-full max-w-5xl shrink-0 items-center gap-2 px-6 pt-3">
+        <div className="flex w-full shrink-0 items-center gap-2 px-8 pt-2">
           {dateFilter !== null && (
             <Badge
               variant="secondary"
@@ -267,8 +267,8 @@ function LibraryView() {
         </div>
       )}
 
-      <main className="flex-1 overflow-y-auto px-6 py-5">
-        <div className="mx-auto w-full max-w-5xl">
+      <main className="flex-1 overflow-y-auto px-8 py-4">
+        <div className="w-full">
           {prefs.layout === "gallery" ? (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
               {pages.map((page) => (
