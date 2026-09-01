@@ -25,6 +25,7 @@ import { FOLDER_COLOR_VALUES, folderColorValue } from "@/lib/folder-colors";
 import { getNodesMap } from "@/lib/index-doc";
 import { createFolder, createPage, moveNode, renameNode, trashNode } from "@/lib/nodes";
 import { setPaletteOpen } from "@/lib/palette";
+import { Button } from "@rune/ui/components/button";
 import { FOLDER_COLORS, type Folder, type FolderColor, type Node, type Page } from "@/lib/schema";
 import {
   Collapsible,
@@ -386,14 +387,9 @@ function NewFolderPopover() {
                 if (event.key === "Escape") setOpen(false);
               }}
             />
-            <button
-              type="button"
-              aria-label="Create folder"
-              onClick={confirm}
-              className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground"
-            >
+            <Button size="icon" aria-label="Create folder" onClick={confirm}>
               <Icon icon={Tick02Icon} className="size-4!" />
-            </button>
+            </Button>
           </div>
           <div className="flex items-center gap-2 px-1">
             {FOLDER_COLORS.map((candidate) => (

@@ -10,6 +10,7 @@ import { useNodes } from "@/hooks/use-index";
 import { folderColorValue } from "@/lib/folder-colors";
 import { recordOpen } from "@/lib/recents";
 import type { Folder, Page } from "@/lib/schema";
+import { Button } from "@rune/ui/components/button";
 
 export const Route = createFileRoute("/page/$pageId")({ component: PageView });
 
@@ -52,9 +53,9 @@ function PageView() {
   return (
     <div className="flex h-full">
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-[44px] shrink-0 items-center gap-2 border-b px-4 text-[13px] text-muted-foreground">
+        <header className="flex h-11 shrink-0 items-center gap-2 px-3">
           {folder && (
-            <>
+            <span className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[13px] text-muted-foreground">
               <HugeiconsIcon
                 icon={Folder01Icon}
                 strokeWidth={1.75}
@@ -62,24 +63,21 @@ function PageView() {
                 style={folderTint ? { color: folderTint } : undefined}
               />
               <span className="max-w-40 truncate">{folder.name}</span>
-              <span className="text-muted-foreground/50">›</span>
-            </>
+            </span>
           )}
-          <span className="truncate text-foreground">
-            {page ? (page.title === "" ? "Untitled" : page.title) : ""}
-          </span>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
+            className="ml-auto text-muted-foreground"
             aria-label={inspectorOpen ? "Hide page info" : "Show page info"}
             onClick={toggleInspector}
-            className="ml-auto flex size-[30px] items-center justify-center rounded-md hover:bg-secondary/60"
           >
-            <HugeiconsIcon icon={SidebarRight01Icon} strokeWidth={1.75} className="size-4!" />
-          </button>
+            <HugeiconsIcon icon={SidebarRight01Icon} strokeWidth={1.75} />
+          </Button>
         </header>
-        <main className="w-full flex-1 overflow-y-auto py-6 px-8">
-          <div className="flex flex-col gap-4">
-            <div className="px-1">
+        <main className="w-full flex-1 overflow-y-auto pt-4 pb-10">
+          <div className="flex flex-col gap-2">
+            <div className="px-[54px]">
               <PageTitle pageId={pageId} />
             </div>
             <Editor pageId={pageId} />

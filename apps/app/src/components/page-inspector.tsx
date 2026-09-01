@@ -3,12 +3,12 @@ import { useNavigate } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { IconSvgElement } from "@hugeicons/react";
 import {
+  Calendar03Icon,
   Clock01Icon,
-  ComputerIcon,
   Delete02Icon,
   Download04Icon,
-  PencilEdit01Icon,
-  TextAlignLeftIcon,
+  LaptopIcon,
+  TextAlignJustifyCenterIcon,
 } from "@hugeicons/core-free-icons";
 
 import { getActiveEditor } from "@/lib/editor-ref";
@@ -18,18 +18,15 @@ import { humanTime } from "@/lib/human-time";
 import { getNodesMap } from "@/lib/index-doc";
 import { trashNode } from "@/lib/nodes";
 import type { Folder, Page } from "@/lib/schema";
+import { Badge } from "@rune/ui/components/badge";
 import { Button } from "@rune/ui/components/button";
 
 function Row({ icon, label, value }: { icon: IconSvgElement; label: string; value: string }) {
   return (
-    <div className="flex items-center gap-2.5">
-      <HugeiconsIcon
-        icon={icon}
-        strokeWidth={1.75}
-        className="size-[15px]! text-muted-foreground"
-      />
-      <span className="w-[72px] text-[13px] text-muted-foreground">{label}</span>
-      <span className="ml-auto font-mono text-xs">{value}</span>
+    <div className="flex h-7 items-center gap-2.5">
+      <HugeiconsIcon icon={icon} strokeWidth={1.75} className="size-4! text-muted-foreground/70" />
+      <span className="text-[13px] text-muted-foreground">{label}</span>
+      <span className="ml-auto font-mono text-xs text-foreground/90">{value}</span>
     </div>
   );
 }
@@ -39,9 +36,7 @@ async function exportMarkdown(page: Page) {
   if (!editor) return;
   const markdown = await editor.blocksToMarkdownLossy(editor.document);
   const title = page.title === "" ? "untitled" : page.title;
-  const blob = new Blob([`# ${title}\n\n${markdown}`], {
-    type: "text/markdown",
-  });
+  const blob = new Blob([`# ${title}\n\n${markdown}`], { type: "text/markdown" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
@@ -71,60 +66,75 @@ export function PageInspector({ page, folder }: { page: Page; folder: Folder | u
   };
 
   return (
-    <aside className="my-2 mr-2 flex w-[280px] shrink-0 flex-col gap-4 rounded-xl border bg-card p-4 text-[13px]">
-      <span className="text-[11px] text-muted-foreground">Properties</span>
-      <div className="flex flex-col gap-3">
+    <aside className="flex w-[264px] shrink-0 flex-col gap-5 border-l px-4 py-4">
+      <section className="flex flex-col gap-1">
+        <span className="pb-1 text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase">
+          Properties
+        </span>
         <Row
-          icon={Clock01Icon}
+          icon={Calendar03Icon}
           label="Created"
           value={new Date(page.createdAt).toLocaleDateString(undefined, {
             month: "short",
             day: "numeric",
           })}
         />
-        <Row icon={PencilEdit01Icon} label="Updated" value={humanTime(page.updatedAt)} />
-        <Row icon={ComputerIcon} label="Device" value={page.createdOn ?? "—"} />
-        <Row icon={TextAlignLeftIcon} label="Words" value={words === null ? "…" : String(words)} />
-      </div>
+        <Row icon={Clock01Icon} label="Updated" value={humanTime(page.updatedAt)} />
+        <Row icon={LaptopIcon} label="Device" value={page.createdOn ?? "—"} />
+        <Row
+          icon={TextAlignJustifyCenterIcon}
+          label="Words"
+          value={words === null ? "…" : String(words)}
+        />
+      </section>
 
-      <div className="flex flex-col gap-2.5 border-t pt-3.5">
-        <span className="text-[11px] text-muted-foreground">Folder</span>
+      <section className="flex flex-col gap-2">
+        <span className="text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase">
+          Folder
+        </span>
         {folder ? (
-          <span className="inline-flex w-fit items-center gap-1.5 rounded-full border bg-secondary px-2.5 py-1 text-xs">
+          <Badge variant="secondary" className="w-fit gap-1.5 font-normal">
             {folderTint && (
               <span className="size-[7px] rounded-full" style={{ background: folderTint }} />
             )}
             {folder.name}
-          </span>
+          </Badge>
         ) : (
           <span className="text-xs text-muted-foreground">Library root</span>
         )}
-      </div>
+      </section>
 
-      <div className="flex flex-col gap-2 border-t pt-3.5">
-        <span className="text-[11px] text-muted-foreground">Storage</span>
-        <span className="flex items-center gap-2">
+      <section className="flex flex-col gap-1.5">
+        <span className="text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase">
+          Storage
+        </span>
+        <span className="flex items-center gap-2 text-[13px]">
           <span className="size-1.5 rounded-full bg-muted-foreground/50" />
           On this device
         </span>
-        <span className="font-mono text-xs text-muted-foreground">local only</span>
-      </div>
+        <span className="font-mono text-[11px] text-muted-foreground">local only</span>
+      </section>
 
-      <div className="mt-auto flex flex-col gap-2">
-        <Button variant="outline" size="sm" onClick={() => void exportMarkdown(page)}>
+      <section className="mt-auto -mx-2 flex flex-col gap-0.5 border-t pt-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="justify-start font-normal text-foreground/85"
+          onClick={() => void exportMarkdown(page)}
+        >
           <HugeiconsIcon icon={Download04Icon} strokeWidth={1.75} />
           Export Markdown
         </Button>
         <Button
           variant="ghost"
           size="sm"
-          className="text-destructive hover:text-destructive"
+          className="justify-start font-normal text-destructive hover:text-destructive"
           onClick={sendToTrash}
         >
           <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
           Move to trash
         </Button>
-      </div>
+      </section>
     </aside>
   );
 }

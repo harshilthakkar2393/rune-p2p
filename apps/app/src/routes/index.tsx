@@ -9,7 +9,7 @@ import { humanTime } from "@/lib/human-time";
 import { readRecents } from "@/lib/recents";
 import type { Page } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "@rune/ui/components/card";
+import { Card } from "@rune/ui/components/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@rune/ui/components/empty";
 
 export const Route = createFileRoute("/")({ component: Home });
@@ -51,23 +51,20 @@ function RecentCard({ page, openedAt }: { page: Page; openedAt: number }) {
     };
   }, [page.id]);
 
-  // Fixed 144px card, fixed slots (title 1 line, excerpt 2 lines
-  // reserved), timestamp PINNED to the bottom edge via mt-auto —
-  // it never rides up with shorter content.
+  // Fixed 144px card with explicit uniform padding; every slot fixed-height,
+  // timestamp pinned to the bottom edge. Excerpt resolves into reserved space.
   return (
     <Link to="/page/$pageId" params={{ pageId: page.id }}>
-      <Card className="flex h-36 flex-col gap-0 overflow-hidden py-4 shadow-none transition-colors hover:bg-accent/40">
-        <CardHeader className="flex h-full flex-col gap-1.5">
-          <CardTitle className="h-5 shrink-0 truncate text-sm leading-5">
-            {page.title === "" ? "Untitled" : page.title}
-          </CardTitle>
-          <CardDescription className="line-clamp-2 h-[38px] shrink-0 text-[13px] leading-[19px]">
-            {excerpt === null ? "" : excerpt === "" ? "Empty page" : excerpt}
-          </CardDescription>
-          <span className="mt-auto h-4 shrink-0 font-mono text-[11px] leading-4 text-muted-foreground">
-            {humanTime(openedAt)}
-          </span>
-        </CardHeader>
+      <Card className="flex h-36 flex-col gap-1.5 overflow-hidden p-4 shadow-none transition-colors hover:bg-accent/40">
+        <span className="h-5 shrink-0 truncate text-sm leading-5">
+          {page.title === "" ? "Untitled" : page.title}
+        </span>
+        <span className="line-clamp-2 h-[38px] shrink-0 overflow-hidden text-[13px] leading-[19px] break-words text-muted-foreground">
+          {excerpt === null ? "" : excerpt === "" ? "Empty page" : excerpt}
+        </span>
+        <span className="mt-auto h-4 shrink-0 font-mono text-[11px] leading-4 text-muted-foreground">
+          {humanTime(openedAt)}
+        </span>
       </Card>
     </Link>
   );
