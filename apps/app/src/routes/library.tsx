@@ -21,6 +21,7 @@ import { createPage, moveNode, trashNode } from "@/lib/nodes";
 import { readLibraryPrefs, writeLibraryPrefs, type LibraryPrefs } from "@/lib/library-prefs";
 import type { Folder, Page } from "@/lib/schema";
 import { Badge } from "@rune/ui/components/badge";
+import { Card } from "@rune/ui/components/card";
 import { Tabs, TabsList, TabsTrigger } from "@rune/ui/components/tabs";
 import { Button } from "@rune/ui/components/button";
 import {
@@ -283,18 +284,18 @@ function LibraryView() {
                   onOpen={() => openPage(page.id)}
                 />
               ))}
-              <button
-                type="button"
+              <Card
+                role="button"
+                tabIndex={0}
                 onClick={newPage}
-                className={cn(
-                  "flex items-center justify-center gap-2 rounded-[10px] border border-dashed text-[13px] text-muted-foreground",
-                  "hover:border-foreground/25 hover:text-foreground",
-                  "h-36",
-                )}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") newPage();
+                }}
+                className="flex h-36 cursor-pointer flex-row items-center justify-center gap-2 border-dashed bg-transparent p-4 text-[13px] text-muted-foreground shadow-none transition-colors hover:border-foreground/25 hover:text-foreground"
               >
                 <HugeiconsIcon icon={Add01Icon} strokeWidth={1.75} className="size-4!" />
                 New page
-              </button>
+              </Card>
             </div>
           ) : (
             <div className="flex flex-col rounded-lg border">
