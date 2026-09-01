@@ -5,6 +5,7 @@ import { useNodes } from "@/hooks/use-index";
 import { getNodesMap } from "@/lib/index-doc";
 import { getPageExcerpt } from "@/lib/excerpt";
 import { createPage } from "@/lib/nodes";
+import { humanTime } from "@/lib/human-time";
 import { readRecents } from "@/lib/recents";
 import type { Page } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
@@ -39,24 +40,21 @@ function RecentCard({ page, openedAt }: { page: Page; openedAt: number }) {
     };
   }, [page.id]);
 
-  // Every slot is fixed-height so cards stay uniform and nothing shifts
-  // when the excerpt resolves: title 1 line, excerpt exactly 2 lines,
-  // date 1 line, card 144px total.
+  // Fixed 144px card, fixed slots (title 1 line, excerpt 2 lines
+  // reserved), timestamp PINNED to the bottom edge via mt-auto —
+  // it never rides up with shorter content.
   return (
     <Link to="/page/$pageId" params={{ pageId: page.id }}>
-      <Card className="h-36 gap-0 overflow-hidden py-4 shadow-none transition-colors hover:bg-accent/40">
-        <CardHeader className="gap-1.5">
-          <CardTitle className="h-5 truncate text-sm leading-5">
+      <Card className="flex h-36 flex-col gap-0 overflow-hidden py-4 shadow-none transition-colors hover:bg-accent/40">
+        <CardHeader className="flex h-full flex-col gap-1.5">
+          <CardTitle className="h-5 shrink-0 truncate text-sm leading-5">
             {page.title === "" ? "Untitled" : page.title}
           </CardTitle>
-          <CardDescription className="line-clamp-2 h-[38px] text-[13px] leading-[19px]">
+          <CardDescription className="line-clamp-2 h-[38px] shrink-0 text-[13px] leading-[19px]">
             {excerpt === null ? "" : excerpt === "" ? "Empty page" : excerpt}
           </CardDescription>
-          <span className="h-4 pt-1 font-mono text-[11px] leading-4 text-muted-foreground">
-            {new Date(openedAt).toLocaleDateString(undefined, {
-              month: "short",
-              day: "numeric",
-            })}
+          <span className="mt-auto h-4 shrink-0 font-mono text-[11px] leading-4 text-muted-foreground">
+            {humanTime(openedAt)}
           </span>
         </CardHeader>
       </Card>
