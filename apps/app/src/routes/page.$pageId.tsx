@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Folder01Icon, SidebarRight01Icon } from "@hugeicons/core-free-icons";
+import { Folder01Icon, LayoutAlignRightIcon } from "@hugeicons/core-free-icons";
 
 import { Editor } from "@/components/editor";
 import { PageTitle } from "@/components/page-title";
@@ -54,7 +54,7 @@ function PageView() {
             aria-label={inspectorOpen ? "Hide page info" : "Show page info"}
             onClick={() => toggleInspector()}
           >
-            <HugeiconsIcon icon={SidebarRight01Icon} strokeWidth={1.75} />
+            <HugeiconsIcon icon={LayoutAlignRightIcon} strokeWidth={1.75} />
           </Button>
         </header>
         <main className="w-full flex-1 overflow-y-auto pt-4 pb-10">
