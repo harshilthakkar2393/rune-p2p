@@ -257,7 +257,7 @@ function TrashView() {
             </DropdownMenuContent>
           </DropdownMenu>
           {trashed.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={() => setConfirming("all")}>
+            <Button variant="destructive" size="sm" onClick={() => setConfirming("all")}>
               Empty trash
             </Button>
           )}
@@ -400,10 +400,7 @@ function TrashView() {
           <HugeiconsIcon icon={ArrowTurnBackwardIcon} strokeWidth={1.75} />
           Restore
         </SelectionBarButton>
-        <SelectionBarButton
-          className="text-destructive hover:text-destructive"
-          onClick={() => setConfirming("selection")}
-        >
+        <SelectionBarButton variant="destructive" onClick={() => setConfirming("selection")}>
           <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
           Delete forever
         </SelectionBarButton>
@@ -429,7 +426,9 @@ function TrashView() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Delete forever</AlertDialogAction>
+            <AlertDialogAction variant="destructive" onClick={confirmDelete}>
+              Delete forever
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

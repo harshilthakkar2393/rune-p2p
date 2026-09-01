@@ -204,8 +204,8 @@ function DevicesView() {
             </Card>
 
             <Button
-              variant="ghost"
-              className="self-start text-destructive hover:text-destructive"
+              variant="destructive"
+              className="self-start"
               onClick={() => setConfirmUnpair(true)}
             >
               Unpair this device
@@ -228,7 +228,9 @@ function DevicesView() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleUnpair}>Unpair</AlertDialogAction>
+              <AlertDialogAction variant="destructive" onClick={handleUnpair}>
+                Unpair
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

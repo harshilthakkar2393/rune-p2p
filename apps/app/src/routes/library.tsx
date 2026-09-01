@@ -345,10 +345,7 @@ function LibraryView() {
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
-        <SelectionBarButton
-          className="text-destructive hover:text-destructive"
-          onClick={trashSelected}
-        >
+        <SelectionBarButton variant="destructive" onClick={trashSelected}>
           <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
           Trash
         </SelectionBarButton>

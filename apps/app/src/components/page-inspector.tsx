@@ -128,9 +128,9 @@ export function PageInspector({ page, folder }: { page: Page; folder: Folder | u
             Export Markdown
           </Button>
           <Button
-            variant="ghost"
+            variant="destructive"
             size="sm"
-            className="justify-start font-normal text-destructive hover:text-destructive"
+            className="justify-start font-normal"
             onClick={sendToTrash}
           >
             <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
