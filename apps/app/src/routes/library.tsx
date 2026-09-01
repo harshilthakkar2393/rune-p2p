@@ -276,7 +276,7 @@ function LibraryView() {
                 onKeyDown={(event) => {
                   if (event.key === "Enter") newPage();
                 }}
-                className="flex h-36 cursor-pointer flex-row items-center justify-center gap-2 border-dashed bg-transparent p-4 text-small text-muted-foreground shadow-none transition-colors hover:border-foreground/25 hover:text-foreground"
+                className="flex h-36 cursor-pointer flex-row items-center justify-center gap-2 border border-dashed bg-transparent p-4 ring-0 text-small text-muted-foreground shadow-none transition-colors hover:border-foreground/25 hover:text-foreground"
               >
                 <HugeiconsIcon icon={Add01Icon} strokeWidth={1.75} className="size-4!" />
                 New page

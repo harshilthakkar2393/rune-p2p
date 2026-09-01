@@ -94,7 +94,7 @@ export function PageCard({
       className={cn(
         "group/card relative flex h-36 flex-col gap-1.5 overflow-hidden p-4 text-left shadow-none transition-colors",
         onActivate && "cursor-pointer hover:bg-accent/40",
-        selected && "border-foreground/50",
+        selected && "ring-foreground/50 dark:ring-foreground/50",
       )}
       role={onActivate ? "button" : undefined}
       tabIndex={onActivate ? 0 : undefined}
