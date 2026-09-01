@@ -1,12 +1,10 @@
 import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { IconSvgElement } from "@hugeicons/react";
-import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 
 import { getPageExcerpt } from "@/lib/excerpt";
 import { folderColorValue } from "@/lib/folder-colors";
 import type { Folder, Page } from "@/lib/schema";
-import { Button } from "@rune/ui/components/button";
 import { Card } from "@rune/ui/components/card";
 import { Checkbox } from "@rune/ui/components/checkbox";
 import {
@@ -17,14 +15,6 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@rune/ui/components/context-menu";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@rune/ui/components/dropdown-menu";
 import { cn } from "@rune/ui/lib/utils";
 
 export type CardAction =
@@ -36,21 +26,19 @@ export type CardAction =
     }
   | "separator";
 
-function actionItems(actions: CardAction[], kind: "context" | "dropdown"): ReactNode {
-  const Item = kind === "context" ? ContextMenuItem : DropdownMenuItem;
-  const Separator = kind === "context" ? ContextMenuSeparator : DropdownMenuSeparator;
+function actionItems(actions: CardAction[]): ReactNode {
   return actions.map((action, index) =>
     action === "separator" ? (
-      <Separator key={`sep-${index}`} />
+      <ContextMenuSeparator key={`sep-${index}`} />
     ) : (
-      <Item
+      <ContextMenuItem
         key={action.label}
         variant={action.destructive ? "destructive" : "default"}
         onClick={action.onSelect}
       >
         <HugeiconsIcon icon={action.icon} strokeWidth={1.75} />
         {action.label}
-      </Item>
+      </ContextMenuItem>
     ),
   );
 }
@@ -58,10 +46,12 @@ function actionItems(actions: CardAction[], kind: "context" | "dropdown"): React
 /**
  * THE page card, app-wide: fixed 144px, uniform p-4, 1-line title,
  * 2 reserved excerpt lines, folder tag + pinned trailing meta.
- * Interactions: hover check circle (top-left) enters selection; hover ⋯
- * (top-right) and right-click open the same quick-action menu; the card
+ * Interactions (one step, Resurf-style): hovering reveals a check circle
+ * top-right; it stays once selected or while a selection exists.
+ * Right-click opens the quick-action menu (no ⋯ button by design). Card
  * click goes to onActivate with the raw event so pages can implement
- * ⌘-click toggle and shift-click ranges.
+ * ⌘-click toggle and shift-click ranges. Top-right placement keeps the
+ * left edge flush — no per-state indent.
  */
 export function PageCard({
   page,
@@ -113,41 +103,24 @@ export function PageCard({
         if (event.key === "Enter") onActivate?.(event as unknown as MouseEvent);
       }}
     >
-      {actions && !selecting && (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Page actions"
-                onClick={(event) => event.stopPropagation()}
-                className="absolute top-2 right-2 z-10 size-6 text-muted-foreground opacity-0 transition-opacity group-hover/card:opacity-100 data-popup-open:bg-secondary data-popup-open:opacity-100"
-              >
-                <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={1.75} className="size-4!" />
-              </Button>
-            }
-          />
-          <DropdownMenuContent
-            align="start"
-            className="w-auto min-w-44"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <DropdownMenuGroup>{actionItems(actions, "dropdown")}</DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      {onSelectToggle && (
+        <span className="absolute top-2 right-2 z-10 flex items-center">
+          {onSelectToggle && (
+            <Checkbox
+              checked={selected}
+              onCheckedChange={() => onSelectToggle()}
+              onClick={(event) => event.stopPropagation()}
+              aria-label={selected ? "Deselect" : "Select"}
+              className={cn(
+                "size-4.5 rounded-full opacity-0 transition-opacity group-hover/card:opacity-100 focus-visible:opacity-100",
+                (selected || selecting) && "opacity-100",
+              )}
+            />
+          )}
+        </span>
       )}
 
-      <span className="flex h-5 shrink-0 items-center gap-2 pr-6">
-        {onSelectToggle && selecting && (
-          <Checkbox
-            checked={selected}
-            onCheckedChange={() => onSelectToggle()}
-            onClick={(event) => event.stopPropagation()}
-            aria-label={selected ? "Deselect" : "Select"}
-            className="size-4.5 rounded-full"
-          />
-        )}
+      <span className={cn("flex h-5 shrink-0 items-center gap-2", onSelectToggle && "pr-7")}>
         <span className={cn("min-w-0 truncate text-sm leading-5", dim && "text-muted-foreground")}>
           {title}
         </span>
@@ -156,17 +129,11 @@ export function PageCard({
         className={cn(
           "line-clamp-2 h-9 shrink-0 overflow-hidden text-small break-words text-muted-foreground",
           dim && "text-muted-foreground/60",
-          onSelectToggle && selecting && "pl-6.5",
         )}
       >
         {excerpt === null ? "" : excerpt === "" ? "Empty page" : excerpt}
       </span>
-      <span
-        className={cn(
-          "mt-auto flex h-4 shrink-0 items-center gap-2",
-          onSelectToggle && selecting && "pl-6.5",
-        )}
-      >
+      <span className="mt-auto flex h-4 shrink-0 items-center gap-2">
         {folder && (
           <span className="inline-flex min-w-0 items-center gap-1.5 text-tiny leading-4 text-muted-foreground">
             {folderTint && (
@@ -186,7 +153,7 @@ export function PageCard({
     <ContextMenu>
       <ContextMenuTrigger render={card} />
       <ContextMenuContent className="w-auto min-w-44">
-        <ContextMenuGroup>{actionItems(actions, "context")}</ContextMenuGroup>
+        <ContextMenuGroup>{actionItems(actions)}</ContextMenuGroup>
       </ContextMenuContent>
     </ContextMenu>
   );

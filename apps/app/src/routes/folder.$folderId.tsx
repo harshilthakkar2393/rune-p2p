@@ -13,6 +13,8 @@ import {
 
 import { FolderGlyph } from "@/components/folder-glyph";
 import { PageCard, type CardAction } from "@/components/page-card";
+import { SelectionBar, SelectionBarButton } from "@/components/selection-bar";
+import { Tip } from "@/components/tip";
 import { useNodes } from "@/hooks/use-index";
 import { useSelection } from "@/hooks/use-selection";
 import { rememberFolder } from "@/lib/compose-target";
@@ -122,11 +124,6 @@ function FolderView() {
 
   const pageActions = (pageId: string): CardAction[] => [
     { label: "Open", icon: ArrowUpRight01Icon, onSelect: () => openPage(pageId) },
-    {
-      label: "Select",
-      icon: CheckmarkCircle02Icon,
-      onSelect: () => selection.toggle(pageId),
-    },
     "separator",
     {
       label: "Move to trash",
@@ -167,31 +164,35 @@ function FolderView() {
           {pages.length} {pages.length === 1 ? "page" : "pages"}
         </span>
         <div className="ml-auto flex items-center gap-1.5 self-center">
-          <Button
-            variant={selecting ? "secondary" : "ghost"}
-            size="icon"
-            aria-label="Select"
-            className={selecting ? undefined : "text-muted-foreground"}
-            onClick={selection.toggleMode}
-          >
-            <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={1.75} />
-          </Button>
+          <Tip label={selecting ? "Done selecting" : "Select"}>
+            <Button
+              variant={selecting ? "secondary" : "ghost"}
+              size="icon"
+              aria-label="Select"
+              className={selecting ? undefined : "text-muted-foreground"}
+              onClick={selection.toggleMode}
+            >
+              <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={1.75} />
+            </Button>
+          </Tip>
           <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Sort"
-                  className="text-muted-foreground"
-                >
-                  <HugeiconsIcon icon={Sorting01Icon} strokeWidth={1.75} />
-                </Button>
-              }
-            />
+            <Tip label="Sort">
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Sort"
+                    className="text-muted-foreground"
+                  >
+                    <HugeiconsIcon icon={Sorting01Icon} strokeWidth={1.75} />
+                  </Button>
+                }
+              />
+            </Tip>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuRadioGroup
-                value={prefs.sort === "updated" ? "updated" : "newest"}
+                value={prefs.sort}
                 onValueChange={(value) => updatePrefs({ sort: value as LibraryPrefs["sort"] })}
               >
                 <DropdownMenuLabel>Sort</DropdownMenuLabel>
@@ -202,18 +203,20 @@ function FolderView() {
           </DropdownMenu>
 
           <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Folder actions"
-                  className="text-muted-foreground"
-                >
-                  <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={1.75} />
-                </Button>
-              }
-            />
+            <Tip label="Folder actions">
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Folder actions"
+                    className="text-muted-foreground"
+                  >
+                    <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={1.75} />
+                  </Button>
+                }
+              />
+            </Tip>
             <DropdownMenuContent align="end" className="w-52">
               <DropdownMenuGroup>
                 <DropdownMenuItem onClick={() => setRenaming(true)}>
@@ -287,51 +290,41 @@ function FolderView() {
         </main>
       </ScrollArea>
 
-      {selected.size > 0 && (
-        <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-lg border bg-popover py-1 pr-1 pl-3 shadow-lg">
-          <span className="font-mono text-xs">{selected.size} selected</span>
-          <span className="mx-2 h-4.5 w-px bg-border" />
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button variant="ghost" size="sm" className="font-normal">
-                  <FolderGlyph className="size-4" />
-                  Move
-                </Button>
-              }
-            />
-            <DropdownMenuContent align="center" side="top">
-              <DropdownMenuGroup>
-                {otherFolders.map((target) => (
-                  <DropdownMenuItem key={target.id} onClick={() => moveSelected(target.id)}>
-                    {target.name}
-                  </DropdownMenuItem>
-                ))}
-                {otherFolders.length === 0 && (
-                  <DropdownMenuItem disabled>No other folders</DropdownMenuItem>
-                )}
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="font-normal text-destructive hover:text-destructive"
-            onClick={trashSelected}
-          >
-            <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
-            Trash
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="font-normal text-muted-foreground"
-            onClick={selection.clear}
-          >
-            Clear
-          </Button>
-        </div>
-      )}
+      <SelectionBar count={selected.size} onClear={selection.clear}>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <SelectionBarButton>
+                <FolderGlyph className="size-4" />
+                Move
+              </SelectionBarButton>
+            }
+          />
+          <DropdownMenuContent align="center" side="top">
+            <DropdownMenuGroup>
+              {otherFolders.map((target) => (
+                <DropdownMenuItem key={target.id} onClick={() => moveSelected(target.id)}>
+                  <FolderGlyph
+                    className="size-4"
+                    color={folderColorValue(target.color) ?? "var(--muted-foreground)"}
+                  />
+                  {target.name}
+                </DropdownMenuItem>
+              ))}
+              {otherFolders.length === 0 && (
+                <DropdownMenuItem disabled>No other folders</DropdownMenuItem>
+              )}
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <SelectionBarButton
+          className="text-destructive hover:text-destructive"
+          onClick={trashSelected}
+        >
+          <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
+          Trash
+        </SelectionBarButton>
+      </SelectionBar>
     </div>
   );
 }

@@ -12,9 +12,12 @@ import {
 
 import { FolderGlyph } from "@/components/folder-glyph";
 import { PageCard, type CardAction } from "@/components/page-card";
+import { SelectionBar, SelectionBarButton } from "@/components/selection-bar";
+import { Tip } from "@/components/tip";
 import { useNodes } from "@/hooks/use-index";
 import { useSelection } from "@/hooks/use-selection";
 import { composeTargetFolderId } from "@/lib/compose-target";
+import { DATE_PRESETS, presetLabel, withinPreset, type DatePresetId } from "@/lib/date-presets";
 import { getDeviceName } from "@/lib/device";
 import { folderColorValue } from "@/lib/folder-colors";
 import { humanTime } from "@/lib/human-time";
@@ -41,32 +44,12 @@ import {
 
 export const Route = createFileRoute("/library")({ component: LibraryView });
 
-const DATE_PRESETS = [
-  { id: "today", label: "Today", days: 1 },
-  { id: "week", label: "This week", days: 7 },
-  { id: "month", label: "This month", days: 31 },
-] as const;
-
-type DatePresetId = (typeof DATE_PRESETS)[number]["id"];
-
-function seededShuffle<T>(items: T[], seed: number): T[] {
-  const arr = items.slice();
-  let state = seed;
-  for (let i = arr.length - 1; i > 0; i--) {
-    state = (state * 9301 + 49297) % 233280;
-    const j = Math.floor((state / 233280) * (i + 1));
-    [arr[i], arr[j]] = [arr[j] as T, arr[i] as T];
-  }
-  return arr;
-}
-
 function LibraryView() {
   const nodes = useNodes();
   const navigate = useNavigate();
   const [prefs, setPrefs] = useState<LibraryPrefs>(() => readLibraryPrefs());
   const [folderFilter, setFolderFilter] = useState<string | null>(null);
   const [dateFilter, setDateFilter] = useState<DatePresetId | null>(null);
-  const [randomSeed] = useState(() => Date.now() % 233280);
 
   const updatePrefs = (patch: Partial<LibraryPrefs>) => {
     const next = { ...prefs, ...patch };
@@ -87,16 +70,11 @@ function LibraryView() {
       live = live.filter((page) => page.folderId === folderFilter);
     }
     if (dateFilter !== null) {
-      const preset = DATE_PRESETS.find((candidate) => candidate.id === dateFilter);
-      if (preset) {
-        const cutoff = Date.now() - preset.days * 24 * 60 * 60 * 1000;
-        live = live.filter((page) => page.updatedAt >= cutoff);
-      }
+      live = live.filter((page) => withinPreset(page.updatedAt, dateFilter));
     }
-    if (prefs.sort === "newest") return live.toSorted((a, b) => b.createdAt - a.createdAt);
     if (prefs.sort === "updated") return live.toSorted((a, b) => b.updatedAt - a.updatedAt);
-    return seededShuffle(live, randomSeed);
-  }, [nodes, folderFilter, dateFilter, prefs.sort, randomSeed]);
+    return live.toSorted((a, b) => b.createdAt - a.createdAt);
+  }, [nodes, folderFilter, dateFilter, prefs.sort]);
 
   const selection = useSelection(pages.map((page) => page.id));
   const { selected, selecting } = selection;
@@ -127,11 +105,6 @@ function LibraryView() {
 
   const pageActions = (pageId: string): CardAction[] => [
     { label: "Open", icon: ArrowUpRight01Icon, onSelect: () => openPage(pageId) },
-    {
-      label: "Select",
-      icon: CheckmarkCircle02Icon,
-      onSelect: () => selection.toggle(pageId),
-    },
     "separator",
     {
       label: "Move to trash",
@@ -151,28 +124,32 @@ function LibraryView() {
           {pages.length} {pages.length === 1 ? "page" : "pages"}
         </span>
         <div className="ml-auto flex items-center gap-1.5 self-center">
-          <Button
-            variant={selecting ? "secondary" : "ghost"}
-            size="icon"
-            aria-label="Select"
-            className={selecting ? undefined : "text-muted-foreground"}
-            onClick={selection.toggleMode}
-          >
-            <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={1.75} />
-          </Button>
+          <Tip label={selecting ? "Done selecting" : "Select"}>
+            <Button
+              variant={selecting ? "secondary" : "ghost"}
+              size="icon"
+              aria-label="Select"
+              className={selecting ? undefined : "text-muted-foreground"}
+              onClick={selection.toggleMode}
+            >
+              <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={1.75} />
+            </Button>
+          </Tip>
           <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Filter"
-                  className="text-muted-foreground"
-                >
-                  <HugeiconsIcon icon={FilterMailIcon} strokeWidth={1.75} />
-                </Button>
-              }
-            />
+            <Tip label="Filter">
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Filter"
+                    className="text-muted-foreground"
+                  >
+                    <HugeiconsIcon icon={FilterMailIcon} strokeWidth={1.75} />
+                  </Button>
+                }
+              />
+            </Tip>
             <DropdownMenuContent align="end" className="w-52">
               <DropdownMenuGroup>
                 <DropdownMenuLabel>Date</DropdownMenuLabel>
@@ -210,18 +187,20 @@ function LibraryView() {
           </DropdownMenu>
 
           <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Sort"
-                  className="text-muted-foreground"
-                >
-                  <HugeiconsIcon icon={Sorting01Icon} strokeWidth={1.75} />
-                </Button>
-              }
-            />
+            <Tip label="Sort">
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Sort"
+                    className="text-muted-foreground"
+                  >
+                    <HugeiconsIcon icon={Sorting01Icon} strokeWidth={1.75} />
+                  </Button>
+                }
+              />
+            </Tip>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuRadioGroup
                 value={prefs.sort}
@@ -230,7 +209,6 @@ function LibraryView() {
                 <DropdownMenuLabel>Sort</DropdownMenuLabel>
                 <DropdownMenuRadioItem value="newest">Newest first</DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="updated">Recently updated</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="random">Random</DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -245,7 +223,7 @@ function LibraryView() {
               className="cursor-pointer gap-1.5 font-normal"
               onClick={() => setDateFilter(null)}
             >
-              {DATE_PRESETS.find((preset) => preset.id === dateFilter)?.label}
+              {presetLabel(dateFilter)}
               <span className="text-muted-foreground">×</span>
             </Badge>
           )}
@@ -308,48 +286,38 @@ function LibraryView() {
         </main>
       </ScrollArea>
 
-      {selected.size > 0 && (
-        <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-lg border bg-popover py-1 pr-1 pl-3 shadow-lg">
-          <span className="font-mono text-xs">{selected.size} selected</span>
-          <span className="mx-2 h-4.5 w-px bg-border" />
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button variant="ghost" size="sm" className="font-normal">
-                  <FolderGlyph className="size-4" />
-                  Move
-                </Button>
-              }
-            />
-            <DropdownMenuContent align="center" side="top">
-              <DropdownMenuGroup>
-                {folders.map((folder) => (
-                  <DropdownMenuItem key={folder.id} onClick={() => moveSelected(folder.id)}>
-                    {folder.name}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="font-normal text-destructive hover:text-destructive"
-            onClick={trashSelected}
-          >
-            <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
-            Trash
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="font-normal text-muted-foreground"
-            onClick={selection.clear}
-          >
-            Clear
-          </Button>
-        </div>
-      )}
+      <SelectionBar count={selected.size} onClear={selection.clear}>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <SelectionBarButton>
+                <FolderGlyph className="size-4" />
+                Move
+              </SelectionBarButton>
+            }
+          />
+          <DropdownMenuContent align="center" side="top">
+            <DropdownMenuGroup>
+              {folders.map((folder) => (
+                <DropdownMenuItem key={folder.id} onClick={() => moveSelected(folder.id)}>
+                  <FolderGlyph
+                    className="size-4"
+                    color={folderColorValue(folder.color) ?? "var(--muted-foreground)"}
+                  />
+                  {folder.name}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <SelectionBarButton
+          className="text-destructive hover:text-destructive"
+          onClick={trashSelected}
+        >
+          <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
+          Trash
+        </SelectionBarButton>
+      </SelectionBar>
     </div>
   );
 }

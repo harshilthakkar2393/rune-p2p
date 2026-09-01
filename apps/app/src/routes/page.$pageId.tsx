@@ -4,6 +4,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { LayoutAlignRightIcon } from "@hugeicons/core-free-icons";
 
 import { Editor } from "@/components/editor";
+import { Tip } from "@/components/tip";
 import { FolderGlyph } from "@/components/folder-glyph";
 import { PageTitle } from "@/components/page-title";
 import { useNodes } from "@/hooks/use-index";
@@ -48,15 +49,17 @@ function PageView() {
               <span className="max-w-40 truncate">{folder.name}</span>
             </span>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="ml-auto text-muted-foreground"
-            aria-label={inspectorOpen ? "Hide page info" : "Show page info"}
-            onClick={() => toggleInspector()}
-          >
-            <HugeiconsIcon icon={LayoutAlignRightIcon} strokeWidth={1.75} />
-          </Button>
+          <Tip label={inspectorOpen ? "Hide page info" : "Show page info"}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="ml-auto text-muted-foreground"
+              aria-label={inspectorOpen ? "Hide page info" : "Show page info"}
+              onClick={() => toggleInspector()}
+            >
+              <HugeiconsIcon icon={LayoutAlignRightIcon} strokeWidth={1.75} />
+            </Button>
+          </Tip>
         </header>
         <ScrollArea className="min-h-0 w-full flex-1">
           <main className="w-full pt-4 pb-10">

@@ -15,6 +15,7 @@ import {
 
 import { FolderGlyph } from "@/components/folder-glyph";
 import { KbdHint } from "@/components/kbd-hint";
+import { Tip } from "@/components/tip";
 import { useNodes } from "@/hooks/use-index";
 import { composeTargetFolderId } from "@/lib/compose-target";
 import { getDeviceName } from "@/lib/device";
@@ -25,6 +26,7 @@ import { modLabel } from "@/lib/platform";
 import { setPaletteOpen } from "@/lib/palette";
 import { FOLDER_COLORS, type Folder, type FolderColor } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
+import { Kbd } from "@rune/ui/components/kbd";
 import { Popover, PopoverContent, PopoverTrigger } from "@rune/ui/components/popover";
 import {
   Sidebar,
@@ -98,13 +100,15 @@ function NewFolderPopover() {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        render={
-          <SidebarGroupAction aria-label="New folder">
-            <Icon icon={Add01Icon} className="size-4!" />
-          </SidebarGroupAction>
-        }
-      />
+      <Tip label="New folder">
+        <PopoverTrigger
+          render={
+            <SidebarGroupAction aria-label="New folder">
+              <Icon icon={Add01Icon} className="size-4!" />
+            </SidebarGroupAction>
+          }
+        />
+      </Tip>
       <PopoverContent align="start" className="w-72 p-3">
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
@@ -121,9 +125,11 @@ function NewFolderPopover() {
                 if (event.key === "Escape") setOpen(false);
               }}
             />
-            <Button size="icon" aria-label="Create folder" onClick={confirm}>
-              <Icon icon={Tick02Icon} className="size-4!" />
-            </Button>
+            <Tip label="Create folder">
+              <Button size="icon" aria-label="Create folder" onClick={confirm}>
+                <Icon icon={Tick02Icon} className="size-4!" />
+              </Button>
+            </Tip>
           </div>
           <div className="flex items-center gap-2 px-1">
             {FOLDER_COLORS.map((candidate) => (
@@ -169,12 +175,26 @@ export function AppSidebar() {
           <span className="px-2 py-1 text-lg font-medium group-data-[collapsible=icon]:hidden">
             rune
           </span>
-          <SidebarTrigger className="text-sidebar-foreground/70" />
+          <Tip
+            label={
+              <>
+                Toggle sidebar <Kbd>{modLabel}B</Kbd>
+              </>
+            }
+          >
+            <SidebarTrigger className="text-sidebar-foreground/70" />
+          </Tip>
         </div>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              tooltip={`New page · ${modLabel}N`}
+              tooltip={{
+                children: (
+                  <>
+                    New page <Kbd>{modLabel}N</Kbd>
+                  </>
+                ),
+              }}
               className="group/kbd"
               onClick={compose}
             >
@@ -185,7 +205,13 @@ export function AppSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
-              tooltip={`Search · ${modLabel}K`}
+              tooltip={{
+                children: (
+                  <>
+                    Search <Kbd>{modLabel}K</Kbd>
+                  </>
+                ),
+              }}
               className="group/kbd"
               onClick={() => setPaletteOpen(true)}
             >
