@@ -149,6 +149,7 @@ h6 {
 [data-slot="sidebar-menu-sub-button"],
 [data-slot="sidebar-group-label"] {
   font-size: 0.8125rem;
+  line-height: 1.125rem; /* 18px — matches the 18px icons so flex centers equal boxes */
 }
 
 @layer base {
