@@ -33,6 +33,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@rune/ui/components/dropdown-menu";
+import { ScrollArea } from "@rune/ui/components/scroll-area";
 import { SidebarInput } from "@rune/ui/components/sidebar";
 
 export const Route = createFileRoute("/folder/$folderId")({
@@ -224,38 +225,40 @@ function FolderView() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-8 py-4">
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
-          {pages.map((page) => (
-            <PageCard
-              key={page.id}
-              page={page}
-              folder={undefined}
-              selected={selected.has(page.id)}
-              selecting={selected.size > 0}
-              trailing={
-                <span className="font-mono text-[11px] text-muted-foreground">
-                  {humanTime(page.updatedAt)}
-                </span>
-              }
-              onSelectToggle={() => toggleSelect(page.id)}
-              onOpen={() => void navigate({ to: "/page/$pageId", params: { pageId: page.id } })}
-            />
-          ))}
-          <Card
-            role="button"
-            tabIndex={0}
-            onClick={newPage}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") newPage();
-            }}
-            className="flex h-36 cursor-pointer flex-row items-center justify-center gap-2 border-dashed bg-transparent p-4 text-[13px] text-muted-foreground shadow-none transition-colors hover:border-foreground/25 hover:text-foreground"
-          >
-            <HugeiconsIcon icon={Add01Icon} strokeWidth={1.75} className="size-4!" />
-            New page
-          </Card>
-        </div>
-      </main>
+      <ScrollArea className="min-h-0 flex-1">
+        <main className="px-8 py-4">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
+            {pages.map((page) => (
+              <PageCard
+                key={page.id}
+                page={page}
+                folder={undefined}
+                selected={selected.has(page.id)}
+                selecting={selected.size > 0}
+                trailing={
+                  <span className="font-mono text-[11px] text-muted-foreground">
+                    {humanTime(page.updatedAt)}
+                  </span>
+                }
+                onSelectToggle={() => toggleSelect(page.id)}
+                onOpen={() => void navigate({ to: "/page/$pageId", params: { pageId: page.id } })}
+              />
+            ))}
+            <Card
+              role="button"
+              tabIndex={0}
+              onClick={newPage}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") newPage();
+              }}
+              className="flex h-36 cursor-pointer flex-row items-center justify-center gap-2 border-dashed bg-transparent p-4 text-[13px] text-muted-foreground shadow-none transition-colors hover:border-foreground/25 hover:text-foreground"
+            >
+              <HugeiconsIcon icon={Add01Icon} strokeWidth={1.75} className="size-4!" />
+              New page
+            </Card>
+          </div>
+        </main>
+      </ScrollArea>
 
       {selected.size > 0 && (
         <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-[10px] border bg-popover py-1 pr-1 pl-3 shadow-lg">

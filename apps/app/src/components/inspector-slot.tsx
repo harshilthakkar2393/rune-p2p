@@ -23,7 +23,7 @@ export function InspectorSlot() {
       : undefined;
 
   return (
-    <aside className="hidden w-[272px] shrink-0 md:my-2 md:mr-2 md:flex md:h-[calc(100vh-16px)] md:flex-col md:rounded-xl md:bg-background md:shadow-sm">
+    <aside className="hidden w-[272px] shrink-0 md:my-2 md:mr-2 md:flex md:h-[calc(100dvh-16px)] md:flex-col md:rounded-xl md:bg-background md:shadow-sm">
       <PageInspector page={page} folder={folder} />
     </aside>
   );

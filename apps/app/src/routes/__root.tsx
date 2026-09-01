@@ -21,7 +21,7 @@ function RootComponent() {
     <ThemeProvider>
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset className="md:h-[calc(100vh-16px)] h-dvh px-4 md:px-0">
+        <SidebarInset className="h-dvh overflow-hidden px-4 md:h-[calc(100dvh-16px)] md:px-0">
           <Outlet />
         </SidebarInset>
         <InspectorSlot />

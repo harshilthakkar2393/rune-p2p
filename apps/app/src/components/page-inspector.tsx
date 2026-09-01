@@ -20,6 +20,7 @@ import { trashNode } from "@/lib/nodes";
 import type { Folder, Page } from "@/lib/schema";
 import { Badge } from "@rune/ui/components/badge";
 import { Button } from "@rune/ui/components/button";
+import { ScrollArea } from "@rune/ui/components/scroll-area";
 
 function Row({ icon, label, value }: { icon: IconSvgElement; label: string; value: string }) {
   return (
@@ -66,75 +67,77 @@ export function PageInspector({ page, folder }: { page: Page; folder: Folder | u
   };
 
   return (
-    <div className="flex h-full flex-col gap-5 overflow-y-auto p-4">
-      <section className="flex flex-col gap-1">
-        <span className="pb-1 text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase">
-          Properties
-        </span>
-        <Row
-          icon={Calendar03Icon}
-          label="Created"
-          value={new Date(page.createdAt).toLocaleDateString(undefined, {
-            month: "short",
-            day: "numeric",
-          })}
-        />
-        <Row icon={Clock01Icon} label="Updated" value={humanTime(page.updatedAt)} />
-        <Row icon={LaptopIcon} label="Device" value={page.createdOn ?? "—"} />
-        <Row
-          icon={TextAlignJustifyCenterIcon}
-          label="Words"
-          value={words === null ? "…" : String(words)}
-        />
-      </section>
+    <ScrollArea className="h-full min-h-0">
+      <div className="flex h-full flex-col gap-5 p-4">
+        <section className="flex flex-col gap-1">
+          <span className="pb-1 text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase">
+            Properties
+          </span>
+          <Row
+            icon={Calendar03Icon}
+            label="Created"
+            value={new Date(page.createdAt).toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+            })}
+          />
+          <Row icon={Clock01Icon} label="Updated" value={humanTime(page.updatedAt)} />
+          <Row icon={LaptopIcon} label="Device" value={page.createdOn ?? "—"} />
+          <Row
+            icon={TextAlignJustifyCenterIcon}
+            label="Words"
+            value={words === null ? "…" : String(words)}
+          />
+        </section>
 
-      <section className="flex flex-col gap-2">
-        <span className="text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase">
-          Folder
-        </span>
-        {folder ? (
-          <Badge variant="secondary" className="w-fit gap-1.5 font-normal">
-            {folderTint && (
-              <span className="size-[7px] rounded-full" style={{ background: folderTint }} />
-            )}
-            {folder.name}
-          </Badge>
-        ) : (
-          <span className="text-xs text-muted-foreground">—</span>
-        )}
-      </section>
+        <section className="flex flex-col gap-2">
+          <span className="text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase">
+            Folder
+          </span>
+          {folder ? (
+            <Badge variant="secondary" className="w-fit gap-1.5 font-normal">
+              {folderTint && (
+                <span className="size-[7px] rounded-full" style={{ background: folderTint }} />
+              )}
+              {folder.name}
+            </Badge>
+          ) : (
+            <span className="text-xs text-muted-foreground">—</span>
+          )}
+        </section>
 
-      <section className="flex flex-col gap-1.5">
-        <span className="text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase">
-          Storage
-        </span>
-        <span className="flex items-center gap-2 text-[13px]">
-          <span className="size-1.5 rounded-full bg-muted-foreground/50" />
-          On this device
-        </span>
-        <span className="font-mono text-[11px] text-muted-foreground">local only</span>
-      </section>
+        <section className="flex flex-col gap-1.5">
+          <span className="text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase">
+            Storage
+          </span>
+          <span className="flex items-center gap-2 text-[13px]">
+            <span className="size-1.5 rounded-full bg-muted-foreground/50" />
+            On this device
+          </span>
+          <span className="font-mono text-[11px] text-muted-foreground">local only</span>
+        </section>
 
-      <section className="mt-auto -mx-2 flex flex-col gap-0.5 border-t pt-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="justify-start font-normal text-foreground/85"
-          onClick={() => void exportMarkdown(page)}
-        >
-          <HugeiconsIcon icon={Download04Icon} strokeWidth={1.75} />
-          Export Markdown
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="justify-start font-normal text-destructive hover:text-destructive"
-          onClick={sendToTrash}
-        >
-          <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
-          Move to trash
-        </Button>
-      </section>
-    </div>
+        <section className="mt-auto -mx-2 flex flex-col gap-0.5 border-t pt-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="justify-start font-normal text-foreground/85"
+            onClick={() => void exportMarkdown(page)}
+          >
+            <HugeiconsIcon icon={Download04Icon} strokeWidth={1.75} />
+            Export Markdown
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="justify-start font-normal text-destructive hover:text-destructive"
+            onClick={sendToTrash}
+          >
+            <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
+            Move to trash
+          </Button>
+        </section>
+      </div>
+    </ScrollArea>
   );
 }

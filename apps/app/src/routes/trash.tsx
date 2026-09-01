@@ -20,6 +20,7 @@ import {
 } from "@rune/ui/components/alert-dialog";
 import { Button } from "@rune/ui/components/button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@rune/ui/components/empty";
+import { ScrollArea } from "@rune/ui/components/scroll-area";
 import { cn } from "@rune/ui/lib/utils";
 
 export const Route = createFileRoute("/trash")({ component: TrashView });
@@ -112,61 +113,63 @@ function TrashView() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-8 py-4">
-        {trashed.length === 0 ? (
-          <Empty>
-            <EmptyHeader>
-              <EmptyTitle>Trash is empty</EmptyTitle>
-              <EmptyDescription>
-                Pages you trash wait here for 30 days before disappearing.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {trashedFolders.map((folder) => {
-              const tint = folderColorValue(folder.color);
-              const isSelected = selected.has(folder.id);
-              return (
-                <button
-                  key={folder.id}
-                  type="button"
-                  onClick={() => toggleSelect(folder.id)}
-                  className={cn(
-                    "flex h-[62px] items-center gap-3 rounded-[10px] border bg-card px-3.5 text-left",
-                    isSelected ? "border-foreground/50" : "hover:border-foreground/20",
-                  )}
-                >
-                  <span
-                    className="size-2 rounded-full"
-                    style={{ background: tint ?? "var(--muted-foreground)" }}
-                  />
-                  <span className="truncate text-sm">{folder.name}</span>
-                  <span className="ml-auto rounded-full border px-2 py-0.5 font-mono text-[11px] text-foreground/85">
-                    {daysLeft(folder.deletedAt ?? 0)}d left
-                  </span>
-                </button>
-              );
-            })}
-            {trashedPages.map((page) => (
-              <PageCard
-                key={page.id}
-                page={page}
-                folder={page.folderId !== null ? folderById.get(page.folderId) : undefined}
-                selected={selected.has(page.id)}
-                selecting
-                dim
-                trailing={
-                  <span className="rounded-full border px-2 py-0.5 font-mono text-[11px] text-foreground/85">
-                    {daysLeft(page.deletedAt ?? 0)}d left
-                  </span>
-                }
-                onSelectToggle={() => toggleSelect(page.id)}
-              />
-            ))}
-          </div>
-        )}
-      </main>
+      <ScrollArea className="min-h-0 flex-1">
+        <main className="px-8 py-4">
+          {trashed.length === 0 ? (
+            <Empty>
+              <EmptyHeader>
+                <EmptyTitle>Trash is empty</EmptyTitle>
+                <EmptyDescription>
+                  Pages you trash wait here for 30 days before disappearing.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {trashedFolders.map((folder) => {
+                const tint = folderColorValue(folder.color);
+                const isSelected = selected.has(folder.id);
+                return (
+                  <button
+                    key={folder.id}
+                    type="button"
+                    onClick={() => toggleSelect(folder.id)}
+                    className={cn(
+                      "flex h-[62px] items-center gap-3 rounded-[10px] border bg-card px-3.5 text-left",
+                      isSelected ? "border-foreground/50" : "hover:border-foreground/20",
+                    )}
+                  >
+                    <span
+                      className="size-2 rounded-full"
+                      style={{ background: tint ?? "var(--muted-foreground)" }}
+                    />
+                    <span className="truncate text-sm">{folder.name}</span>
+                    <span className="ml-auto rounded-full border px-2 py-0.5 font-mono text-[11px] text-foreground/85">
+                      {daysLeft(folder.deletedAt ?? 0)}d left
+                    </span>
+                  </button>
+                );
+              })}
+              {trashedPages.map((page) => (
+                <PageCard
+                  key={page.id}
+                  page={page}
+                  folder={page.folderId !== null ? folderById.get(page.folderId) : undefined}
+                  selected={selected.has(page.id)}
+                  selecting
+                  dim
+                  trailing={
+                    <span className="rounded-full border px-2 py-0.5 font-mono text-[11px] text-foreground/85">
+                      {daysLeft(page.deletedAt ?? 0)}d left
+                    </span>
+                  }
+                  onSelectToggle={() => toggleSelect(page.id)}
+                />
+              ))}
+            </div>
+          )}
+        </main>
+      </ScrollArea>
 
       <AlertDialog
         open={confirming !== null}

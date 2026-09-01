@@ -14,6 +14,7 @@ import { rememberFolder } from "@/lib/compose-target";
 import { recordOpen } from "@/lib/recents";
 import type { Folder, Page } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
+import { ScrollArea } from "@rune/ui/components/scroll-area";
 
 export const Route = createFileRoute("/page/$pageId")({ component: PageView });
 
@@ -57,14 +58,16 @@ function PageView() {
             <HugeiconsIcon icon={LayoutAlignRightIcon} strokeWidth={1.75} />
           </Button>
         </header>
-        <main className="w-full flex-1 overflow-y-auto pt-4 pb-10">
-          <div className="flex flex-col gap-2">
-            <div className="px-[54px]">
-              <PageTitle pageId={pageId} />
+        <ScrollArea className="min-h-0 w-full flex-1">
+          <main className="w-full pt-4 pb-10">
+            <div className="flex flex-col gap-2">
+              <div className="px-[54px]">
+                <PageTitle pageId={pageId} />
+              </div>
+              <Editor pageId={pageId} />
             </div>
-            <Editor pageId={pageId} />
-          </div>
-        </main>
+          </main>
+        </ScrollArea>
       </div>
     </div>
   );

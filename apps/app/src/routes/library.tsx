@@ -17,6 +17,7 @@ import type { Folder, Page } from "@/lib/schema";
 import { Badge } from "@rune/ui/components/badge";
 import { Card } from "@rune/ui/components/card";
 import { Button } from "@rune/ui/components/button";
+import { ScrollArea } from "@rune/ui/components/scroll-area";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -243,40 +244,42 @@ function LibraryView() {
         </div>
       )}
 
-      <main className="flex-1 overflow-y-auto px-8 py-4">
-        <div className="w-full">
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
-            {pages.map((page) => (
-              <PageCard
-                key={page.id}
-                page={page}
-                folder={page.folderId !== null ? folderById.get(page.folderId) : undefined}
-                selected={selected.has(page.id)}
-                selecting={selected.size > 0}
-                trailing={
-                  <span className="font-mono text-[11px] text-muted-foreground">
-                    {humanTime(page.updatedAt)}
-                  </span>
-                }
-                onSelectToggle={() => toggleSelect(page.id)}
-                onOpen={() => openPage(page.id)}
-              />
-            ))}
-            <Card
-              role="button"
-              tabIndex={0}
-              onClick={newPage}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") newPage();
-              }}
-              className="flex h-36 cursor-pointer flex-row items-center justify-center gap-2 border-dashed bg-transparent p-4 text-[13px] text-muted-foreground shadow-none transition-colors hover:border-foreground/25 hover:text-foreground"
-            >
-              <HugeiconsIcon icon={Add01Icon} strokeWidth={1.75} className="size-4!" />
-              New page
-            </Card>
+      <ScrollArea className="min-h-0 flex-1">
+        <main className="px-8 py-4">
+          <div className="w-full">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
+              {pages.map((page) => (
+                <PageCard
+                  key={page.id}
+                  page={page}
+                  folder={page.folderId !== null ? folderById.get(page.folderId) : undefined}
+                  selected={selected.has(page.id)}
+                  selecting={selected.size > 0}
+                  trailing={
+                    <span className="font-mono text-[11px] text-muted-foreground">
+                      {humanTime(page.updatedAt)}
+                    </span>
+                  }
+                  onSelectToggle={() => toggleSelect(page.id)}
+                  onOpen={() => openPage(page.id)}
+                />
+              ))}
+              <Card
+                role="button"
+                tabIndex={0}
+                onClick={newPage}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") newPage();
+                }}
+                className="flex h-36 cursor-pointer flex-row items-center justify-center gap-2 border-dashed bg-transparent p-4 text-[13px] text-muted-foreground shadow-none transition-colors hover:border-foreground/25 hover:text-foreground"
+              >
+                <HugeiconsIcon icon={Add01Icon} strokeWidth={1.75} className="size-4!" />
+                New page
+              </Card>
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </ScrollArea>
 
       {selected.size > 0 && (
         <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-[10px] border bg-popover py-1 pr-1 pl-3 shadow-lg">

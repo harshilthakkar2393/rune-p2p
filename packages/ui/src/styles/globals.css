@@ -157,6 +157,25 @@ h6 {
   gap: 0.625rem; /* 10px icon-to-label, up from the default 8px */
 }
 
+/* Scroll fade: Base UI exposes overflow distances as CSS vars on the
+   viewport; drive a mask so content fades at scrollable edges. */
+[data-slot="scroll-area-viewport"] {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    black min(var(--scroll-area-overflow-y-start, 0px), 24px),
+    black calc(100% - min(var(--scroll-area-overflow-y-end, 0px), 24px)),
+    transparent 100%
+  );
+}
+
+[data-slot="scroll-area-thumb"] {
+  background: color-mix(in oklab, var(--muted-foreground) 35%, transparent);
+}
+[data-slot="scroll-area-scrollbar"]:hover [data-slot="scroll-area-thumb"] {
+  background: color-mix(in oklab, var(--muted-foreground) 55%, transparent);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

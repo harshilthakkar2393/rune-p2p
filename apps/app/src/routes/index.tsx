@@ -9,6 +9,7 @@ import { humanTime } from "@/lib/human-time";
 import { readRecents } from "@/lib/recents";
 import type { Folder } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
+import { ScrollArea } from "@rune/ui/components/scroll-area";
 import { PageCard } from "@/components/page-card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@rune/ui/components/empty";
 
@@ -80,52 +81,53 @@ function Home() {
   };
 
   return (
-    <>
-      <main className="mx-auto w-full max-w-3xl py-6 px-8">
-        <div className="flex h-12 items-center">
-          <h1 className="text-h1">{greeting()}</h1>
-        </div>
-
-        <section className="mt-8 flex flex-col gap-6">
-          {recents.length === 0 ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyTitle>Nothing recent</EmptyTitle>
-                <EmptyDescription>Pages you open show up here.</EmptyDescription>
-              </EmptyHeader>
-              <Button onClick={newPage}>New page</Button>
-            </Empty>
-          ) : (
-            dayGroups.map((group) => (
-              <div key={group.label} className="flex flex-col gap-3.5">
-                <div className="flex h-4 items-center gap-3">
-                  <span className="shrink-0 font-mono text-[11px] leading-4 text-muted-foreground">
-                    {group.label}
-                  </span>
-                  <span className="grow border-t border-dashed border-foreground/10" />
+    <div className="flex h-full flex-col">
+      <header className="mx-auto flex h-20 w-full max-w-3xl shrink-0 items-end px-8 pb-2">
+        <h1 className="text-h1">{greeting()}</h1>
+      </header>
+      <ScrollArea className="min-h-0 flex-1">
+        <main className="mx-auto w-full max-w-3xl px-8 pt-4 pb-8">
+          <section className="flex flex-col gap-6">
+            {recents.length === 0 ? (
+              <Empty>
+                <EmptyHeader>
+                  <EmptyTitle>Nothing recent</EmptyTitle>
+                  <EmptyDescription>Pages you open show up here.</EmptyDescription>
+                </EmptyHeader>
+                <Button onClick={newPage}>New page</Button>
+              </Empty>
+            ) : (
+              dayGroups.map((group) => (
+                <div key={group.label} className="flex flex-col gap-3.5">
+                  <div className="flex h-4 items-center gap-3">
+                    <span className="shrink-0 font-mono text-[11px] leading-4 text-muted-foreground">
+                      {group.label}
+                    </span>
+                    <span className="grow border-t border-dashed border-foreground/10" />
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {group.items.map(({ page, openedAt }) => (
+                      <PageCard
+                        key={page.id}
+                        page={page}
+                        folder={page.folderId !== null ? folderById.get(page.folderId) : undefined}
+                        trailing={
+                          <span className="font-mono text-[11px] leading-4 text-muted-foreground">
+                            {humanTime(openedAt)}
+                          </span>
+                        }
+                        onOpen={() =>
+                          void navigate({ to: "/page/$pageId", params: { pageId: page.id } })
+                        }
+                      />
+                    ))}
+                  </div>
                 </div>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {group.items.map(({ page, openedAt }) => (
-                    <PageCard
-                      key={page.id}
-                      page={page}
-                      folder={page.folderId !== null ? folderById.get(page.folderId) : undefined}
-                      trailing={
-                        <span className="font-mono text-[11px] leading-4 text-muted-foreground">
-                          {humanTime(openedAt)}
-                        </span>
-                      }
-                      onOpen={() =>
-                        void navigate({ to: "/page/$pageId", params: { pageId: page.id } })
-                      }
-                    />
-                  ))}
-                </div>
-              </div>
-            ))
-          )}
-        </section>
-      </main>
-    </>
+              ))
+            )}
+          </section>
+        </main>
+      </ScrollArea>
+    </div>
   );
 }
