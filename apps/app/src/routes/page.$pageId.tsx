@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Folder01Icon, LayoutAlignRightIcon } from "@hugeicons/core-free-icons";
+import { LayoutAlignRightIcon } from "@hugeicons/core-free-icons";
 
 import { Editor } from "@/components/editor";
+import { FolderGlyph } from "@/components/folder-glyph";
 import { PageTitle } from "@/components/page-title";
 import { useNodes } from "@/hooks/use-index";
 import { folderColorValue } from "@/lib/folder-colors";
@@ -42,12 +43,7 @@ function PageView() {
         <header className="flex h-11 shrink-0 items-center gap-2 px-3">
           {folder && (
             <span className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[13px] text-muted-foreground">
-              <HugeiconsIcon
-                icon={Folder01Icon}
-                strokeWidth={1.75}
-                className="size-4!"
-                style={folderTint ? { color: folderTint } : undefined}
-              />
+              <FolderGlyph className="size-4" color={folderTint ?? "var(--muted-foreground)"} />
               <span className="max-w-40 truncate">{folder.name}</span>
             </span>
           )}

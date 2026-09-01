@@ -7,13 +7,13 @@ import {
   ComputerPhoneSyncIcon,
   DashboardSquare01Icon,
   Delete02Icon,
-  Folder01Icon,
   Home04Icon,
   PencilEdit02Icon,
   Search01Icon,
   Tick02Icon,
 } from "@hugeicons/core-free-icons";
 
+import { FolderGlyph } from "@/components/folder-glyph";
 import { useNodes } from "@/hooks/use-index";
 import { composeTargetFolderId } from "@/lib/compose-target";
 import { getDeviceName } from "@/lib/device";
@@ -107,7 +107,7 @@ function NewFolderPopover() {
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
             <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-secondary">
-              <Icon icon={Folder01Icon} className="size-4!" color={FOLDER_COLOR_VALUES[color]} />
+              <FolderGlyph className="size-4" color={FOLDER_COLOR_VALUES[color]} />
             </span>
             <SidebarInput
               autoFocus
@@ -222,7 +222,10 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     render={<Link to="/folder/$folderId" params={{ folderId: folder.id }} />}
                   >
-                    <Icon icon={Folder01Icon} color={folderColorValue(folder.color)} />
+                    <FolderGlyph
+                      className="size-4.5"
+                      color={folderColorValue(folder.color) ?? "var(--muted-foreground)"}
+                    />
                     <span className="truncate">{folder.name}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

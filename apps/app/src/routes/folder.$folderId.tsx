@@ -4,12 +4,12 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Add01Icon,
   Delete02Icon,
-  Folder01Icon,
   MoreHorizontalIcon,
   PencilEdit01Icon,
   Sorting01Icon,
 } from "@hugeicons/core-free-icons";
 
+import { FolderGlyph } from "@/components/folder-glyph";
 import { PageCard } from "@/components/page-card";
 import { useNodes } from "@/hooks/use-index";
 import { rememberFolder } from "@/lib/compose-target";
@@ -215,7 +215,7 @@ function FolderView() {
                 </div>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={trashFolder}>
+              <DropdownMenuItem variant="destructive" onClick={trashFolder}>
                 <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
                 Move to trash
               </DropdownMenuItem>
@@ -265,7 +265,7 @@ function FolderView() {
             <DropdownMenuTrigger
               render={
                 <Button variant="ghost" size="sm" className="font-normal">
-                  <HugeiconsIcon icon={Folder01Icon} strokeWidth={1.75} />
+                  <FolderGlyph className="size-4" />
                   Move
                 </Button>
               }
@@ -283,7 +283,12 @@ function FolderView() {
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="ghost" size="sm" className="font-normal" onClick={trashSelected}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="font-normal text-destructive hover:text-destructive"
+            onClick={trashSelected}
+          >
             <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
             Trash
           </Button>

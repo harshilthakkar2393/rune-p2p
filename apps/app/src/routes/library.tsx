@@ -1,14 +1,9 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  Add01Icon,
-  Delete02Icon,
-  FilterMailIcon,
-  Folder01Icon,
-  Sorting01Icon,
-} from "@hugeicons/core-free-icons";
+import { Add01Icon, Delete02Icon, FilterMailIcon, Sorting01Icon } from "@hugeicons/core-free-icons";
 
+import { FolderGlyph } from "@/components/folder-glyph";
 import { PageCard } from "@/components/page-card";
 import { useNodes } from "@/hooks/use-index";
 import { composeTargetFolderId } from "@/lib/compose-target";
@@ -291,7 +286,7 @@ function LibraryView() {
             <DropdownMenuTrigger
               render={
                 <Button variant="ghost" size="sm" className="font-normal">
-                  <HugeiconsIcon icon={Folder01Icon} strokeWidth={1.75} />
+                  <FolderGlyph className="size-4" />
                   Move
                 </Button>
               }
@@ -306,7 +301,12 @@ function LibraryView() {
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="ghost" size="sm" className="font-normal" onClick={trashSelected}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="font-normal text-destructive hover:text-destructive"
+            onClick={trashSelected}
+          >
             <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
             Trash
           </Button>
