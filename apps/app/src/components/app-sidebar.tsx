@@ -168,7 +168,7 @@ function NewPageButton({ onClick }: { onClick: () => void }) {
       size="lg"
       aria-label="New page"
       onClick={onClick}
-      className="group/kbd w-full justify-start gap-2 border-dashed font-normal group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
+      className="group/kbd w-full justify-start gap-2 font-normal group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
     >
       <Icon icon={PencilEdit02Icon} className="size-4!" />
       <span className="group-data-[collapsible=icon]:hidden">New page</span>
