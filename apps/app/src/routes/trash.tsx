@@ -10,6 +10,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { PageCard, type CardAction } from "@/components/page-card";
+import { PhoneAction, RootMenu } from "@/components/root-menu";
 import { SelectionBar, SelectionBarButton } from "@/components/selection-bar";
 import { Tip } from "@/components/tip";
 import { useNodes } from "@/hooks/use-index";
@@ -42,6 +43,9 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@rune/ui/components/dropdown-menu";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@rune/ui/components/empty";
@@ -153,6 +157,48 @@ function TrashView() {
     setConfirming(null);
   };
 
+  const filterItems = (
+    <>
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>Deleted</DropdownMenuLabel>
+        {DATE_PRESETS.map((preset) => (
+          <DropdownMenuCheckboxItem
+            key={preset.id}
+            checked={dateFilter === preset.id}
+            onCheckedChange={() => setDateFilter(dateFilter === preset.id ? null : preset.id)}
+          >
+            {preset.label}
+          </DropdownMenuCheckboxItem>
+        ))}
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>From folder</DropdownMenuLabel>
+        {filterFolders.map((folder) => (
+          <DropdownMenuCheckboxItem
+            key={folder.id}
+            checked={folderFilter === folder.id}
+            onCheckedChange={() => setFolderFilter(folderFilter === folder.id ? null : folder.id)}
+          >
+            {folder.name}
+          </DropdownMenuCheckboxItem>
+        ))}
+        {filterFolders.length === 0 && (
+          <DropdownMenuItem disabled>No trashed pages</DropdownMenuItem>
+        )}
+      </DropdownMenuGroup>
+    </>
+  );
+  const sortItems = (
+    <>
+      <DropdownMenuRadioGroup value={sort} onValueChange={(value) => setSort(value as TrashSort)}>
+        <DropdownMenuLabel>Sort</DropdownMenuLabel>
+        <DropdownMenuRadioItem value="deleted">Recently deleted</DropdownMenuRadioItem>
+        <DropdownMenuRadioItem value="expiring">Expiring soon</DropdownMenuRadioItem>
+      </DropdownMenuRadioGroup>
+    </>
+  );
+
   return (
     <div className="relative flex h-full flex-col">
       <header className="flex shrink-0 items-baseline gap-3.5 px-4 md:px-8 pt-3 pb-2">
@@ -160,7 +206,7 @@ function TrashView() {
         <span className="font-mono text-tiny text-muted-foreground">
           deleted forever after 30 days
         </span>
-        <div className="ml-auto flex items-center gap-1.5 self-center">
+        <div className="ml-auto hidden items-center gap-1.5 self-center md:flex">
           <Tip label={selecting ? "Done selecting" : "Select"}>
             <Button
               variant={selecting ? "secondary" : "ghost"}
@@ -188,38 +234,7 @@ function TrashView() {
               />
             </Tip>
             <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>Deleted</DropdownMenuLabel>
-                {DATE_PRESETS.map((preset) => (
-                  <DropdownMenuCheckboxItem
-                    key={preset.id}
-                    checked={dateFilter === preset.id}
-                    onCheckedChange={() =>
-                      setDateFilter(dateFilter === preset.id ? null : preset.id)
-                    }
-                  >
-                    {preset.label}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>From folder</DropdownMenuLabel>
-                {filterFolders.map((folder) => (
-                  <DropdownMenuCheckboxItem
-                    key={folder.id}
-                    checked={folderFilter === folder.id}
-                    onCheckedChange={() =>
-                      setFolderFilter(folderFilter === folder.id ? null : folder.id)
-                    }
-                  >
-                    {folder.name}
-                  </DropdownMenuCheckboxItem>
-                ))}
-                {filterFolders.length === 0 && (
-                  <DropdownMenuItem disabled>No trashed pages</DropdownMenuItem>
-                )}
-              </DropdownMenuGroup>
+              {filterItems}
             </DropdownMenuContent>
           </DropdownMenu>
           <DropdownMenu>
@@ -238,14 +253,7 @@ function TrashView() {
               />
             </Tip>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuRadioGroup
-                value={sort}
-                onValueChange={(value) => setSort(value as TrashSort)}
-              >
-                <DropdownMenuLabel>Sort</DropdownMenuLabel>
-                <DropdownMenuRadioItem value="deleted">Recently deleted</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="expiring">Expiring soon</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
+              {sortItems}
             </DropdownMenuContent>
           </DropdownMenu>
           {trashed.length > 0 && (
@@ -254,6 +262,38 @@ function TrashView() {
             </Button>
           )}
         </div>
+        <RootMenu
+          action={
+            <PhoneAction
+              label={selecting ? "Done selecting" : "Select"}
+              active={selecting}
+              onClick={selection.toggleMode}
+            >
+              <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={1.75} />
+            </PhoneAction>
+          }
+        >
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <HugeiconsIcon icon={FilterMailIcon} strokeWidth={1.75} />
+              Filter
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>{filterItems}</DropdownMenuSubContent>
+          </DropdownMenuSub>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <HugeiconsIcon icon={Sorting01Icon} strokeWidth={1.75} />
+              Sort
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>{sortItems}</DropdownMenuSubContent>
+          </DropdownMenuSub>
+          {trashed.length > 0 && (
+            <DropdownMenuItem variant="destructive" onClick={() => setConfirming("all")}>
+              <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
+              Empty trash
+            </DropdownMenuItem>
+          )}
+        </RootMenu>
       </header>
 
       {filtered && (

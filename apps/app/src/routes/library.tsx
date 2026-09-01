@@ -12,7 +12,7 @@ import {
 
 import { FolderGlyph } from "@/components/folder-glyph";
 import { PageCard, type CardAction } from "@/components/page-card";
-import { RootMenu } from "@/components/root-menu";
+import { PhoneAction, RootMenu } from "@/components/root-menu";
 import { SelectionBar, SelectionBarButton } from "@/components/selection-bar";
 import { Tip } from "@/components/tip";
 import { useNodes } from "@/hooks/use-index";
@@ -40,6 +40,9 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@rune/ui/components/dropdown-menu";
 
@@ -117,6 +120,49 @@ function LibraryView() {
 
   const activeFolder = folderFilter !== null ? folderById.get(folderFilter) : undefined;
 
+  const filterItems = (
+    <>
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>Date</DropdownMenuLabel>
+        {DATE_PRESETS.map((preset) => (
+          <DropdownMenuCheckboxItem
+            key={preset.id}
+            checked={dateFilter === preset.id}
+            onCheckedChange={() => setDateFilter(dateFilter === preset.id ? null : preset.id)}
+          >
+            {preset.label}
+          </DropdownMenuCheckboxItem>
+        ))}
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>Folder</DropdownMenuLabel>
+        {folders.map((folder) => (
+          <DropdownMenuCheckboxItem
+            key={folder.id}
+            checked={folderFilter === folder.id}
+            onCheckedChange={() => setFolderFilter(folderFilter === folder.id ? null : folder.id)}
+          >
+            {folder.name}
+          </DropdownMenuCheckboxItem>
+        ))}
+        {folders.length === 0 && <DropdownMenuItem disabled>No folders yet</DropdownMenuItem>}
+      </DropdownMenuGroup>
+    </>
+  );
+  const sortItems = (
+    <>
+      <DropdownMenuRadioGroup
+        value={prefs.sort}
+        onValueChange={(value) => updatePrefs({ sort: value as LibraryPrefs["sort"] })}
+      >
+        <DropdownMenuLabel>Sort</DropdownMenuLabel>
+        <DropdownMenuRadioItem value="newest">Newest first</DropdownMenuRadioItem>
+        <DropdownMenuRadioItem value="updated">Recently updated</DropdownMenuRadioItem>
+      </DropdownMenuRadioGroup>
+    </>
+  );
+
   return (
     <div className="relative flex h-full flex-col">
       <header className="flex shrink-0 items-baseline gap-3.5 px-4 md:px-8 pt-3 pb-2">
@@ -124,8 +170,7 @@ function LibraryView() {
         <span className="font-mono text-tiny text-muted-foreground">
           {pages.length} {pages.length === 1 ? "page" : "pages"}
         </span>
-        <div className="ml-auto flex items-center gap-1.5 self-center">
-          <RootMenu />
+        <div className="ml-auto hidden items-center gap-1.5 self-center md:flex">
           <Tip label={selecting ? "Done selecting" : "Select"}>
             <Button
               variant={selecting ? "secondary" : "ghost"}
@@ -153,38 +198,7 @@ function LibraryView() {
               />
             </Tip>
             <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>Date</DropdownMenuLabel>
-                {DATE_PRESETS.map((preset) => (
-                  <DropdownMenuCheckboxItem
-                    key={preset.id}
-                    checked={dateFilter === preset.id}
-                    onCheckedChange={() =>
-                      setDateFilter(dateFilter === preset.id ? null : preset.id)
-                    }
-                  >
-                    {preset.label}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>Folder</DropdownMenuLabel>
-                {folders.map((folder) => (
-                  <DropdownMenuCheckboxItem
-                    key={folder.id}
-                    checked={folderFilter === folder.id}
-                    onCheckedChange={() =>
-                      setFolderFilter(folderFilter === folder.id ? null : folder.id)
-                    }
-                  >
-                    {folder.name}
-                  </DropdownMenuCheckboxItem>
-                ))}
-                {folders.length === 0 && (
-                  <DropdownMenuItem disabled>No folders yet</DropdownMenuItem>
-                )}
-              </DropdownMenuGroup>
+              {filterItems}
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -204,17 +218,36 @@ function LibraryView() {
               />
             </Tip>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuRadioGroup
-                value={prefs.sort}
-                onValueChange={(value) => updatePrefs({ sort: value as LibraryPrefs["sort"] })}
-              >
-                <DropdownMenuLabel>Sort</DropdownMenuLabel>
-                <DropdownMenuRadioItem value="newest">Newest first</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="updated">Recently updated</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
+              {sortItems}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        <RootMenu
+          action={
+            <PhoneAction
+              label={selecting ? "Done selecting" : "Select"}
+              active={selecting}
+              onClick={selection.toggleMode}
+            >
+              <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={1.75} />
+            </PhoneAction>
+          }
+        >
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <HugeiconsIcon icon={FilterMailIcon} strokeWidth={1.75} />
+              Filter
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>{filterItems}</DropdownMenuSubContent>
+          </DropdownMenuSub>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <HugeiconsIcon icon={Sorting01Icon} strokeWidth={1.75} />
+              Sort
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>{sortItems}</DropdownMenuSubContent>
+          </DropdownMenuSub>
+        </RootMenu>
       </header>
 
       {(activeFolder !== undefined || dateFilter !== null) && (

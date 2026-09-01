@@ -13,6 +13,7 @@ import {
 
 import { FolderGlyph } from "@/components/folder-glyph";
 import { PageCard, type CardAction } from "@/components/page-card";
+import { PhoneAction, RootMenu } from "@/components/root-menu";
 import { SelectionBar, SelectionBarButton } from "@/components/selection-bar";
 import { Tip } from "@/components/tip";
 import { useNodes } from "@/hooks/use-index";
@@ -36,6 +37,9 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@rune/ui/components/dropdown-menu";
 import { ScrollArea } from "@rune/ui/components/scroll-area";
@@ -133,6 +137,51 @@ function FolderView() {
     },
   ];
 
+  const sortItems = (
+    <>
+      <DropdownMenuRadioGroup
+        value={prefs.sort}
+        onValueChange={(value) => updatePrefs({ sort: value as LibraryPrefs["sort"] })}
+      >
+        <DropdownMenuLabel>Sort</DropdownMenuLabel>
+        <DropdownMenuRadioItem value="newest">Newest first</DropdownMenuRadioItem>
+        <DropdownMenuRadioItem value="updated">Recently updated</DropdownMenuRadioItem>
+      </DropdownMenuRadioGroup>
+    </>
+  );
+  const folderItems = (
+    <>
+      <DropdownMenuGroup>
+        <DropdownMenuItem onClick={() => setRenaming(true)}>
+          <HugeiconsIcon icon={PencilEdit01Icon} strokeWidth={1.75} />
+          Rename
+        </DropdownMenuItem>
+        <DropdownMenuLabel>Color</DropdownMenuLabel>
+        <div className="flex items-center gap-2 px-2 pb-1.5">
+          {FOLDER_COLORS.map((candidate) => (
+            <button
+              key={candidate}
+              type="button"
+              aria-label={`Color ${candidate}`}
+              onClick={() => updateFolderColor(getNodesMap(), folder.id, candidate)}
+              className="flex size-4 items-center justify-center rounded-full"
+              style={{
+                background: FOLDER_COLOR_VALUES[candidate],
+                outline: folder.color === candidate ? "2px solid var(--foreground)" : undefined,
+                outlineOffset: 2,
+              }}
+            />
+          ))}
+        </div>
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem variant="destructive" onClick={trashFolder}>
+        <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
+        Move to trash
+      </DropdownMenuItem>
+    </>
+  );
+
   return (
     <div className="relative flex h-full flex-col">
       <header className="flex shrink-0 items-baseline gap-3.5 px-4 md:px-8 pt-3 pb-2">
@@ -163,7 +212,7 @@ function FolderView() {
         <span className="font-mono text-tiny text-muted-foreground">
           {pages.length} {pages.length === 1 ? "page" : "pages"}
         </span>
-        <div className="ml-auto flex items-center gap-1.5 self-center">
+        <div className="ml-auto hidden items-center gap-1.5 self-center md:flex">
           <Tip label={selecting ? "Done selecting" : "Select"}>
             <Button
               variant={selecting ? "secondary" : "ghost"}
@@ -191,14 +240,7 @@ function FolderView() {
               />
             </Tip>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuRadioGroup
-                value={prefs.sort}
-                onValueChange={(value) => updatePrefs({ sort: value as LibraryPrefs["sort"] })}
-              >
-                <DropdownMenuLabel>Sort</DropdownMenuLabel>
-                <DropdownMenuRadioItem value="newest">Newest first</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="updated">Recently updated</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
+              {sortItems}
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -218,38 +260,30 @@ function FolderView() {
               />
             </Tip>
             <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => setRenaming(true)}>
-                  <HugeiconsIcon icon={PencilEdit01Icon} strokeWidth={1.75} />
-                  Rename
-                </DropdownMenuItem>
-                <DropdownMenuLabel>Color</DropdownMenuLabel>
-                <div className="flex items-center gap-2 px-2 pb-1.5">
-                  {FOLDER_COLORS.map((candidate) => (
-                    <button
-                      key={candidate}
-                      type="button"
-                      aria-label={`Color ${candidate}`}
-                      onClick={() => updateFolderColor(getNodesMap(), folder.id, candidate)}
-                      className="flex size-4 items-center justify-center rounded-full"
-                      style={{
-                        background: FOLDER_COLOR_VALUES[candidate],
-                        outline:
-                          folder.color === candidate ? "2px solid var(--foreground)" : undefined,
-                        outlineOffset: 2,
-                      }}
-                    />
-                  ))}
-                </div>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" onClick={trashFolder}>
-                <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
-                Move to trash
-              </DropdownMenuItem>
+              {folderItems}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        <RootMenu
+          action={
+            <PhoneAction
+              label={selecting ? "Done selecting" : "Select"}
+              active={selecting}
+              onClick={selection.toggleMode}
+            >
+              <HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={1.75} />
+            </PhoneAction>
+          }
+        >
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <HugeiconsIcon icon={Sorting01Icon} strokeWidth={1.75} />
+              Sort
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>{sortItems}</DropdownMenuSubContent>
+          </DropdownMenuSub>
+          {folderItems}
+        </RootMenu>
       </header>
 
       <ScrollArea className="min-h-0 flex-1">
