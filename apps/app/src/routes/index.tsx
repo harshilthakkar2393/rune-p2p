@@ -96,8 +96,8 @@ function Home() {
                     <span className="grow border-t border-dashed border-foreground/10" />
                   </div>
                   {/* Bleed to the gutter edges so the row scrolls edge to edge. */}
-                  <ScrollArea data-axis="x" className="-mx-4 md:-mx-8">
-                    <div className="flex w-max gap-3 px-4 md:px-8">
+                  <ScrollArea data-axis="x" className="-mx-4 -my-2 md:-mx-8">
+                    <div className="flex w-max gap-3 px-4 py-2 md:px-8">
                       {group.items.map(({ page, openedAt }) => (
                         <div key={page.id} className="w-64 shrink-0">
                           <PageCard
