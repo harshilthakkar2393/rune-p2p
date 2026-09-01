@@ -27,7 +27,7 @@ function greeting(): string {
 }
 
 function RecentCard({ page, openedAt }: { page: Page; openedAt: number }) {
-  const [excerpt, setExcerpt] = useState("");
+  const [excerpt, setExcerpt] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -39,17 +39,20 @@ function RecentCard({ page, openedAt }: { page: Page; openedAt: number }) {
     };
   }, [page.id]);
 
+  // Every slot is fixed-height so cards stay uniform and nothing shifts
+  // when the excerpt resolves: title 1 line, excerpt exactly 2 lines,
+  // date 1 line, card 144px total.
   return (
     <Link to="/page/$pageId" params={{ pageId: page.id }}>
-      <Card className="h-full gap-2 shadow-none transition-colors hover:bg-accent/40">
+      <Card className="h-36 gap-0 overflow-hidden py-4 shadow-none transition-colors hover:bg-accent/40">
         <CardHeader className="gap-1.5">
-          <CardTitle className="truncate text-sm">
+          <CardTitle className="h-5 truncate text-sm leading-5">
             {page.title === "" ? "Untitled" : page.title}
           </CardTitle>
-          <CardDescription className="line-clamp-2 min-h-8 text-[13px]">
-            {excerpt || "Empty page"}
+          <CardDescription className="line-clamp-2 h-[38px] text-[13px] leading-[19px]">
+            {excerpt === null ? "" : excerpt === "" ? "Empty page" : excerpt}
           </CardDescription>
-          <span className="pt-1 font-mono text-[11px] text-muted-foreground">
+          <span className="h-4 pt-1 font-mono text-[11px] leading-4 text-muted-foreground">
             {new Date(openedAt).toLocaleDateString(undefined, {
               month: "short",
               day: "numeric",
@@ -90,10 +93,14 @@ function Home() {
   return (
     <>
       <main className="mx-auto w-full max-w-3xl py-6 px-8">
-        <h1 className="text-h1">{greeting()}</h1>
+        <div className="flex h-12 items-center">
+          <h1 className="text-h1">{greeting()}</h1>
+        </div>
 
-        <section className="mt-10">
-          <h2 className="text-sm font-medium text-muted-foreground">Recent</h2>
+        <section className="mt-8">
+          <h2 className="flex h-6 items-center text-sm font-medium text-muted-foreground">
+            Recent
+          </h2>
           {recents.length === 0 ? (
             <div className="mt-4">
               <Empty>
