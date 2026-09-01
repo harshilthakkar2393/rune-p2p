@@ -154,7 +154,7 @@ function TrashView() {
                     type="button"
                     onClick={() => toggleSelect(folder.id)}
                     className={cn(
-                      "flex h-[62px] items-center gap-3 rounded-[10px] border bg-card px-3.5 text-left",
+                      "flex h-[62px] items-center gap-3 rounded-xl border bg-card px-3.5 text-left",
                       isSelected ? "border-foreground/50" : "hover:border-foreground/20",
                     )}
                   >

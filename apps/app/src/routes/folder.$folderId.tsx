@@ -283,7 +283,7 @@ function FolderView() {
       </ScrollArea>
 
       {selected.size > 0 && (
-        <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-[10px] border bg-popover py-1 pr-1 pl-3 shadow-lg">
+        <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-lg border bg-popover py-1 pr-1 pl-3 shadow-lg">
           <span className="font-mono text-xs">{selected.size} selected</span>
           <span className="mx-2 h-[18px] w-px bg-border" />
           <DropdownMenu>

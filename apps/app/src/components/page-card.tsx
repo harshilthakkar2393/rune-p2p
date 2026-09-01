@@ -120,7 +120,7 @@ export function PageCard({
             onSelectToggle();
           }}
           className={cn(
-            "absolute top-3 left-3 z-10 flex size-[18px] items-center justify-center rounded-[5px] transition-opacity",
+            "absolute top-3 left-3 z-10 flex size-[18px] items-center justify-center rounded-sm transition-opacity",
             selected
               ? "bg-primary text-primary-foreground opacity-100"
               : "border border-foreground/25 opacity-0 group-hover/card:opacity-100",
