@@ -16,7 +16,7 @@ import { cn } from "@rune/ui/lib/utils";
 /** Phone nav: tabs pill left (Home · Library · Search), New page right. Hidden while a page is open. */
 
 const TAB_CLASS =
-  "flex size-11 items-center justify-center rounded-full text-muted-foreground transition-colors data-[status=active]:bg-accent data-[status=active]:text-foreground";
+  "flex size-12 items-center justify-center rounded-full text-muted-foreground transition-colors data-[status=active]:bg-accent data-[status=active]:text-foreground";
 
 /** True on phones for routes that show the dock; the editor and pair flow do not. */
 export function useDockVisible(pathname: string): boolean {
@@ -36,7 +36,7 @@ function Tab({
 }) {
   return (
     <Link to={to} aria-label={label} activeOptions={{ exact }} className={TAB_CLASS}>
-      <HugeiconsIcon icon={icon} strokeWidth={1.75} className="size-5" />
+      <HugeiconsIcon icon={icon} strokeWidth={1.75} className="size-6" />
     </Link>
   );
 }
@@ -62,7 +62,7 @@ export function MobileDock() {
           className={TAB_CLASS}
           onClick={() => setPaletteOpen(true)}
         >
-          <HugeiconsIcon icon={Search01Icon} strokeWidth={1.75} className="size-5" />
+          <HugeiconsIcon icon={Search01Icon} strokeWidth={1.75} className="size-6" />
         </button>
       </nav>
       <Button
@@ -70,9 +70,9 @@ export function MobileDock() {
         size="icon-lg"
         aria-label="New page"
         onClick={compose}
-        className="pointer-events-auto size-13 rounded-full shadow-lg"
+        className="pointer-events-auto size-12 rounded-full shadow-lg"
       >
-        <HugeiconsIcon icon={PencilEdit02Icon} strokeWidth={1.75} className="size-5!" />
+        <HugeiconsIcon icon={PencilEdit02Icon} strokeWidth={1.75} className="size-6!" />
       </Button>
     </div>
   );
