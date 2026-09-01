@@ -35,16 +35,16 @@ export function RootMenu({ action, children }: { action?: ReactNode; children?: 
   const dark = resolvedTheme === "dark";
 
   return (
-    <div className="ml-auto flex h-11 items-center gap-0.5 self-center rounded-full border bg-card px-1 md:hidden">
+    <div className="ml-auto flex h-10 items-center gap-0.5 self-center rounded-full border bg-card px-1 md:hidden">
       {action}
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
             <Button
               variant="ghost"
-              size="icon-lg"
+              size="icon"
               aria-label="More"
-              className="rounded-full [&_svg]:size-5.5!"
+              className="rounded-full [&_svg]:size-5!"
             >
               <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={1.75} />
             </Button>
@@ -100,11 +100,11 @@ export function PhoneAction({
   return (
     <Button
       variant="ghost"
-      size="icon-lg"
+      size="icon"
       aria-label={label}
       aria-pressed={active}
       onClick={onClick}
-      className={cn("rounded-full [&_svg]:size-5.5!", active ? "bg-accent" : "text-muted-foreground")}
+      className={cn("rounded-full [&_svg]:size-5!", active ? "bg-accent" : "text-muted-foreground")}
     >
       {children}
     </Button>
