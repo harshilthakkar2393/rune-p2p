@@ -107,11 +107,9 @@ function TypePlayground() {
         </p>
 
         <section className="mt-8">
-          <p className="mb-3 font-mono text-[11px] text-muted-foreground">
-            measured (live from DOM)
-          </p>
+          <p className="mb-3 font-mono text-tiny text-muted-foreground">measured (live from DOM)</p>
           <div className="overflow-x-auto rounded-md border">
-            <table className="w-full font-mono text-[12px]">
+            <table className="w-full font-mono text-xs">
               <thead>
                 <tr className="border-b text-left text-muted-foreground">
                   <th className="p-2 font-normal">element</th>
@@ -150,7 +148,7 @@ function TypePlayground() {
             app body token sample — reading text for pages and longform.
           </span>
           <span className="text-small">app small token — sidebar rows, captions.</span>
-          <span className="font-mono text-[11px] text-muted-foreground">
+          <span className="font-mono text-tiny text-muted-foreground">
             2026-09-01 · local only · ⌘K
           </span>
         </section>
@@ -158,7 +156,7 @@ function TypePlayground() {
         <Separator className="my-10" />
 
         <section>
-          <p className="mb-4 font-mono text-[11px] text-muted-foreground">
+          <p className="mb-4 font-mono text-tiny text-muted-foreground">
             blocknote editor (reference)
           </p>
           <ScratchEditor />

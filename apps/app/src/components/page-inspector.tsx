@@ -26,7 +26,7 @@ function Row({ icon, label, value }: { icon: IconSvgElement; label: string; valu
   return (
     <div className="flex h-7 items-center gap-2.5">
       <HugeiconsIcon icon={icon} strokeWidth={1.75} className="size-4! text-muted-foreground/70" />
-      <span className="text-[13px] text-muted-foreground">{label}</span>
+      <span className="text-small text-muted-foreground">{label}</span>
       <span className="ml-auto font-mono text-xs text-foreground/90">{value}</span>
     </div>
   );
@@ -70,7 +70,7 @@ export function PageInspector({ page, folder }: { page: Page; folder: Folder | u
     <ScrollArea className="h-full min-h-0">
       <div className="flex h-full flex-col gap-5 p-4">
         <section className="flex flex-col gap-1">
-          <span className="pb-1 text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase">
+          <span className="pb-1 text-tiny font-medium tracking-wide text-muted-foreground/70 uppercase">
             Properties
           </span>
           <Row
@@ -91,13 +91,13 @@ export function PageInspector({ page, folder }: { page: Page; folder: Folder | u
         </section>
 
         <section className="flex flex-col gap-2">
-          <span className="text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase">
+          <span className="text-tiny font-medium tracking-wide text-muted-foreground/70 uppercase">
             Folder
           </span>
           {folder ? (
             <Badge variant="secondary" className="w-fit gap-1.5 font-normal">
               {folderTint && (
-                <span className="size-[7px] rounded-full" style={{ background: folderTint }} />
+                <span className="size-1.75 rounded-full" style={{ background: folderTint }} />
               )}
               {folder.name}
             </Badge>
@@ -107,14 +107,14 @@ export function PageInspector({ page, folder }: { page: Page; folder: Folder | u
         </section>
 
         <section className="flex flex-col gap-1.5">
-          <span className="text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase">
+          <span className="text-tiny font-medium tracking-wide text-muted-foreground/70 uppercase">
             Storage
           </span>
-          <span className="flex items-center gap-2 text-[13px]">
+          <span className="flex items-center gap-2 text-small">
             <span className="size-1.5 rounded-full bg-muted-foreground/50" />
             On this device
           </span>
-          <span className="font-mono text-[11px] text-muted-foreground">local only</span>
+          <span className="font-mono text-tiny text-muted-foreground">local only</span>
         </section>
 
         <section className="mt-auto -mx-2 flex flex-col gap-0.5 border-t pt-3">

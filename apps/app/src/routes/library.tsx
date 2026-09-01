@@ -142,7 +142,7 @@ function LibraryView() {
     <div className="relative flex h-full flex-col">
       <header className="flex shrink-0 items-baseline gap-3.5 px-8 pt-3 pb-2">
         <h1 className="text-h1">Library</h1>
-        <span className="font-mono text-[11px] text-muted-foreground">
+        <span className="font-mono text-tiny text-muted-foreground">
           {pages.length} {pages.length === 1 ? "page" : "pages"}
         </span>
         <div className="ml-auto flex items-center gap-1.5 self-center">
@@ -252,7 +252,7 @@ function LibraryView() {
             >
               {folderColorValue(activeFolder.color) && (
                 <span
-                  className="size-[7px] rounded-full"
+                  className="size-1.75 rounded-full"
                   style={{ background: folderColorValue(activeFolder.color) }}
                 />
               )}
@@ -275,7 +275,7 @@ function LibraryView() {
                   selected={selected.has(page.id)}
                   selecting={selecting}
                   trailing={
-                    <span className="font-mono text-[11px] text-muted-foreground">
+                    <span className="font-mono text-tiny text-muted-foreground">
                       {humanTime(page.updatedAt)}
                     </span>
                   }
@@ -293,7 +293,7 @@ function LibraryView() {
                 onKeyDown={(event) => {
                   if (event.key === "Enter") newPage();
                 }}
-                className="flex h-36 cursor-pointer flex-row items-center justify-center gap-2 border-dashed bg-transparent p-4 text-[13px] text-muted-foreground shadow-none transition-colors hover:border-foreground/25 hover:text-foreground"
+                className="flex h-36 cursor-pointer flex-row items-center justify-center gap-2 border-dashed bg-transparent p-4 text-small text-muted-foreground shadow-none transition-colors hover:border-foreground/25 hover:text-foreground"
               >
                 <HugeiconsIcon icon={Add01Icon} strokeWidth={1.75} className="size-4!" />
                 New page
@@ -306,7 +306,7 @@ function LibraryView() {
       {selected.size > 0 && (
         <div className="absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-lg border bg-popover py-1 pr-1 pl-3 shadow-lg">
           <span className="font-mono text-xs">{selected.size} selected</span>
-          <span className="mx-2 h-[18px] w-px bg-border" />
+          <span className="mx-2 h-4.5 w-px bg-border" />
           <DropdownMenu>
             <DropdownMenuTrigger
               render={

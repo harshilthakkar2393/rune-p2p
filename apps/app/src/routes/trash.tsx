@@ -107,7 +107,7 @@ function TrashView() {
     <div className="flex h-full flex-col">
       <header className="flex shrink-0 items-baseline gap-3.5 px-8 pt-3 pb-2">
         <h1 className="text-h1">Trash</h1>
-        <span className="font-mono text-[11px] text-muted-foreground">
+        <span className="font-mono text-tiny text-muted-foreground">
           deleted forever after 30 days
         </span>
         <div className="ml-auto flex items-center gap-2 self-center">
@@ -154,7 +154,7 @@ function TrashView() {
                     type="button"
                     onClick={() => toggleSelect(folder.id)}
                     className={cn(
-                      "flex h-[62px] items-center gap-3 rounded-xl border bg-card px-3.5 text-left",
+                      "flex h-15.5 items-center gap-3 rounded-xl border bg-card px-3.5 text-left",
                       isSelected ? "border-foreground/50" : "hover:border-foreground/20",
                     )}
                   >
@@ -163,7 +163,7 @@ function TrashView() {
                       style={{ background: tint ?? "var(--muted-foreground)" }}
                     />
                     <span className="truncate text-sm">{folder.name}</span>
-                    <span className="ml-auto rounded-full border px-2 py-0.5 font-mono text-[11px] text-foreground/85">
+                    <span className="ml-auto rounded-full border px-2 py-0.5 font-mono text-tiny text-foreground/85">
                       {daysLeft(folder.deletedAt ?? 0)}d left
                     </span>
                   </button>
@@ -179,7 +179,7 @@ function TrashView() {
                   dim
                   actions={trashActions(page.id)}
                   trailing={
-                    <span className="rounded-full border px-2 py-0.5 font-mono text-[11px] text-foreground/85">
+                    <span className="rounded-full border px-2 py-0.5 font-mono text-tiny text-foreground/85">
                       {daysLeft(page.deletedAt ?? 0)}d left
                     </span>
                   }

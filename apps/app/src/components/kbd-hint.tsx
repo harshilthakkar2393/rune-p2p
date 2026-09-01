@@ -4,10 +4,10 @@ import { isMac, modLabel } from "@/lib/platform";
  * the letter; non-mac platforms get plain "Ctrl K". */
 export function KbdHint({ letter }: { letter: string }) {
   return (
-    <span className="ml-auto font-mono text-[11px] leading-4 text-muted-foreground opacity-0 transition-opacity group-hover/kbd:opacity-100">
+    <span className="ml-auto font-mono text-tiny leading-4 text-muted-foreground opacity-0 transition-opacity group-hover/kbd:opacity-100">
       {isMac ? (
         <>
-          <span className="text-[12px] leading-4">⌘</span>
+          <span className="text-xs leading-4">⌘</span>
           {letter}
         </>
       ) : (

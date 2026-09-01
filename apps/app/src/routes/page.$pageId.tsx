@@ -43,7 +43,7 @@ function PageView() {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-11 shrink-0 items-center gap-2 px-3">
           {folder && (
-            <span className="flex items-center gap-1.5 rounded-md px-2 py-1 text-[13px] text-muted-foreground">
+            <span className="flex items-center gap-1.5 rounded-md px-2 py-1 text-small text-muted-foreground">
               <FolderGlyph className="size-4" color={folderTint ?? "var(--muted-foreground)"} />
               <span className="max-w-40 truncate">{folder.name}</span>
             </span>
@@ -61,7 +61,7 @@ function PageView() {
         <ScrollArea className="min-h-0 w-full flex-1">
           <main className="w-full pt-4 pb-10">
             <div className="flex flex-col gap-2">
-              <div className="px-[54px]">
+              <div className="px-13.5">
                 <PageTitle pageId={pageId} />
               </div>
               <Editor pageId={pageId} />

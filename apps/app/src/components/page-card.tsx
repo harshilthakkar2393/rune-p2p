@@ -6,6 +6,7 @@ import { MoreHorizontalIcon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { getPageExcerpt } from "@/lib/excerpt";
 import { folderColorValue } from "@/lib/folder-colors";
 import type { Folder, Page } from "@/lib/schema";
+import { Button } from "@rune/ui/components/button";
 import { Card } from "@rune/ui/components/card";
 import {
   ContextMenu,
@@ -120,7 +121,7 @@ export function PageCard({
             onSelectToggle();
           }}
           className={cn(
-            "absolute top-3 left-3 z-10 flex size-[18px] items-center justify-center rounded-sm transition-opacity",
+            "absolute top-3 left-3 z-10 flex size-4.5 items-center justify-center rounded-sm transition-opacity",
             selected
               ? "bg-primary text-primary-foreground opacity-100"
               : "border border-foreground/25 opacity-0 group-hover/card:opacity-100",
@@ -135,14 +136,15 @@ export function PageCard({
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="icon"
                 aria-label="Page actions"
                 onClick={(event) => event.stopPropagation()}
-                className="absolute top-2.5 right-2.5 z-10 flex size-6 items-center justify-center rounded-md text-muted-foreground opacity-0 transition-opacity group-hover/card:opacity-100 hover:bg-secondary data-popup-open:bg-secondary data-popup-open:opacity-100"
+                className="absolute top-2 right-2 z-10 size-6 text-muted-foreground opacity-0 transition-opacity group-hover/card:opacity-100 data-popup-open:bg-secondary data-popup-open:opacity-100"
               >
                 <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={1.75} className="size-4!" />
-              </button>
+              </Button>
             }
           />
           <DropdownMenuContent align="start" onClick={(event) => event.stopPropagation()}>
@@ -155,22 +157,28 @@ export function PageCard({
         className={cn(
           "h-5 shrink-0 truncate pr-6 text-sm leading-5",
           dim && "text-muted-foreground",
-          onSelectToggle && (selecting || selected) && "pl-6",
+          onSelectToggle && selecting && "pl-6",
         )}
       >
         {title}
       </span>
       <span
         className={cn(
-          "line-clamp-2 h-[38px] shrink-0 overflow-hidden text-[13px] leading-[19px] break-words text-muted-foreground",
+          "line-clamp-2 h-9 shrink-0 overflow-hidden text-small break-words text-muted-foreground",
           dim && "text-muted-foreground/60",
+          onSelectToggle && selecting && "pl-6",
         )}
       >
         {excerpt === null ? "" : excerpt === "" ? "Empty page" : excerpt}
       </span>
-      <span className="mt-auto flex h-4 shrink-0 items-center gap-2">
+      <span
+        className={cn(
+          "mt-auto flex h-4 shrink-0 items-center gap-2",
+          onSelectToggle && selecting && "pl-6",
+        )}
+      >
         {folder && (
-          <span className="inline-flex min-w-0 items-center gap-1.5 text-[11px] leading-4 text-muted-foreground">
+          <span className="inline-flex min-w-0 items-center gap-1.5 text-tiny leading-4 text-muted-foreground">
             {folderTint && (
               <span className="size-1.5 shrink-0 rounded-full" style={{ background: folderTint }} />
             )}

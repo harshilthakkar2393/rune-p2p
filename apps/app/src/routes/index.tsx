@@ -100,7 +100,7 @@ function Home() {
               dayGroups.map((group) => (
                 <div key={group.label} className="flex flex-col gap-3.5">
                   <div className="flex h-4 items-center gap-3">
-                    <span className="shrink-0 font-mono text-[11px] leading-4 text-muted-foreground">
+                    <span className="shrink-0 font-mono text-tiny leading-4 text-muted-foreground">
                       {group.label}
                     </span>
                     <span className="grow border-t border-dashed border-foreground/10" />
@@ -112,7 +112,7 @@ function Home() {
                         page={page}
                         folder={page.folderId !== null ? folderById.get(page.folderId) : undefined}
                         trailing={
-                          <span className="font-mono text-[11px] leading-4 text-muted-foreground">
+                          <span className="font-mono text-tiny leading-4 text-muted-foreground">
                             {humanTime(openedAt)}
                           </span>
                         }
