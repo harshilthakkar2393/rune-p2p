@@ -171,15 +171,25 @@ export function AppSidebar() {
         </div>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="New page" onClick={compose}>
+            <SidebarMenuButton tooltip="New page · ⌘N" className="group/kbd" onClick={compose}>
               <Icon icon={PencilEdit02Icon} />
               New page
+              <span className="ml-auto font-mono text-[11px] text-muted-foreground opacity-0 transition-opacity group-hover/kbd:opacity-100">
+                ⌘N
+              </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Search" onClick={() => setPaletteOpen(true)}>
+            <SidebarMenuButton
+              tooltip="Search · ⌘K"
+              className="group/kbd"
+              onClick={() => setPaletteOpen(true)}
+            >
               <Icon icon={Search01Icon} />
               Search
+              <span className="ml-auto font-mono text-[11px] text-muted-foreground opacity-0 transition-opacity group-hover/kbd:opacity-100">
+                ⌘K
+              </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
