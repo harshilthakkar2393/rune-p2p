@@ -24,8 +24,10 @@ h6 {
 
 @theme inline {
   --font-heading: var(--font-sans);
-  --font-sans: 'Geist Variable', sans-serif;
-  --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
+  /* system-ui sits second: Geist ships no ⌘/⇧/⌥ glyphs, and the default
+     fallback (Menlo/Apple Symbols) draws them small and thin. */
+  --font-sans: "Geist Variable", system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", system-ui, ui-monospace, monospace;
   --text-h1: 1.75rem;
   --text-h1--line-height: 1.25;
   --text-h2: 1.375rem;
