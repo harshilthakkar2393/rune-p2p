@@ -1,16 +1,14 @@
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 
 import { useNodes } from "@/hooks/use-index";
 import { getNodesMap } from "@/lib/index-doc";
+import { getPageExcerpt } from "@/lib/excerpt";
 import { createPage } from "@/lib/nodes";
 import { readRecents } from "@/lib/recents";
+import type { Page } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@rune/ui/components/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@rune/ui/components/card";
 import {
   Empty,
   EmptyDescription,
@@ -27,6 +25,41 @@ function greeting(): string {
   if (hour < 12) return "Good morning";
   if (hour < 18) return "Good afternoon";
   return "Good evening";
+}
+
+function RecentCard({ page, openedAt }: { page: Page; openedAt: number }) {
+  const [excerpt, setExcerpt] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    void getPageExcerpt(page.id).then((text) => {
+      if (!cancelled) setExcerpt(text);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [page.id]);
+
+  return (
+    <Link to="/page/$pageId" params={{ pageId: page.id }}>
+      <Card className="h-full gap-2 shadow-none transition-colors hover:bg-accent/40">
+        <CardHeader className="gap-1.5">
+          <CardTitle className="truncate text-sm">
+            {page.title === "" ? "Untitled" : page.title}
+          </CardTitle>
+          <CardDescription className="line-clamp-2 min-h-8 text-[13px]">
+            {excerpt || "Empty page"}
+          </CardDescription>
+          <span className="pt-1 font-mono text-[11px] text-muted-foreground">
+            {new Date(openedAt).toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+            })}
+          </span>
+        </CardHeader>
+      </Card>
+    </Link>
+  );
 }
 
 function Home() {
@@ -61,9 +94,9 @@ function Home() {
         <SidebarTrigger />
       </header>
       <main className="mx-auto w-full max-w-3xl py-6 px-8">
-        <h1 className="text-2xl font-medium">{greeting()}</h1>
+        <h1 className="font-serif text-4xl">{greeting()}</h1>
 
-        <section className="mt-8">
+        <section className="mt-10">
           <h2 className="text-sm font-medium text-muted-foreground">Recent</h2>
           {recents.length === 0 ? (
             <div className="mt-4">
@@ -80,25 +113,7 @@ function Home() {
           ) : (
             <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {recents.map(({ page, openedAt }) => (
-                <Link
-                  key={page.id}
-                  to="/page/$pageId"
-                  params={{ pageId: page.id }}
-                >
-                  <Card className="h-full transition-colors hover:bg-accent/50">
-                    <CardHeader>
-                      <CardTitle className="truncate">
-                        {page.title === "" ? "Untitled" : page.title}
-                      </CardTitle>
-                      <CardDescription>
-                        {new Date(openedAt).toLocaleDateString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
-                </Link>
+                <RecentCard key={page.id} page={page} openedAt={openedAt} />
               ))}
             </div>
           )}

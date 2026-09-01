@@ -44,5 +44,6 @@ body {
 .bn-root[data-color-scheme] .bn-editor h1,
 .bn-root[data-color-scheme] .bn-editor h2,
 .bn-root[data-color-scheme] .bn-editor h3 {
+  font-family: var(--font-sans);
   font-weight: 500;
 }
