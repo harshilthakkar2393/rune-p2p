@@ -2,12 +2,27 @@
   "name": "rune",
   "private": true,
   "packageManager": "bun@1.4.0",
-  "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "dev": "bun run --filter @rune/app dev",
-    "build": "bun run --filter @rune/app build",
-    "check": "bun run --filter @rune/app check",
-    "format": "bun run --filter @rune/app format",
-    "test": "bun test"
-  }
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "check": "turbo run check",
+    "test": "turbo run test",
+    "format": "turbo run format"
+  },
+  "devDependencies": {
+    "turbo": "^2.10.12"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "bun",
+      "version": "1.4.0"
+    }
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }
