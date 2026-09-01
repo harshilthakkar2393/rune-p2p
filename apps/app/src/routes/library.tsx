@@ -12,6 +12,7 @@ import {
 
 import { FolderGlyph } from "@/components/folder-glyph";
 import { PageCard, type CardAction } from "@/components/page-card";
+import { RootMenu } from "@/components/root-menu";
 import { SelectionBar, SelectionBarButton } from "@/components/selection-bar";
 import { Tip } from "@/components/tip";
 import { useNodes } from "@/hooks/use-index";
@@ -124,6 +125,7 @@ function LibraryView() {
           {pages.length} {pages.length === 1 ? "page" : "pages"}
         </span>
         <div className="ml-auto flex items-center gap-1.5 self-center">
+          <RootMenu />
           <Tip label={selecting ? "Done selecting" : "Select"}>
             <Button
               variant={selecting ? "secondary" : "ghost"}

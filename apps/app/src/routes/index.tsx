@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
+import { RootMenu } from "@/components/root-menu";
 import { useNodes } from "@/hooks/use-index";
 import { getNodesMap } from "@/lib/index-doc";
 import { composeTargetFolderId } from "@/lib/compose-target";
@@ -84,6 +85,9 @@ function Home() {
     <div className="flex h-full flex-col">
       <header className="mx-auto flex h-14 w-full max-w-3xl shrink-0 items-center px-8">
         <h1 className="text-h1">{greeting()}</h1>
+        <span className="ml-auto">
+          <RootMenu />
+        </span>
       </header>
       <ScrollArea className="min-h-0 flex-1">
         <main className="mx-auto w-full max-w-3xl px-8 pt-4 pb-8">

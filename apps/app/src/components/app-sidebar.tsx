@@ -16,12 +16,11 @@ import {
 import { FolderGlyph } from "@/components/folder-glyph";
 import { KbdHint } from "@/components/kbd-hint";
 import { Tip } from "@/components/tip";
+import { useComposePage } from "@/hooks/use-compose-page";
 import { useNodes } from "@/hooks/use-index";
-import { composeTargetFolderId } from "@/lib/compose-target";
-import { getDeviceName } from "@/lib/device";
 import { FOLDER_COLOR_VALUES, folderColorValue } from "@/lib/folder-colors";
 import { getNodesMap } from "@/lib/index-doc";
-import { createFolder, createPage } from "@/lib/nodes";
+import { createFolder } from "@/lib/nodes";
 import { modLabel } from "@/lib/platform";
 import { setPaletteOpen } from "@/lib/palette";
 import { FOLDER_COLORS, type Folder, type FolderColor } from "@/lib/schema";
@@ -63,22 +62,6 @@ function Icon({
       style={color ? { color } : undefined}
     />
   );
-}
-
-function useComposePage() {
-  const navigate = useNavigate();
-  return () => {
-    const map = getNodesMap();
-    const result = createPage(map, composeTargetFolderId(map), {
-      createdOn: getDeviceName(),
-    });
-    if (result.isOk()) {
-      void navigate({
-        to: "/page/$pageId",
-        params: { pageId: result.value.id },
-      });
-    }
-  };
 }
 
 function NewFolderPopover() {
