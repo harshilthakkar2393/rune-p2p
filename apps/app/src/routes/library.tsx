@@ -165,7 +165,7 @@ function LibraryView() {
 
   return (
     <div className="relative flex h-full flex-col">
-      <header className="flex shrink-0 items-baseline gap-3.5 px-4 md:px-8 pt-3 pb-2">
+      <header className="flex shrink-0 items-baseline gap-3.5 px-4 md:px-8 pt-3 pb-2 max-md:h-14 max-md:items-center max-md:py-0">
         <h1 className="text-h1">Library</h1>
         <span className="font-mono text-tiny text-muted-foreground">
           {pages.length} {pages.length === 1 ? "page" : "pages"}
