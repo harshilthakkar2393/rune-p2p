@@ -64,6 +64,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
+  SidebarTrigger,
 } from "@rune/ui/components/sidebar";
 
 function Icon({ icon, className }: { icon: IconSvgElement; className?: string }) {
@@ -425,16 +426,15 @@ export function AppSidebar() {
             <span className="px-2 py-1 text-lg font-medium group-data-[collapsible=icon]:hidden">
               rune
             </span>
-            <button
-              type="button"
-              aria-label="New page"
-              className="flex size-8 items-center justify-center rounded-md text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              onClick={compose}
-            >
-              <Icon icon={PencilEdit02Icon} />
-            </button>
+            <SidebarTrigger className="text-sidebar-foreground/70" />
           </div>
           <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton tooltip="New page" onClick={compose}>
+                <Icon icon={PencilEdit02Icon} />
+                New page
+              </SidebarMenuButton>
+            </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton
                 tooltip="Search"

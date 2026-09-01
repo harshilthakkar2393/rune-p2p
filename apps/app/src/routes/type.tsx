@@ -5,7 +5,6 @@ import { BlockNoteView } from "@blocknote/shadcn";
 
 import { useTheme } from "@rune/ui/components/theme-provider";
 import { Separator } from "@rune/ui/components/separator";
-import { SidebarTrigger } from "@rune/ui/components/sidebar";
 
 export const Route = createFileRoute("/type")({ component: TypePlayground });
 
@@ -102,9 +101,6 @@ function TypePlayground() {
 
   return (
     <>
-      <header className="flex items-center px-2 pt-1">
-        <SidebarTrigger />
-      </header>
       <main className="mx-auto w-full max-w-3xl py-6 px-8">
         <h1 className="text-h1" data-measure="h1">
           Type scale
