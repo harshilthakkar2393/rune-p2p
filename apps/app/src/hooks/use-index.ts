@@ -1,6 +1,8 @@
 import { useSyncExternalStore } from "react";
 
 import { getNodesMap, initIndexPersistence } from "@/lib/index-doc";
+import { purgeExpired } from "@/lib/nodes";
+import { destroyPageDoc } from "@/lib/page-doc";
 import type { Node } from "@/lib/schema";
 
 /**
@@ -20,7 +22,11 @@ function start() {
   if (started) return;
   started = true;
   // Kick off IndexedDB load; observe below fires when persisted state arrives.
-  void initIndexPersistence();
+  // Once loaded, permanently drop trash past its 30-day retention.
+  void initIndexPersistence().then(() => {
+    const { removedPageIds } = purgeExpired(getNodesMap());
+    for (const pageId of removedPageIds) void destroyPageDoc(pageId);
+  });
   refreshSnapshot();
 }
 

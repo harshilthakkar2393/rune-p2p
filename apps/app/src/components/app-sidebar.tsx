@@ -6,6 +6,7 @@ import {
   Add01Icon,
   ArrowRight01Icon,
   ComputerPhoneSyncIcon,
+  DashboardSquare01Icon,
   Delete02Icon,
   File02Icon,
   Folder01Icon,
@@ -15,24 +16,16 @@ import {
   PencilEdit01Icon,
   PencilEdit02Icon,
   Search01Icon,
+  Tick02Icon,
 } from "@hugeicons/core-free-icons";
 
 import { useNodes } from "@/hooks/use-index";
+import { getDeviceName } from "@/lib/device";
+import { FOLDER_COLOR_VALUES, folderColorValue } from "@/lib/folder-colors";
 import { getNodesMap } from "@/lib/index-doc";
-import { createFolder, createPage, moveNode, removeNode, renameNode } from "@/lib/nodes";
-import { destroyPageDoc } from "@/lib/page-doc";
+import { createFolder, createPage, moveNode, renameNode, trashNode } from "@/lib/nodes";
 import { setPaletteOpen } from "@/lib/palette";
-import type { Folder, Node, Page } from "@/lib/schema";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@rune/ui/components/alert-dialog";
+import { FOLDER_COLORS, type Folder, type FolderColor, type Node, type Page } from "@/lib/schema";
 import {
   Collapsible,
   CollapsibleContent,
@@ -49,6 +42,11 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@rune/ui/components/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@rune/ui/components/popover";
 import {
   Sidebar,
   SidebarContent,
@@ -67,12 +65,21 @@ import {
   SidebarTrigger,
 } from "@rune/ui/components/sidebar";
 
-function Icon({ icon, className }: { icon: IconSvgElement; className?: string }) {
+function Icon({
+  icon,
+  className,
+  color,
+}: {
+  icon: IconSvgElement;
+  className?: string;
+  color?: string;
+}) {
   return (
     <HugeiconsIcon
       icon={icon}
       strokeWidth={1.75}
       className={className ?? "size-4.5!"}
+      style={color ? { color } : undefined}
     />
   );
 }
@@ -83,6 +90,7 @@ function childrenOf(nodes: Node[], parentId: string | null): Node[] {
   );
   return nodes
     .filter((node) => {
+      if (node.deletedAt !== undefined) return false;
       const parent = node.type === "folder" ? node.parentId : node.folderId;
       const resolved = parent !== null && folderIds.has(parent) ? parent : null;
       return resolved === parentId;
@@ -90,17 +98,19 @@ function childrenOf(nodes: Node[], parentId: string | null): Node[] {
     .toSorted((a, b) => a.sortKey.localeCompare(b.sortKey));
 }
 
-type PendingDelete = { node: Node; label: string } | null;
-
 type RowMenuProps = {
   node: Node;
   nodes: Node[];
   onRename: () => void;
-  onDelete: () => void;
+  onTrash: () => void;
   onNewPageInside?: () => void;
 };
 
-function isDescendantFolder(nodes: Node[], folderId: string, candidateId: string): boolean {
+function isDescendantFolder(
+  nodes: Node[],
+  folderId: string,
+  candidateId: string,
+): boolean {
   let current: string | null = candidateId;
   const byId = new Map(nodes.map((node) => [node.id, node]));
   while (current !== null) {
@@ -111,8 +121,10 @@ function isDescendantFolder(nodes: Node[], folderId: string, candidateId: string
   return false;
 }
 
-function RowMenu({ node, nodes, onRename, onDelete, onNewPageInside }: RowMenuProps) {
-  const folders = nodes.filter((n): n is Folder => n.type === "folder");
+function RowMenu({ node, nodes, onRename, onTrash, onNewPageInside }: RowMenuProps) {
+  const folders = nodes.filter(
+    (n): n is Folder => n.type === "folder" && n.deletedAt === undefined,
+  );
   const currentParent = node.type === "folder" ? node.parentId : node.folderId;
   const moveTargets = folders.filter((folder) => {
     if (folder.id === currentParent) return false;
@@ -160,7 +172,11 @@ function RowMenu({ node, nodes, onRename, onDelete, onNewPageInside }: RowMenuPr
                   key={folder.id}
                   onClick={() => moveNode(getNodesMap(), node.id, folder.id)}
                 >
-                  <Icon icon={Folder01Icon} className="size-4!" />
+                  <Icon
+                    icon={Folder01Icon}
+                    className="size-4!"
+                    color={folderColorValue(folder.color)}
+                  />
                   {folder.name}
                 </DropdownMenuItem>
               ))}
@@ -171,9 +187,9 @@ function RowMenu({ node, nodes, onRename, onDelete, onNewPageInside }: RowMenuPr
           </DropdownMenuSub>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive" onClick={onDelete}>
+        <DropdownMenuItem onClick={onTrash}>
           <Icon icon={Delete02Icon} className="size-4!" />
-          Delete
+          Move to trash
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -205,17 +221,22 @@ function RenameInput({
   );
 }
 
-function PageItem({
-  page,
-  nodes,
-  requestDelete,
-}: {
-  page: Page;
-  nodes: Node[];
-  requestDelete: (pending: PendingDelete) => void;
-}) {
+function useTrashNode() {
+  const navigate = useNavigate();
+  const params = useParams({ strict: false });
+  return (id: string) => {
+    trashNode(getNodesMap(), id);
+    const openPage = params.pageId ? getNodesMap().get(params.pageId) : undefined;
+    if (openPage && openPage.deletedAt !== undefined) {
+      void navigate({ to: "/" });
+    }
+  };
+}
+
+function PageItem({ page, nodes }: { page: Page; nodes: Node[] }) {
   const params = useParams({ strict: false });
   const [renaming, setRenaming] = useState(false);
+  const sendToTrash = useTrashNode();
   const title = page.title === "" ? "Untitled" : page.title;
 
   if (renaming) {
@@ -246,26 +267,21 @@ function PageItem({
         node={page}
         nodes={nodes}
         onRename={() => setRenaming(true)}
-        onDelete={() => requestDelete({ node: page, label: title })}
+        onTrash={() => sendToTrash(page.id)}
       />
     </SidebarMenuItem>
   );
 }
 
-function FolderItem({
-  folder,
-  nodes,
-  requestDelete,
-}: {
-  folder: Folder;
-  nodes: Node[];
-  requestDelete: (pending: PendingDelete) => void;
-}) {
+function FolderItem({ folder, nodes }: { folder: Folder; nodes: Node[] }) {
   const [renaming, setRenaming] = useState(false);
   const navigate = useNavigate();
+  const sendToTrash = useTrashNode();
 
   const newPageInside = () => {
-    const result = createPage(getNodesMap(), folder.id);
+    const result = createPage(getNodesMap(), folder.id, {
+      createdOn: getDeviceName(),
+    });
     if (result.isOk()) {
       void navigate({
         to: "/page/$pageId",
@@ -295,7 +311,7 @@ function FolderItem({
         <CollapsibleTrigger
           render={
             <SidebarMenuButton>
-              <Icon icon={Folder01Icon} />
+              <Icon icon={Folder01Icon} color={folderColorValue(folder.color)} />
               <span className="truncate">{folder.name}</span>
               <HugeiconsIcon
                 icon={ArrowRight01Icon}
@@ -308,16 +324,12 @@ function FolderItem({
           node={folder}
           nodes={nodes}
           onRename={() => setRenaming(true)}
-          onDelete={() => requestDelete({ node: folder, label: folder.name })}
+          onTrash={() => sendToTrash(folder.id)}
           onNewPageInside={newPageInside}
         />
         <CollapsibleContent>
           <SidebarMenuSub>
-            <TreeLevel
-              nodes={nodes}
-              parentId={folder.id}
-              requestDelete={requestDelete}
-            />
+            <TreeLevel nodes={nodes} parentId={folder.id} />
           </SidebarMenuSub>
         </CollapsibleContent>
       </Collapsible>
@@ -328,27 +340,15 @@ function FolderItem({
 function TreeLevel({
   nodes,
   parentId,
-  requestDelete,
 }: {
   nodes: Node[];
   parentId: string | null;
-  requestDelete: (pending: PendingDelete) => void;
 }) {
   return childrenOf(nodes, parentId).map((node) =>
     node.type === "folder" ? (
-      <FolderItem
-        key={node.id}
-        folder={node}
-        nodes={nodes}
-        requestDelete={requestDelete}
-      />
+      <FolderItem key={node.id} folder={node} nodes={nodes} />
     ) : (
-      <PageItem
-        key={node.id}
-        page={node}
-        nodes={nodes}
-        requestDelete={requestDelete}
-      />
+      <PageItem key={node.id} page={node} nodes={nodes} />
     ),
   );
 }
@@ -356,7 +356,9 @@ function TreeLevel({
 function useComposePage() {
   const navigate = useNavigate();
   return () => {
-    const result = createPage(getNodesMap(), null);
+    const result = createPage(getNodesMap(), null, {
+      createdOn: getDeviceName(),
+    });
     if (result.isOk()) {
       void navigate({
         to: "/page/$pageId",
@@ -366,155 +368,160 @@ function useComposePage() {
   };
 }
 
-function LibraryAction() {
-  const compose = useComposePage();
+function NewFolderPopover() {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [color, setColor] = useState<FolderColor>("blue");
+
+  const confirm = () => {
+    if (name.trim() === "") return;
+    createFolder(getNodesMap(), null, name.trim(), color);
+    setName("");
+    setOpen(false);
+  };
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
         render={
-          <SidebarGroupAction aria-label="Add page or folder">
+          <SidebarGroupAction aria-label="New folder">
             <Icon icon={Add01Icon} className="size-4!" />
           </SidebarGroupAction>
         }
       />
-      <DropdownMenuContent align="start">
-        <DropdownMenuGroup>
-          <DropdownMenuItem onClick={compose}>
-            <Icon icon={File02Icon} className="size-4!" />
-            New page
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => createFolder(getNodesMap(), null, "New folder")}
-          >
-            <Icon icon={Folder01Icon} className="size-4!" />
-            New folder
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      <PopoverContent align="start" className="w-72 p-3">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-secondary">
+              <Icon
+                icon={Folder01Icon}
+                className="size-4!"
+                color={FOLDER_COLOR_VALUES[color]}
+              />
+            </span>
+            <SidebarInput
+              autoFocus
+              placeholder="Folder name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") confirm();
+                if (event.key === "Escape") setOpen(false);
+              }}
+            />
+            <button
+              type="button"
+              aria-label="Create folder"
+              onClick={confirm}
+              className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground"
+            >
+              <Icon icon={Tick02Icon} className="size-4!" />
+            </button>
+          </div>
+          <div className="flex items-center gap-2 px-1">
+            {FOLDER_COLORS.map((candidate) => (
+              <button
+                key={candidate}
+                type="button"
+                aria-label={`Color ${candidate}`}
+                onClick={() => setColor(candidate)}
+                className="flex size-5 items-center justify-center rounded-full"
+                style={{
+                  outline:
+                    candidate === color
+                      ? "2px solid var(--foreground)"
+                      : undefined,
+                  outlineOffset: 2,
+                }}
+              >
+                <span
+                  className="size-4 rounded-full"
+                  style={{ background: FOLDER_COLOR_VALUES[candidate] }}
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
 
 export function AppSidebar() {
   const nodes = useNodes();
   const compose = useComposePage();
-  const navigate = useNavigate();
-  const params = useParams({ strict: false });
-  const [pendingDelete, setPendingDelete] = useState<PendingDelete>(null);
-
-  const confirmDelete = () => {
-    if (!pendingDelete) return;
-    const { node } = pendingDelete;
-    const result = removeNode(getNodesMap(), node.id);
-    if (result.isOk()) {
-      for (const pageId of result.value.removedPageIds) {
-        void destroyPageDoc(pageId);
-      }
-      const openPageGone =
-        params.pageId !== undefined &&
-        result.value.removedPageIds.includes(params.pageId);
-      if (openPageGone) void navigate({ to: "/" });
-    }
-    setPendingDelete(null);
-  };
 
   return (
-    <>
-      <Sidebar variant="inset" collapsible="icon">
-        <SidebarHeader>
-          <div className="flex items-center justify-between group-data-[collapsible=icon]:justify-center">
-            <span className="px-2 py-1 text-lg font-medium group-data-[collapsible=icon]:hidden">
-              rune
-            </span>
-            <SidebarTrigger className="text-sidebar-foreground/70" />
-          </div>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton tooltip="New page" onClick={compose}>
-                <Icon icon={PencilEdit02Icon} />
-                New page
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                tooltip="Search"
-                onClick={() => setPaletteOpen(true)}
-              >
-                <Icon icon={Search01Icon} />
-                Search
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                tooltip="Home"
-                render={<Link to="/" activeOptions={{ exact: true }} />}
-              >
-                <Icon icon={Home04Icon} />
-                Home
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                tooltip="Devices"
-                render={<Link to="/devices" />}
-              >
-                <Icon icon={ComputerPhoneSyncIcon} />
-                Devices
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-            <SidebarGroupLabel>Library</SidebarGroupLabel>
-            <LibraryAction />
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <TreeLevel
-                  nodes={nodes}
-                  parentId={null}
-                  requestDelete={setPendingDelete}
-                />
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-        <SidebarFooter>
-          <div className="flex items-center gap-2 px-2 py-1 font-mono text-xs text-muted-foreground group-data-[collapsible=icon]:justify-center">
-            <span className="size-1.5 shrink-0 rounded-full bg-muted-foreground/50" />
-            <span className="group-data-[collapsible=icon]:hidden">
-              local only
-            </span>
-          </div>
-        </SidebarFooter>
-      </Sidebar>
-
-      <AlertDialog
-        open={pendingDelete !== null}
-        onOpenChange={(open) => {
-          if (!open) setPendingDelete(null);
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              Delete {pendingDelete?.node.type === "folder" ? "folder" : "page"}{" "}
-              “{pendingDelete?.label}”?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {pendingDelete?.node.type === "folder"
-                ? "Everything inside — pages and subfolders — is deleted with it. This cannot be undone."
-                : "The page and its content are deleted. This cannot be undone."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+    <Sidebar variant="inset" collapsible="icon">
+      <SidebarHeader>
+        <div className="flex items-center justify-between group-data-[collapsible=icon]:justify-center">
+          <span className="px-2 py-1 text-lg font-medium group-data-[collapsible=icon]:hidden">
+            rune
+          </span>
+          <SidebarTrigger className="text-sidebar-foreground/70" />
+        </div>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="New page" onClick={compose}>
+              <Icon icon={PencilEdit02Icon} />
+              New page
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip="Search"
+              onClick={() => setPaletteOpen(true)}
+            >
+              <Icon icon={Search01Icon} />
+              Search
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip="Home"
+              render={<Link to="/" activeOptions={{ exact: true }} />}
+            >
+              <Icon icon={Home04Icon} />
+              Home
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="Library" render={<Link to="/library" />}>
+              <Icon icon={DashboardSquare01Icon} />
+              Library
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="Devices" render={<Link to="/devices" />}>
+              <Icon icon={ComputerPhoneSyncIcon} />
+              Devices
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="Trash" render={<Link to="/trash" />}>
+              <Icon icon={Delete02Icon} />
+              Trash
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+          <SidebarGroupLabel>Folders</SidebarGroupLabel>
+          <NewFolderPopover />
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <TreeLevel nodes={nodes} parentId={null} />
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
+        <div className="flex items-center gap-2 px-2 py-1 font-mono text-xs text-muted-foreground group-data-[collapsible=icon]:justify-center">
+          <span className="size-1.5 shrink-0 rounded-full bg-muted-foreground/50" />
+          <span className="group-data-[collapsible=icon]:hidden">local only</span>
+        </div>
+      </SidebarFooter>
+    </Sidebar>
   );
 }
