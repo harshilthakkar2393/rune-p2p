@@ -17,7 +17,7 @@ function DevicesView() {
         <SidebarTrigger />
       </header>
       <main className="mx-auto w-full max-w-3xl py-6 px-8">
-        <h1 className="font-serif text-4xl">Devices</h1>
+        <h1 className="text-h1">Devices</h1>
         <div className="mt-8">
           <Empty>
             <EmptyHeader>

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DevicesRouteImport } from './routes/devices'
+import { Route as TypeRouteImport } from './routes/type'
 import { Route as PagePageIdRouteImport } from './routes/page.$pageId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +24,11 @@ const DevicesRoute = DevicesRouteImport.update({
   path: '/devices',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TypeRoute = TypeRouteImport.update({
+  id: '/type',
+  path: '/type',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PagePageIdRoute = PagePageIdRouteImport.update({
   id: '/page/$pageId',
   path: '/page/$pageId',
@@ -32,30 +38,34 @@ const PagePageIdRoute = PagePageIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/devices': typeof DevicesRoute
+  '/type': typeof TypeRoute
   '/page/$pageId': typeof PagePageIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/devices': typeof DevicesRoute
+  '/type': typeof TypeRoute
   '/page/$pageId': typeof PagePageIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/devices': typeof DevicesRoute
+  '/type': typeof TypeRoute
   '/page/$pageId': typeof PagePageIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/devices' | '/page/$pageId'
+  fullPaths: '/' | '/devices' | '/type' | '/page/$pageId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/devices' | '/page/$pageId'
-  id: '__root__' | '/' | '/devices' | '/page/$pageId'
+  to: '/' | '/devices' | '/type' | '/page/$pageId'
+  id: '__root__' | '/' | '/devices' | '/type' | '/page/$pageId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DevicesRoute: typeof DevicesRoute
+  TypeRoute: typeof TypeRoute
   PagePageIdRoute: typeof PagePageIdRoute
 }
 
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/type': {
+      id: '/type'
+      path: '/type'
+      fullPath: '/type'
+      preLoaderRoute: typeof TypeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/page/$pageId': {
       id: '/page/$pageId'
       path: '/page/$pageId'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DevicesRoute: DevicesRoute,
+  TypeRoute: TypeRoute,
   PagePageIdRoute: PagePageIdRoute,
 }
 export const routeTree = rootRouteImport

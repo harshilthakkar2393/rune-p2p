@@ -41,9 +41,30 @@ body {
   --bn-colors-side-menu: var(--muted-foreground);
 }
 
+/* Editor typography = app typography: same scale tokens, same 400 weight. */
+.bn-root[data-color-scheme] .bn-editor {
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+
 .bn-root[data-color-scheme] .bn-editor h1,
 .bn-root[data-color-scheme] .bn-editor h2,
 .bn-root[data-color-scheme] .bn-editor h3 {
   font-family: var(--font-sans);
-  font-weight: 500;
+  font-weight: 400;
+}
+
+.bn-root[data-color-scheme] .bn-editor h1 {
+  font-size: var(--text-h1);
+  line-height: var(--text-h1--line-height);
+}
+
+.bn-root[data-color-scheme] .bn-editor h2 {
+  font-size: var(--text-h2);
+  line-height: var(--text-h2--line-height);
+}
+
+.bn-root[data-color-scheme] .bn-editor h3 {
+  font-size: var(--text-h3);
+  line-height: var(--text-h3--line-height);
 }

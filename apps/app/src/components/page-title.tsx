@@ -22,7 +22,7 @@ export function PageTitle({ pageId }: { pageId: string }) {
 
   return (
     <input
-      className="w-full bg-transparent font-serif text-4xl outline-none placeholder:text-muted-foreground/40"
+      className="w-full bg-transparent text-h1 outline-none placeholder:text-muted-foreground/40"
       placeholder="Untitled"
       value={draft}
       onChange={(event) => setDraft(event.target.value)}
