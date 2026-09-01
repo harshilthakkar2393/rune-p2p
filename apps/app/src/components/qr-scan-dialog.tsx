@@ -23,6 +23,14 @@ export function QrScanDialog({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [message, setMessage] = useState<string | null>(null);
 
+  // Keep the latest callbacks without re-running the effect below on every
+  // render — devices.tsx passes onSecret/onOpenChange as fresh closures each
+  // time, and re-running the effect would tear down and restart the camera.
+  const onSecretRef = useRef(onSecret);
+  const onOpenChangeRef = useRef(onOpenChange);
+  onSecretRef.current = onSecret;
+  onOpenChangeRef.current = onOpenChange;
+
   useEffect(() => {
     if (!open) return;
     const video = videoRef.current;
@@ -45,8 +53,8 @@ export function QrScanDialog({
           const result = parsePairInput(data);
           if (result.isOk()) {
             scanner?.stop();
-            onSecret(result.value);
-            onOpenChange(false);
+            onSecretRef.current(result.value);
+            onOpenChangeRef.current(false);
           }
         },
         {
@@ -68,7 +76,7 @@ export function QrScanDialog({
       scanner?.stop();
       scanner?.destroy();
     };
-  }, [open, onSecret, onOpenChange]);
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
