@@ -40,7 +40,12 @@ export function RootMenu({ action, children }: { action?: ReactNode; children?: 
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button variant="ghost" size="icon-lg" aria-label="More" className="rounded-full">
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              aria-label="More"
+              className="rounded-full [&_svg]:size-5"
+            >
               <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={1.75} />
             </Button>
           }
@@ -99,7 +104,7 @@ export function PhoneAction({
       aria-label={label}
       aria-pressed={active}
       onClick={onClick}
-      className={cn("rounded-full", active ? "bg-accent" : "text-muted-foreground")}
+      className={cn("rounded-full [&_svg]:size-5", active ? "bg-accent" : "text-muted-foreground")}
     >
       {children}
     </Button>
