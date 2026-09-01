@@ -7,7 +7,7 @@ import {
   File02Icon,
   FileEditIcon,
   Folder01Icon,
-  Home01Icon,
+  Home04Icon,
   Search01Icon,
 } from "@hugeicons/core-free-icons";
 
@@ -44,9 +44,7 @@ import {
 } from "@rune/ui/components/sidebar";
 
 function childrenOf(nodes: Node[], parentId: string | null): Node[] {
-  const folderIds = new Set(
-    nodes.filter((node) => node.type === "folder").map((node) => node.id),
-  );
+  const folderIds = new Set(nodes.filter((node) => node.type === "folder").map((node) => node.id));
   return nodes
     .filter((node) => {
       const parent = node.type === "folder" ? node.parentId : node.folderId;
@@ -64,10 +62,8 @@ function PageItem({ page }: { page: Page }) {
         isActive={params.pageId === page.id}
         render={<Link to="/page/$pageId" params={{ pageId: page.id }} />}
       >
-        <HugeiconsIcon icon={File02Icon} />
-        <span className="truncate">
-          {page.title === "" ? "Untitled" : page.title}
-        </span>
+        <HugeiconsIcon icon={File02Icon} strokeWidth={1.75} className="size-4.5!" />
+        <span className="truncate">{page.title === "" ? "Untitled" : page.title}</span>
       </SidebarMenuButton>
     </SidebarMenuItem>
   );
@@ -80,7 +76,7 @@ function FolderItem({ folder, nodes }: { folder: Folder; nodes: Node[] }) {
         <CollapsibleTrigger
           render={
             <SidebarMenuButton>
-              <HugeiconsIcon icon={Folder01Icon} />
+              <HugeiconsIcon icon={Folder01Icon} strokeWidth={1.75} className="size-4.5!" />
               <span className="truncate">{folder.name}</span>
               <HugeiconsIcon
                 icon={ArrowRight01Icon}
@@ -99,13 +95,7 @@ function FolderItem({ folder, nodes }: { folder: Folder; nodes: Node[] }) {
   );
 }
 
-function TreeLevel({
-  nodes,
-  parentId,
-}: {
-  nodes: Node[];
-  parentId: string | null;
-}) {
+function TreeLevel({ nodes, parentId }: { nodes: Node[]; parentId: string | null }) {
   return childrenOf(nodes, parentId).map((node) =>
     node.type === "folder" ? (
       <FolderItem key={node.id} folder={node} nodes={nodes} />
@@ -135,20 +125,18 @@ function LibraryAction() {
       <DropdownMenuTrigger
         render={
           <SidebarGroupAction aria-label="Add page or folder">
-            <HugeiconsIcon icon={Add01Icon} />
+            <HugeiconsIcon icon={Add01Icon} strokeWidth={1.75} />
           </SidebarGroupAction>
         }
       />
       <DropdownMenuContent align="start">
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={compose}>
-            <HugeiconsIcon icon={File02Icon} />
+            <HugeiconsIcon icon={File02Icon} strokeWidth={1.75} className="size-4.5!" />
             New page
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => createFolder(getNodesMap(), null, "New folder")}
-          >
-            <HugeiconsIcon icon={Folder01Icon} />
+          <DropdownMenuItem onClick={() => createFolder(getNodesMap(), null, "New folder")}>
+            <HugeiconsIcon icon={Folder01Icon} strokeWidth={1.75} className="size-4.5!" />
             New folder
           </DropdownMenuItem>
         </DropdownMenuGroup>
@@ -172,27 +160,29 @@ export function AppSidebar() {
             className="flex size-8 items-center justify-center rounded-md text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground [&_svg]:size-4"
             onClick={compose}
           >
-            <HugeiconsIcon icon={FileEditIcon} />
+            <HugeiconsIcon icon={FileEditIcon} strokeWidth={1.75} className="size-4.5!" />
           </button>
         </div>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton onClick={() => setPaletteOpen(true)}>
-              <HugeiconsIcon icon={Search01Icon} />
+              <HugeiconsIcon icon={Search01Icon} strokeWidth={1.75} className="size-4.5!" />
               Search
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              render={<Link to="/" activeOptions={{ exact: true }} />}
-            >
-              <HugeiconsIcon icon={Home01Icon} />
+            <SidebarMenuButton render={<Link to="/" activeOptions={{ exact: true }} />}>
+              <HugeiconsIcon icon={Home04Icon} strokeWidth={1.75} className="size-4.5!" />
               Home
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton render={<Link to="/devices" />}>
-              <HugeiconsIcon icon={ComputerPhoneSyncIcon} />
+              <HugeiconsIcon
+                icon={ComputerPhoneSyncIcon}
+                strokeWidth={1.75}
+                className="size-4.5!"
+              />
               Devices
             </SidebarMenuButton>
           </SidebarMenuItem>
