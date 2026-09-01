@@ -83,14 +83,14 @@ function Home() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="mx-auto flex h-14 w-full max-w-3xl shrink-0 items-center px-8">
+      <header className="mx-auto flex h-14 w-full max-w-3xl shrink-0 items-center px-4 md:px-8">
         <h1 className="text-h1">{greeting()}</h1>
         <span className="ml-auto">
           <RootMenu />
         </span>
       </header>
       <ScrollArea className="min-h-0 flex-1">
-        <main className="mx-auto w-full max-w-3xl px-8 pt-4 pb-8">
+        <main className="mx-auto w-full max-w-3xl px-4 md:px-8 pt-4 pb-8">
           <section className="flex flex-col gap-6">
             {recents.length === 0 ? (
               <Empty>

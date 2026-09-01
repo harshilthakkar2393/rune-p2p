@@ -35,7 +35,7 @@ function PairView() {
 
   return (
     <ScrollArea className="h-full min-h-0">
-      <main className="mx-auto w-full max-w-2xl px-8 pt-3 pb-6">
+      <main className="mx-auto w-full max-w-2xl px-4 md:px-8 pt-3 pb-6">
         <h1 className="text-h1">Pair this device</h1>
 
         {secret ? (

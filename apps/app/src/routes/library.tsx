@@ -119,7 +119,7 @@ function LibraryView() {
 
   return (
     <div className="relative flex h-full flex-col">
-      <header className="flex shrink-0 items-baseline gap-3.5 px-8 pt-3 pb-2">
+      <header className="flex shrink-0 items-baseline gap-3.5 px-4 md:px-8 pt-3 pb-2">
         <h1 className="text-h1">Library</h1>
         <span className="font-mono text-tiny text-muted-foreground">
           {pages.length} {pages.length === 1 ? "page" : "pages"}
@@ -218,7 +218,7 @@ function LibraryView() {
       </header>
 
       {(activeFolder !== undefined || dateFilter !== null) && (
-        <div className="flex w-full shrink-0 items-center gap-2 px-8 pt-2">
+        <div className="flex w-full shrink-0 items-center gap-2 px-4 md:px-8 pt-2">
           {dateFilter !== null && (
             <Badge
               variant="secondary"
@@ -249,7 +249,7 @@ function LibraryView() {
       )}
 
       <ScrollArea className="min-h-0 flex-1">
-        <main className="px-8 py-4">
+        <main className="px-4 md:px-8 py-4">
           <div className="w-full">
             <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
               {pages.map((page) => (

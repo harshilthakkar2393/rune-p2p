@@ -135,7 +135,7 @@ function FolderView() {
 
   return (
     <div className="relative flex h-full flex-col">
-      <header className="flex shrink-0 items-baseline gap-3.5 px-8 pt-3 pb-2">
+      <header className="flex shrink-0 items-baseline gap-3.5 px-4 md:px-8 pt-3 pb-2">
         {renaming ? (
           <SidebarInput
             autoFocus
@@ -253,7 +253,7 @@ function FolderView() {
       </header>
 
       <ScrollArea className="min-h-0 flex-1">
-        <main className="px-8 py-4">
+        <main className="px-4 md:px-8 py-4">
           <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
             {pages.map((page) => (
               <PageCard

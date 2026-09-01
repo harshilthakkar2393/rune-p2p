@@ -155,7 +155,7 @@ function TrashView() {
 
   return (
     <div className="relative flex h-full flex-col">
-      <header className="flex shrink-0 items-baseline gap-3.5 px-8 pt-3 pb-2">
+      <header className="flex shrink-0 items-baseline gap-3.5 px-4 md:px-8 pt-3 pb-2">
         <h1 className="text-h1">Trash</h1>
         <span className="font-mono text-tiny text-muted-foreground">
           deleted forever after 30 days
@@ -257,7 +257,7 @@ function TrashView() {
       </header>
 
       {filtered && (
-        <div className="flex w-full shrink-0 items-center gap-2 px-8 pt-2">
+        <div className="flex w-full shrink-0 items-center gap-2 px-4 md:px-8 pt-2">
           {dateFilter !== null && (
             <Badge
               variant="secondary"
@@ -288,7 +288,7 @@ function TrashView() {
       )}
 
       <ScrollArea className="min-h-0 flex-1">
-        <main className="px-8 py-4">
+        <main className="px-4 md:px-8 py-4">
           {trashed.length === 0 ? (
             <Empty>
               <EmptyHeader>
