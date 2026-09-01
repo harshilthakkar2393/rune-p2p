@@ -42,6 +42,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarTrigger,
+  useSidebar,
 } from "@rune/ui/components/sidebar";
 
 function Icon({
@@ -157,6 +158,37 @@ function NewFolderPopover() {
   );
 }
 
+/** The one primary action: a real button above the nav rows (rows stay
+ * ghost). Collapsed rail = icon square + tooltip; expanded = label + hover kbd. */
+function NewPageButton({ onClick }: { onClick: () => void }) {
+  const { state } = useSidebar();
+  const button = (
+    <Button
+      variant="outline"
+      size="lg"
+      aria-label="New page"
+      onClick={onClick}
+      className="group/kbd w-full justify-start gap-2 font-normal group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
+    >
+      <Icon icon={PencilEdit02Icon} className="size-4!" />
+      <span className="group-data-[collapsible=icon]:hidden">New page</span>
+      <KbdHint letter="N" />
+    </Button>
+  );
+  if (state !== "collapsed") return button;
+  return (
+    <Tip
+      label={
+        <>
+          New page <Kbd>{modLabel}N</Kbd>
+        </>
+      }
+    >
+      {button}
+    </Tip>
+  );
+}
+
 export function AppSidebar() {
   const nodes = useNodes();
   const compose = useComposePage();
@@ -185,24 +217,8 @@ export function AppSidebar() {
             <SidebarTrigger className="text-sidebar-foreground/70" />
           </Tip>
         </div>
+        <NewPageButton onClick={compose} />
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip={{
-                children: (
-                  <>
-                    New page <Kbd>{modLabel}N</Kbd>
-                  </>
-                ),
-              }}
-              className="group/kbd"
-              onClick={compose}
-            >
-              <Icon icon={PencilEdit02Icon} />
-              New page
-              <KbdHint letter="N" />
-            </SidebarMenuButton>
-          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip={{
