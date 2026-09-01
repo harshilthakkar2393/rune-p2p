@@ -34,11 +34,11 @@ export function RootMenu() {
           render={
             <Button
               variant="ghost"
-              size="icon"
+              size="icon-lg"
               aria-label="More"
-              className="text-muted-foreground md:hidden"
+              className="size-11 text-muted-foreground md:hidden"
             >
-              <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={1.75} />
+              <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={1.75} className="size-5!" />
             </Button>
           }
         />
