@@ -1,11 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@rune/ui/components/empty";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@rune/ui/components/empty";
 
 export const Route = createFileRoute("/devices")({ component: DevicesView });
 
@@ -19,8 +14,8 @@ function DevicesView() {
             <EmptyHeader>
               <EmptyTitle>Local only</EmptyTitle>
               <EmptyDescription>
-                Your notes live on this device. Pairing and sync between your
-                devices lands here soon.
+                Your notes live on this device. Pairing and sync between your devices lands here
+                soon.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>

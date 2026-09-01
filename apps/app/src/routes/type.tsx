@@ -45,12 +45,8 @@ function useMeasurements(): Measured[] {
       const editor = document.querySelector(".bn-editor");
       if (!editor) return false;
       const heading = (level: string) =>
-        editor.querySelector(
-          `[data-content-type="heading"][data-level="${level}"] h${level}`,
-        ) ??
-        (level === "1"
-          ? editor.querySelector('[data-content-type="heading"] h1')
-          : null);
+        editor.querySelector(`[data-content-type="heading"][data-level="${level}"] h${level}`) ??
+        (level === "1" ? editor.querySelector('[data-content-type="heading"] h1') : null);
       const paragraph = editor.querySelector('[data-content-type="paragraph"] p');
       const emptyInline = editor.querySelector(
         '[data-content-type="paragraph"]:last-of-type .bn-inline-content',
@@ -106,8 +102,8 @@ function TypePlayground() {
           Type scale
         </h1>
         <p className="mt-2 text-small text-muted-foreground">
-          Editor below is the reference. Measured table shows real computed
-          styles — set globals.css tokens from it. Throwaway page.
+          Editor below is the reference. Measured table shows real computed styles — set globals.css
+          tokens from it. Throwaway page.
         </p>
 
         <section className="mt-8">

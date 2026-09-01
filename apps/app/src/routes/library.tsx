@@ -15,16 +15,8 @@ import { getDeviceName } from "@/lib/device";
 import { folderColorValue } from "@/lib/folder-colors";
 import { humanTime } from "@/lib/human-time";
 import { getNodesMap } from "@/lib/index-doc";
-import {
-  createPage,
-  moveNode,
-  trashNode,
-} from "@/lib/nodes";
-import {
-  readLibraryPrefs,
-  writeLibraryPrefs,
-  type LibraryPrefs,
-} from "@/lib/library-prefs";
+import { createPage, moveNode, trashNode } from "@/lib/nodes";
+import { readLibraryPrefs, writeLibraryPrefs, type LibraryPrefs } from "@/lib/library-prefs";
 import type { Folder, Page } from "@/lib/schema";
 import {
   DropdownMenu,
@@ -33,11 +25,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@rune/ui/components/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@rune/ui/components/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@rune/ui/components/popover";
 import { Switch } from "@rune/ui/components/switch";
 import { cn } from "@rune/ui/lib/utils";
 
@@ -81,9 +69,7 @@ function MenuRow({
       )}
     >
       {label}
-      {active && (
-        <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="ml-auto size-3.5!" />
-      )}
+      {active && <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="ml-auto size-3.5!" />}
     </button>
   );
 }
@@ -122,10 +108,8 @@ function LibraryView() {
         live = live.filter((page) => page.updatedAt >= cutoff);
       }
     }
-    if (prefs.sort === "newest")
-      return live.toSorted((a, b) => b.createdAt - a.createdAt);
-    if (prefs.sort === "updated")
-      return live.toSorted((a, b) => b.updatedAt - a.updatedAt);
+    if (prefs.sort === "newest") return live.toSorted((a, b) => b.createdAt - a.createdAt);
+    if (prefs.sort === "updated") return live.toSorted((a, b) => b.updatedAt - a.updatedAt);
     return seededShuffle(live, randomSeed);
   }, [nodes, folderFilter, dateFilter, prefs.sort, randomSeed]);
 
@@ -189,30 +173,22 @@ function LibraryView() {
             />
             <PopoverContent align="end" className="w-56 p-2">
               <div className="flex flex-col gap-2">
-                <span className="px-2 pt-1 text-[11px] text-muted-foreground">
-                  Date
-                </span>
+                <span className="px-2 pt-1 text-[11px] text-muted-foreground">Date</span>
                 {DATE_PRESETS.map((preset) => (
                   <MenuRow
                     key={preset.id}
                     label={preset.label}
                     active={dateFilter === preset.id}
-                    onClick={() =>
-                      setDateFilter(dateFilter === preset.id ? null : preset.id)
-                    }
+                    onClick={() => setDateFilter(dateFilter === preset.id ? null : preset.id)}
                   />
                 ))}
-                <span className="border-t px-2 pt-2 text-[11px] text-muted-foreground">
-                  Folder
-                </span>
+                <span className="border-t px-2 pt-2 text-[11px] text-muted-foreground">Folder</span>
                 {folders.map((folder) => (
                   <MenuRow
                     key={folder.id}
                     label={folder.name}
                     active={folderFilter === folder.id}
-                    onClick={() =>
-                      setFolderFilter(folderFilter === folder.id ? null : folder.id)
-                    }
+                    onClick={() => setFolderFilter(folderFilter === folder.id ? null : folder.id)}
                   />
                 ))}
                 {folders.length === 0 && (
@@ -258,9 +234,7 @@ function LibraryView() {
                     onClick={() => updatePrefs({ sort: "random" })}
                   />
                 </div>
-                <span className="border-t pt-2.5 text-[11px] text-muted-foreground">
-                  Layout
-                </span>
+                <span className="border-t pt-2.5 text-[11px] text-muted-foreground">Layout</span>
                 <div className="flex flex-col gap-0.5">
                   <MenuRow
                     label="Gallery"
@@ -277,9 +251,7 @@ function LibraryView() {
                   <span>Show previews</span>
                   <Switch
                     checked={prefs.showPreviews}
-                    onCheckedChange={(checked) =>
-                      updatePrefs({ showPreviews: checked === true })
-                    }
+                    onCheckedChange={(checked) => updatePrefs({ showPreviews: checked === true })}
                   />
                 </div>
               </div>
@@ -312,10 +284,7 @@ function LibraryView() {
                 return (
                   <>
                     {tint && (
-                      <span
-                        className="size-[7px] rounded-full"
-                        style={{ background: tint }}
-                      />
+                      <span className="size-[7px] rounded-full" style={{ background: tint }} />
                     )}
                     {folder?.name}
                   </>
@@ -334,9 +303,7 @@ function LibraryView() {
               <PageCard
                 key={page.id}
                 page={page}
-                folder={
-                  page.folderId !== null ? folderById.get(page.folderId) : undefined
-                }
+                folder={page.folderId !== null ? folderById.get(page.folderId) : undefined}
                 selected={selected.has(page.id)}
                 selecting={selected.size > 0}
                 showPreview={prefs.showPreviews}
@@ -361,16 +328,13 @@ function LibraryView() {
         ) : (
           <div className="flex flex-col">
             {pages.map((page) => {
-              const folder =
-                page.folderId !== null ? folderById.get(page.folderId) : undefined;
+              const folder = page.folderId !== null ? folderById.get(page.folderId) : undefined;
               const tint = folderColorValue(folder?.color);
               return (
                 <button
                   key={page.id}
                   type="button"
-                  onClick={() =>
-                    selected.size > 0 ? toggleSelect(page.id) : openPage(page.id)
-                  }
+                  onClick={() => (selected.size > 0 ? toggleSelect(page.id) : openPage(page.id))}
                   className={cn(
                     "flex h-12 items-center gap-3 border-b px-3 text-left last:border-0",
                     selected.has(page.id) ? "bg-secondary/60" : "hover:bg-secondary/40",
@@ -381,10 +345,7 @@ function LibraryView() {
                   </span>
                   <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     {tint && (
-                      <span
-                        className="size-1.5 rounded-full"
-                        style={{ background: tint }}
-                      />
+                      <span className="size-1.5 rounded-full" style={{ background: tint }} />
                     )}
                     {folder?.name ?? "—"}
                   </span>
@@ -417,25 +378,16 @@ function LibraryView() {
                   type="button"
                   className="flex items-center gap-1.5 text-[13px] text-foreground/85"
                 >
-                  <HugeiconsIcon
-                    icon={Folder01Icon}
-                    strokeWidth={1.75}
-                    className="size-4!"
-                  />
+                  <HugeiconsIcon icon={Folder01Icon} strokeWidth={1.75} className="size-4!" />
                   Move
                 </button>
               }
             />
             <DropdownMenuContent align="center" side="top">
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => moveSelected(null)}>
-                  Library root
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => moveSelected(null)}>Library root</DropdownMenuItem>
                 {folders.map((folder) => (
-                  <DropdownMenuItem
-                    key={folder.id}
-                    onClick={() => moveSelected(folder.id)}
-                  >
+                  <DropdownMenuItem key={folder.id} onClick={() => moveSelected(folder.id)}>
                     {folder.name}
                   </DropdownMenuItem>
                 ))}

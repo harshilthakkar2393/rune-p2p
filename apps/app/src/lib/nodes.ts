@@ -101,10 +101,7 @@ function nextSortKey(map: NodesMap, parentId: string | null): string {
   return generateKeyBetween(last?.sortKey ?? null, null);
 }
 
-function requireFolder(
-  map: NodesMap,
-  folderId: string,
-): Result<Folder, NotAFolderError> {
+function requireFolder(map: NodesMap, folderId: string): Result<Folder, NotAFolderError> {
   const node = map.get(folderId);
   return node?.type === "folder"
     ? Result.ok(node)
@@ -213,13 +210,9 @@ export function moveNode(
 }
 
 /** Move a node (and, for folders, everything inside) to the trash. Recoverable. */
-export function trashNode(
-  map: NodesMap,
-  id: string,
-): Result<void, NodeNotFoundError> {
+export function trashNode(map: NodesMap, id: string): Result<void, NodeNotFoundError> {
   const node = map.get(id);
-  if (!node || node.deletedAt !== undefined)
-    return Result.err(new NodeNotFoundError({ id }));
+  if (!node || node.deletedAt !== undefined) return Result.err(new NodeNotFoundError({ id }));
 
   const now = Date.now();
   const mark = (target: Node) => {
@@ -239,17 +232,13 @@ export function restoreNode(
   id: string,
 ): Result<Node, NodeNotFoundError | InvalidNodeError> {
   const node = map.get(id);
-  if (!node || node.deletedAt === undefined)
-    return Result.err(new NodeNotFoundError({ id }));
+  if (!node || node.deletedAt === undefined) return Result.err(new NodeNotFoundError({ id }));
   const { deletedAt: _dropped, ...rest } = node;
   return validateAndSet(map, { ...rest, updatedAt: Date.now() } as Node);
 }
 
 /** Permanently delete trashed nodes older than the retention window. */
-export function purgeExpired(
-  map: NodesMap,
-  now = Date.now(),
-): { removedPageIds: string[] } {
+export function purgeExpired(map: NodesMap, now = Date.now()): { removedPageIds: string[] } {
   const removedPageIds: string[] = [];
   const transact = (fn: () => void) => (map.doc ? map.doc.transact(fn) : fn());
   transact(() => {
@@ -275,8 +264,7 @@ export function removeNode(
   // Raw parent match, trashed included — a permanent delete takes everything.
   const allChildren = (parentId: string): Node[] =>
     Array.from(map.values()).filter((candidate) => {
-      const parent =
-        candidate.type === "folder" ? candidate.parentId : candidate.folderId;
+      const parent = candidate.type === "folder" ? candidate.parentId : candidate.folderId;
       return parent === parentId;
     });
   const removeRecursive = (target: Node) => {
@@ -288,8 +276,7 @@ export function removeNode(
     map.delete(target.id);
   };
 
-  const transact = (fn: () => void) =>
-    map.doc ? map.doc.transact(fn) : fn();
+  const transact = (fn: () => void) => (map.doc ? map.doc.transact(fn) : fn());
   transact(() => removeRecursive(node));
 
   return Result.ok({ removedPageIds });

@@ -74,9 +74,7 @@ export function PageCard({
             selected ? "bg-primary text-primary-foreground" : "border border-foreground/20",
           )}
         >
-          {selected && (
-            <HugeiconsIcon icon={Tick02Icon} strokeWidth={2.5} className="size-3!" />
-          )}
+          {selected && <HugeiconsIcon icon={Tick02Icon} strokeWidth={2.5} className="size-3!" />}
         </button>
       )}
 
@@ -88,9 +86,7 @@ export function PageCard({
           )}
         >
           {excerpt === null ? null : excerpt === "" ? (
-            <span className="m-auto text-xs text-muted-foreground/60">
-              Empty page
-            </span>
+            <span className="m-auto text-xs text-muted-foreground/60">Empty page</span>
           ) : (
             <span className="line-clamp-5 text-xs leading-[17px] text-muted-foreground">
               {excerpt}
@@ -105,10 +101,7 @@ export function PageCard({
           {folder && (
             <span className="inline-flex items-center gap-1.5 text-[11px] leading-4 text-muted-foreground">
               {folderTint && (
-                <span
-                  className="size-1.5 rounded-full"
-                  style={{ background: folderTint }}
-                />
+                <span className="size-1.5 rounded-full" style={{ background: folderTint }} />
               )}
               {folder.name}
             </span>

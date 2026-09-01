@@ -1,8 +1,10 @@
+import { useEffect } from "react";
 import { useCreateBlockNote } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
 import { withCollaboration } from "@blocknote/core/yjs";
 import type * as Y from "yjs";
 
+import { setActiveEditor } from "@/lib/editor-ref";
 import { usePageDoc } from "@/hooks/use-page-doc";
 import { useTheme } from "@rune/ui/components/theme-provider";
 
@@ -20,6 +22,11 @@ function BoundEditor({ doc }: { doc: Y.Doc }) {
     }),
     [doc],
   );
+  useEffect(() => {
+    setActiveEditor(editor);
+    return () => setActiveEditor(null);
+  }, [editor]);
+
   return <BlockNoteView editor={editor} theme={resolvedTheme} />;
 }
 

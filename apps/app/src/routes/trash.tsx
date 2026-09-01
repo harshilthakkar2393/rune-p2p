@@ -19,12 +19,7 @@ import {
   AlertDialogTitle,
 } from "@rune/ui/components/alert-dialog";
 import { Button } from "@rune/ui/components/button";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@rune/ui/components/empty";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@rune/ui/components/empty";
 import { cn } from "@rune/ui/lib/utils";
 
 export const Route = createFileRoute("/trash")({ component: TrashView });
@@ -85,12 +80,8 @@ function TrashView() {
     setConfirming(null);
   };
 
-  const trashedPages = trashed.filter(
-    (node): node is Page => node.type === "page",
-  );
-  const trashedFolders = trashed.filter(
-    (node): node is Folder => node.type === "folder",
-  );
+  const trashedPages = trashed.filter((node): node is Page => node.type === "page");
+  const trashedFolders = trashed.filter((node): node is Folder => node.type === "folder");
 
   return (
     <div className="flex h-full flex-col">
@@ -108,11 +99,7 @@ function TrashView() {
               <Button variant="secondary" size="sm" onClick={restoreSelected}>
                 Restore
               </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setConfirming("selection")}
-              >
+              <Button variant="destructive" size="sm" onClick={() => setConfirming("selection")}>
                 Delete forever
               </Button>
             </>
@@ -165,9 +152,7 @@ function TrashView() {
               <PageCard
                 key={page.id}
                 page={page}
-                folder={
-                  page.folderId !== null ? folderById.get(page.folderId) : undefined
-                }
+                folder={page.folderId !== null ? folderById.get(page.folderId) : undefined}
                 selected={selected.has(page.id)}
                 selecting
                 dimPreview
@@ -197,15 +182,13 @@ function TrashView() {
                 : `Delete ${selected.size} ${selected.size === 1 ? "item" : "items"} forever?`}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This permanently deletes the {confirming === "all" ? "trashed" : "selected"}{" "}
-              pages and their content. It cannot be undone.
+              This permanently deletes the {confirming === "all" ? "trashed" : "selected"} pages and
+              their content. It cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>
-              Delete forever
-            </AlertDialogAction>
+            <AlertDialogAction onClick={confirmDelete}>Delete forever</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

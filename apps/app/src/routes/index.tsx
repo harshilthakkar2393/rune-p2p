@@ -10,14 +10,25 @@ import { readRecents } from "@/lib/recents";
 import type { Page } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@rune/ui/components/card";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@rune/ui/components/empty";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@rune/ui/components/empty";
 
 export const Route = createFileRoute("/")({ component: Home });
+
+function dayKey(timestamp: number): string {
+  const date = new Date(timestamp);
+  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+}
+
+function dayLabel(timestamp: number): string {
+  const now = new Date();
+  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const date = new Date(timestamp);
+  const weekday = date.toLocaleDateString(undefined, { weekday: "long" });
+  if (dayKey(timestamp) === dayKey(now.getTime())) return `Today · ${weekday}`;
+  if (dayKey(timestamp) === dayKey(yesterday.getTime())) return `Yesterday · ${weekday}`;
+  const md = date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return `${md} · ${weekday}`;
+}
 
 function greeting(): string {
   const hour = new Date().getHours();
@@ -69,14 +80,21 @@ function Home() {
   const recents = readRecents()
     .map((entry) => {
       const node = nodes.find(
-        (candidate) =>
-          candidate.id === entry.pageId && candidate.type === "page",
+        (candidate) => candidate.id === entry.pageId && candidate.type === "page",
       );
-      return node?.type === "page"
+      return node?.type === "page" && node.deletedAt === undefined
         ? { page: node, openedAt: entry.openedAt }
         : null;
     })
     .filter((entry) => entry !== null);
+
+  const dayGroups: { label: string; items: typeof recents }[] = [];
+  for (const entry of recents) {
+    const label = dayLabel(entry.openedAt);
+    const group = dayGroups.at(-1);
+    if (group && group.label === label) group.items.push(entry);
+    else dayGroups.push({ label, items: [entry] });
+  }
 
   const newPage = () => {
     const result = createPage(getNodesMap(), null);
@@ -95,28 +113,31 @@ function Home() {
           <h1 className="text-h1">{greeting()}</h1>
         </div>
 
-        <section className="mt-8">
-          <h2 className="flex h-6 items-center text-sm font-medium text-muted-foreground">
-            Recent
-          </h2>
+        <section className="mt-8 flex flex-col gap-6">
           {recents.length === 0 ? (
-            <div className="mt-4">
-              <Empty>
-                <EmptyHeader>
-                  <EmptyTitle>Nothing recent</EmptyTitle>
-                  <EmptyDescription>
-                    Pages you open show up here.
-                  </EmptyDescription>
-                </EmptyHeader>
-                <Button onClick={newPage}>New page</Button>
-              </Empty>
-            </div>
+            <Empty>
+              <EmptyHeader>
+                <EmptyTitle>Nothing recent</EmptyTitle>
+                <EmptyDescription>Pages you open show up here.</EmptyDescription>
+              </EmptyHeader>
+              <Button onClick={newPage}>New page</Button>
+            </Empty>
           ) : (
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {recents.map(({ page, openedAt }) => (
-                <RecentCard key={page.id} page={page} openedAt={openedAt} />
-              ))}
-            </div>
+            dayGroups.map((group) => (
+              <div key={group.label} className="flex flex-col gap-3.5">
+                <div className="flex h-4 items-center gap-3">
+                  <span className="shrink-0 font-mono text-[11px] leading-4 text-muted-foreground">
+                    {group.label}
+                  </span>
+                  <span className="grow border-t border-dashed border-foreground/10" />
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {group.items.map(({ page, openedAt }) => (
+                    <RecentCard key={page.id} page={page} openedAt={openedAt} />
+                  ))}
+                </div>
+              </div>
+            ))
           )}
         </section>
       </main>

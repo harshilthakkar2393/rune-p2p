@@ -6,8 +6,7 @@ function defaultName(): string {
   if (typeof navigator === "undefined") return "Device";
   const ua = navigator.userAgent;
   if (/iPhone/.test(ua)) return "iPhone";
-  if (/iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1))
-    return "iPad";
+  if (/iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return "iPad";
   if (/Macintosh/.test(ua)) return "Mac";
   if (/Android/.test(ua)) return "Android";
   if (/Windows/.test(ua)) return "PC";

@@ -42,11 +42,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@rune/ui/components/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@rune/ui/components/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@rune/ui/components/popover";
 import {
   Sidebar,
   SidebarContent,
@@ -85,9 +81,7 @@ function Icon({
 }
 
 function childrenOf(nodes: Node[], parentId: string | null): Node[] {
-  const folderIds = new Set(
-    nodes.filter((node) => node.type === "folder").map((node) => node.id),
-  );
+  const folderIds = new Set(nodes.filter((node) => node.type === "folder").map((node) => node.id));
   return nodes
     .filter((node) => {
       if (node.deletedAt !== undefined) return false;
@@ -106,11 +100,7 @@ type RowMenuProps = {
   onNewPageInside?: () => void;
 };
 
-function isDescendantFolder(
-  nodes: Node[],
-  folderId: string,
-  candidateId: string,
-): boolean {
+function isDescendantFolder(nodes: Node[], folderId: string, candidateId: string): boolean {
   let current: string | null = candidateId;
   const byId = new Map(nodes.map((node) => [node.id, node]));
   while (current !== null) {
@@ -128,8 +118,7 @@ function RowMenu({ node, nodes, onRename, onTrash, onNewPageInside }: RowMenuPro
   const currentParent = node.type === "folder" ? node.parentId : node.folderId;
   const moveTargets = folders.filter((folder) => {
     if (folder.id === currentParent) return false;
-    if (node.type === "folder" && isDescendantFolder(nodes, node.id, folder.id))
-      return false;
+    if (node.type === "folder" && isDescendantFolder(nodes, node.id, folder.id)) return false;
     return true;
   });
 
@@ -161,9 +150,7 @@ function RowMenu({ node, nodes, onRename, onTrash, onNewPageInside }: RowMenuPro
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
               {currentParent !== null && (
-                <DropdownMenuItem
-                  onClick={() => moveNode(getNodesMap(), node.id, null)}
-                >
+                <DropdownMenuItem onClick={() => moveNode(getNodesMap(), node.id, null)}>
                   Library root
                 </DropdownMenuItem>
               )}
@@ -337,13 +324,7 @@ function FolderItem({ folder, nodes }: { folder: Folder; nodes: Node[] }) {
   );
 }
 
-function TreeLevel({
-  nodes,
-  parentId,
-}: {
-  nodes: Node[];
-  parentId: string | null;
-}) {
+function TreeLevel({ nodes, parentId }: { nodes: Node[]; parentId: string | null }) {
   return childrenOf(nodes, parentId).map((node) =>
     node.type === "folder" ? (
       <FolderItem key={node.id} folder={node} nodes={nodes} />
@@ -393,11 +374,7 @@ function NewFolderPopover() {
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
             <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-secondary">
-              <Icon
-                icon={Folder01Icon}
-                className="size-4!"
-                color={FOLDER_COLOR_VALUES[color]}
-              />
+              <Icon icon={Folder01Icon} className="size-4!" color={FOLDER_COLOR_VALUES[color]} />
             </span>
             <SidebarInput
               autoFocus
@@ -427,10 +404,7 @@ function NewFolderPopover() {
                 onClick={() => setColor(candidate)}
                 className="flex size-5 items-center justify-center rounded-full"
                 style={{
-                  outline:
-                    candidate === color
-                      ? "2px solid var(--foreground)"
-                      : undefined,
+                  outline: candidate === color ? "2px solid var(--foreground)" : undefined,
                   outlineOffset: 2,
                 }}
               >
@@ -468,10 +442,7 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip="Search"
-              onClick={() => setPaletteOpen(true)}
-            >
+            <SidebarMenuButton tooltip="Search" onClick={() => setPaletteOpen(true)}>
               <Icon icon={Search01Icon} />
               Search
             </SidebarMenuButton>
