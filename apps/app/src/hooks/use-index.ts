@@ -4,6 +4,7 @@ import { getNodesMap, initIndexPersistence } from "@/lib/index-doc";
 import { adoptOrphanPages, ensureDefaultFolder, purgeExpired } from "@/lib/nodes";
 import { destroyPageDoc } from "@/lib/page-doc";
 import type { Node } from "@/lib/schema";
+import { startSyncIfPaired } from "@/lib/sync/manager";
 
 /**
  * React binding for the index Y.Map. One observe subscription feeds
@@ -30,6 +31,7 @@ function start() {
     // No-root-pages model: always at least one folder; orphans adopt it.
     ensureDefaultFolder(map);
     adoptOrphanPages(map);
+    startSyncIfPaired();
   });
   refreshSnapshot();
 }
