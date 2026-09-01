@@ -6,8 +6,6 @@ import {
   Delete02Icon,
   FilterMailIcon,
   Folder01Icon,
-  GridViewIcon,
-  LeftToRightListBulletIcon,
   Sorting01Icon,
 } from "@hugeicons/core-free-icons";
 
@@ -22,7 +20,6 @@ import { readLibraryPrefs, writeLibraryPrefs, type LibraryPrefs } from "@/lib/li
 import type { Folder, Page } from "@/lib/schema";
 import { Badge } from "@rune/ui/components/badge";
 import { Card } from "@rune/ui/components/card";
-import { Tabs, TabsList, TabsTrigger } from "@rune/ui/components/tabs";
 import { Button } from "@rune/ui/components/button";
 import {
   DropdownMenu,
@@ -36,7 +33,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@rune/ui/components/dropdown-menu";
-import { cn } from "@rune/ui/lib/utils";
 
 export const Route = createFileRoute("/library")({ component: LibraryView });
 
@@ -216,20 +212,6 @@ function LibraryView() {
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          <Tabs
-            value={prefs.layout}
-            onValueChange={(value) => updatePrefs({ layout: value as LibraryPrefs["layout"] })}
-          >
-            <TabsList>
-              <TabsTrigger value="gallery" aria-label="Gallery layout">
-                <HugeiconsIcon icon={GridViewIcon} strokeWidth={1.75} />
-              </TabsTrigger>
-              <TabsTrigger value="list" aria-label="List layout">
-                <HugeiconsIcon icon={LeftToRightListBulletIcon} strokeWidth={1.75} />
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
         </div>
       </header>
 
@@ -266,69 +248,36 @@ function LibraryView() {
 
       <main className="flex-1 overflow-y-auto px-8 py-4">
         <div className="w-full">
-          {prefs.layout === "gallery" ? (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
-              {pages.map((page) => (
-                <PageCard
-                  key={page.id}
-                  page={page}
-                  folder={page.folderId !== null ? folderById.get(page.folderId) : undefined}
-                  selected={selected.has(page.id)}
-                  selecting={selected.size > 0}
-                  trailing={
-                    <span className="font-mono text-[11px] text-muted-foreground">
-                      {humanTime(page.updatedAt)}
-                    </span>
-                  }
-                  onSelectToggle={() => toggleSelect(page.id)}
-                  onOpen={() => openPage(page.id)}
-                />
-              ))}
-              <Card
-                role="button"
-                tabIndex={0}
-                onClick={newPage}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") newPage();
-                }}
-                className="flex h-36 cursor-pointer flex-row items-center justify-center gap-2 border-dashed bg-transparent p-4 text-[13px] text-muted-foreground shadow-none transition-colors hover:border-foreground/25 hover:text-foreground"
-              >
-                <HugeiconsIcon icon={Add01Icon} strokeWidth={1.75} className="size-4!" />
-                New page
-              </Card>
-            </div>
-          ) : (
-            <div className="flex flex-col rounded-lg border">
-              {pages.map((page) => {
-                const folder = page.folderId !== null ? folderById.get(page.folderId) : undefined;
-                const tint = folderColorValue(folder?.color);
-                return (
-                  <button
-                    key={page.id}
-                    type="button"
-                    onClick={() => (selected.size > 0 ? toggleSelect(page.id) : openPage(page.id))}
-                    className={cn(
-                      "flex h-12 items-center gap-3 border-b px-4 text-left last:border-0",
-                      selected.has(page.id) ? "bg-secondary/60" : "hover:bg-secondary/40",
-                    )}
-                  >
-                    <span className="w-1/3 truncate text-sm">
-                      {page.title === "" ? "Untitled" : page.title}
-                    </span>
-                    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      {tint && (
-                        <span className="size-1.5 rounded-full" style={{ background: tint }} />
-                      )}
-                      {folder?.name ?? "—"}
-                    </span>
-                    <span className="ml-auto font-mono text-[11px] text-muted-foreground">
-                      {humanTime(page.updatedAt)}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
+            {pages.map((page) => (
+              <PageCard
+                key={page.id}
+                page={page}
+                folder={page.folderId !== null ? folderById.get(page.folderId) : undefined}
+                selected={selected.has(page.id)}
+                selecting={selected.size > 0}
+                trailing={
+                  <span className="font-mono text-[11px] text-muted-foreground">
+                    {humanTime(page.updatedAt)}
+                  </span>
+                }
+                onSelectToggle={() => toggleSelect(page.id)}
+                onOpen={() => openPage(page.id)}
+              />
+            ))}
+            <Card
+              role="button"
+              tabIndex={0}
+              onClick={newPage}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") newPage();
+              }}
+              className="flex h-36 cursor-pointer flex-row items-center justify-center gap-2 border-dashed bg-transparent p-4 text-[13px] text-muted-foreground shadow-none transition-colors hover:border-foreground/25 hover:text-foreground"
+            >
+              <HugeiconsIcon icon={Add01Icon} strokeWidth={1.75} className="size-4!" />
+              New page
+            </Card>
+          </div>
         </div>
       </main>
 
