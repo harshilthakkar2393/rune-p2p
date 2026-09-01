@@ -14,6 +14,8 @@ export type SyncStatus = {
   peers: PresenceState[];
   /** Page docs still queued for their first sync. */
   pendingDocs: number;
+  /** Why sync could not start (e.g. no secure context); null when fine. */
+  error: string | null;
 };
 
 let state: SyncStatus = {
@@ -21,6 +23,7 @@ let state: SyncStatus = {
   connected: false,
   peers: [],
   pendingDocs: 0,
+  error: null,
 };
 const listeners = new Set<() => void>();
 

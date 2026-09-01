@@ -226,26 +226,40 @@ export function startSyncIfPaired(): void {
   if (!secret) return;
 
   startInFlight = true;
-  void deriveKeys(secret).then((keys) => {
+  if (typeof crypto === "undefined" || !crypto.subtle) {
     startInFlight = false;
-    // stopSync()/unpair() may have run while the keys were deriving.
-    if (currentManager || readStoredSecret() === null) return;
-
-    const manager = new SyncManager({
-      indexDoc: getIndexDoc(),
-      nodesMap: getNodesMap(),
-      openPage: (pageId) => {
-        const { doc, whenSynced } = getPageDoc(pageId);
-        return whenSynced.then(() => doc);
-      },
-      destroyPage: destroyPageDoc,
-      join: () => joinPairedRoom(keys),
-      local: buildLocalState(),
+    setSyncStatus({
+      paired: true,
+      error: "Sync needs a secure connection. Open the app over https (or localhost).",
     });
-    currentManager = manager;
-    manager.start();
-    setSyncStatus({ paired: true });
-  });
+    return;
+  }
+  void deriveKeys(secret)
+    .then((keys) => {
+      startInFlight = false;
+      // stopSync()/unpair() may have run while the keys were deriving.
+      if (currentManager || readStoredSecret() === null) return;
+
+      const manager = new SyncManager({
+        indexDoc: getIndexDoc(),
+        nodesMap: getNodesMap(),
+        openPage: (pageId) => {
+          const { doc, whenSynced } = getPageDoc(pageId);
+          return whenSynced.then(() => doc);
+        },
+        destroyPage: destroyPageDoc,
+        join: () => joinPairedRoom(keys),
+        local: buildLocalState(),
+      });
+      currentManager = manager;
+      manager.start();
+      setSyncStatus({ paired: true, error: null });
+    })
+    .catch((error: unknown) => {
+      startInFlight = false;
+      console.warn("sync manager: could not start", error);
+      setSyncStatus({ paired: true, error: "Sync could not start. See the console for details." });
+    });
 }
 
 export function stopSync(): void {
@@ -263,5 +277,5 @@ export async function pairWithSecret(secret: Uint8Array): Promise<void> {
 export function unpair(): void {
   stopSync();
   clearStoredSecret();
-  setSyncStatus({ paired: false, connected: false, peers: [], pendingDocs: 0 });
+  setSyncStatus({ paired: false, connected: false, peers: [], pendingDocs: 0, error: null });
 }

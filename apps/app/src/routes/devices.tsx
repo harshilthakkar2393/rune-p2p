@@ -134,6 +134,9 @@ function DevicesView() {
                   {status.connected ? "connected" : "connecting…"}
                   {status.pendingDocs > 0 ? ` · syncing ${status.pendingDocs}` : ""}
                 </span>
+                {status.error && (
+                  <span className="text-destructive text-small">{status.error}</span>
+                )}
               </CardContent>
             </Card>
 
