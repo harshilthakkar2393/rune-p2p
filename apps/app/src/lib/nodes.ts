@@ -53,6 +53,15 @@ export class FolderCycleError extends TaggedError("FolderCycleError")<{
   }
 }
 
+export class LastFolderError extends TaggedError("LastFolderError")<{
+  id: string;
+  message: string;
+}> {
+  constructor(args: { id: string }) {
+    super({ ...args, message: "The last folder cannot be trashed" });
+  }
+}
+
 export class InvalidNodeError extends TaggedError("InvalidNodeError")<{
   message: string;
   cause: unknown;
@@ -117,13 +126,11 @@ function validateAndSet(map: NodesMap, node: Node): Result<Node, InvalidNodeErro
 
 export function createPage(
   map: NodesMap,
-  folderId: string | null,
+  folderId: string,
   options?: { createdOn?: string },
 ): Result<Page, NotAFolderError | InvalidNodeError> {
-  if (folderId !== null) {
-    const folder = requireFolder(map, folderId);
-    if (folder.isErr()) return Result.err(folder.error);
-  }
+  const folder = requireFolder(map, folderId);
+  if (folder.isErr()) return Result.err(folder.error);
   const now = Date.now();
   const page: Page = {
     id: nanoid(),
@@ -184,6 +191,9 @@ export function moveNode(
   const node = map.get(id);
   if (!node) return Result.err(new NodeNotFoundError({ id }));
 
+  if (node.type === "page" && newParentId === null) {
+    return Result.err(new NotAFolderError({ id: "root" }));
+  }
   if (newParentId !== null) {
     const parent = requireFolder(map, newParentId);
     if (parent.isErr()) return Result.err(parent.error);
@@ -210,9 +220,17 @@ export function moveNode(
 }
 
 /** Move a node (and, for folders, everything inside) to the trash. Recoverable. */
-export function trashNode(map: NodesMap, id: string): Result<void, NodeNotFoundError> {
+export function trashNode(
+  map: NodesMap,
+  id: string,
+): Result<void, NodeNotFoundError | LastFolderError> {
   const node = map.get(id);
   if (!node || node.deletedAt !== undefined) return Result.err(new NodeNotFoundError({ id }));
+
+  if (node.type === "folder") {
+    const liveFolders = listLive(map).filter((candidate) => candidate.type === "folder");
+    if (liveFolders.length <= 1) return Result.err(new LastFolderError({ id }));
+  }
 
   const now = Date.now();
   const mark = (target: Node) => {
@@ -280,4 +298,48 @@ export function removeNode(
   transact(() => removeRecursive(node));
 
   return Result.ok({ removedPageIds });
+}
+
+export function updateFolderColor(
+  map: NodesMap,
+  id: string,
+  color: FolderColor,
+): Result<Node, NodeNotFoundError | InvalidNodeError> {
+  const node = map.get(id);
+  if (!node || node.type !== "folder") return Result.err(new NodeNotFoundError({ id }));
+  return validateAndSet(map, { ...node, color, updatedAt: Date.now() });
+}
+
+export const DEFAULT_FOLDER_NAME = "Notes";
+
+/** Guarantee at least one live folder; create the default when none exists. */
+export function ensureDefaultFolder(map: NodesMap): Folder {
+  const existing = listLive(map)
+    .filter((node): node is Folder => node.type === "folder")
+    .toSorted((a, b) => a.sortKey.localeCompare(b.sortKey));
+  const first = existing[0];
+  if (first) return first;
+  const created = createFolder(map, null, DEFAULT_FOLDER_NAME);
+  if (created.isOk()) return created.value;
+  // Creation of a plain default folder cannot fail schema validation.
+  throw new Error("failed to create default folder");
+}
+
+/** Pages without a live folder (legacy root pages, merge orphans) adopt the default. */
+export function adoptOrphanPages(map: NodesMap): number {
+  const fallback = ensureDefaultFolder(map);
+  let adopted = 0;
+  const transact = (fn: () => void) => (map.doc ? map.doc.transact(fn) : fn());
+  transact(() => {
+    for (const node of Array.from(map.values())) {
+      if (node.type !== "page" || node.deletedAt !== undefined) continue;
+      const parent = node.folderId !== null ? map.get(node.folderId) : undefined;
+      const parentAlive = parent?.type === "folder" && parent.deletedAt === undefined;
+      if (!parentAlive) {
+        map.set(node.id, { ...node, folderId: fallback.id, updatedAt: Date.now() });
+        adopted += 1;
+      }
+    }
+  });
+  return adopted;
 }

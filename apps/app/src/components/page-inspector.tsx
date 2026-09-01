@@ -100,7 +100,7 @@ export function PageInspector({ page, folder }: { page: Page; folder: Folder | u
             {folder.name}
           </Badge>
         ) : (
-          <span className="text-xs text-muted-foreground">Library root</span>
+          <span className="text-xs text-muted-foreground">—</span>
         )}
       </section>
 

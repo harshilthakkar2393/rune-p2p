@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
 import { useNodes } from "@/hooks/use-index";
 import { getNodesMap } from "@/lib/index-doc";
+import { composeTargetFolderId } from "@/lib/compose-target";
+import { getDeviceName } from "@/lib/device";
 import { createPage } from "@/lib/nodes";
 import { humanTime } from "@/lib/human-time";
 import { readRecents } from "@/lib/recents";
@@ -65,7 +67,10 @@ function Home() {
   }
 
   const newPage = () => {
-    const result = createPage(getNodesMap(), null);
+    const map = getNodesMap();
+    const result = createPage(map, composeTargetFolderId(map), {
+      createdOn: getDeviceName(),
+    });
     if (result.isOk()) {
       void navigate({
         to: "/page/$pageId",

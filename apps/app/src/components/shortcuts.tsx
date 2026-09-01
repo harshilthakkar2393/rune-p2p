@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 
+import { composeTargetFolderId } from "@/lib/compose-target";
+import { getDeviceName } from "@/lib/device";
 import { getNodesMap } from "@/lib/index-doc";
 import { createPage } from "@/lib/nodes";
 import { setPaletteOpen } from "@/lib/palette";
@@ -18,7 +20,10 @@ export function Shortcuts() {
       } else if (event.key === "n" && !event.shiftKey && !event.altKey) {
         // Browser reserves plain ⌘N in some contexts; PWA installs get it fully.
         event.preventDefault();
-        const result = createPage(getNodesMap(), null);
+        const map = getNodesMap();
+        const result = createPage(map, composeTargetFolderId(map), {
+          createdOn: getDeviceName(),
+        });
         if (result.isOk()) {
           void navigate({
             to: "/page/$pageId",

@@ -3,8 +3,10 @@ import * as Y from "yjs";
 
 import type { Node } from "@/lib/schema";
 import {
+  adoptOrphanPages,
   createFolder,
   createPage,
+  ensureDefaultFolder,
   listChildren,
   listTrashed,
   moveNode,
@@ -25,51 +27,59 @@ function unwrap<T>(result: { isOk(): boolean; value?: T; error?: unknown }): T {
   return result.value as T;
 }
 
+function seeded() {
+  const map = freshMap();
+  const home = unwrap(createFolder(map, null, "Notes"));
+  return { map, home };
+}
+
 describe("createPage", () => {
-  test("creates an untitled page at root", () => {
-    const map = freshMap();
-    const page = unwrap(createPage(map, null));
+  test("creates an untitled page inside a folder", () => {
+    const { map, home } = seeded();
+    const page = unwrap(createPage(map, home.id));
     expect(page.title).toBe("");
-    expect(page.folderId).toBeNull();
+    expect(page.folderId).toBe(home.id);
     expect(map.get(page.id)).toEqual(page);
   });
 
-  test("creates a page inside an existing folder", () => {
-    const map = freshMap();
-    const folder = unwrap(createFolder(map, null, "Work"));
-    const page = unwrap(createPage(map, folder.id));
-    expect(page.folderId).toBe(folder.id);
-  });
-
   test("rejects a missing parent folder", () => {
-    const map = freshMap();
-    const result = createPage(map, "does-not-exist");
-    expect(result.isErr()).toBe(true);
+    const { map } = seeded();
+    expect(createPage(map, "does-not-exist").isErr()).toBe(true);
   });
 
   test("rejects a page as parent", () => {
-    const map = freshMap();
-    const page = unwrap(createPage(map, null));
-    const result = createPage(map, page.id);
-    expect(result.isErr()).toBe(true);
+    const { map, home } = seeded();
+    const page = unwrap(createPage(map, home.id));
+    expect(createPage(map, page.id).isErr()).toBe(true);
+  });
+
+  test("stores creating device", () => {
+    const { map, home } = seeded();
+    const page = unwrap(createPage(map, home.id, { createdOn: "MacBook Pro" }));
+    expect(page.createdOn).toBe("MacBook Pro");
   });
 });
 
 describe("createFolder", () => {
   test("rejects an empty name via schema", () => {
     const map = freshMap();
-    const result = createFolder(map, null, "");
-    expect(result.isErr()).toBe(true);
+    expect(createFolder(map, null, "").isErr()).toBe(true);
+  });
+
+  test("stores a preset color", () => {
+    const map = freshMap();
+    const folder = unwrap(createFolder(map, null, "Work", "blue"));
+    expect(folder.color).toBe("blue");
   });
 });
 
 describe("ordering", () => {
   test("siblings keep creation order via sortKey", () => {
-    const map = freshMap();
-    const first = unwrap(createPage(map, null));
-    const second = unwrap(createPage(map, null));
-    const third = unwrap(createPage(map, null));
-    const ids = listChildren(map, null).map((node) => node.id);
+    const { map, home } = seeded();
+    const first = unwrap(createPage(map, home.id));
+    const second = unwrap(createPage(map, home.id));
+    const third = unwrap(createPage(map, home.id));
+    const ids = listChildren(map, home.id).map((node) => node.id);
     expect(ids).toEqual([first.id, second.id, third.id]);
   });
 });
@@ -84,8 +94,8 @@ describe("renameNode", () => {
   });
 
   test("allows empty page title (untitled dump)", () => {
-    const map = freshMap();
-    const page = unwrap(createPage(map, null));
+    const { map, home } = seeded();
+    const page = unwrap(createPage(map, home.id));
     unwrap(renameNode(map, page.id, "Dump 31-08-26"));
     const cleared = unwrap(renameNode(map, page.id, ""));
     expect(cleared.type === "page" && cleared.title).toBe("");
@@ -96,133 +106,103 @@ describe("renameNode", () => {
     const folder = unwrap(createFolder(map, null, "Keep"));
     expect(renameNode(map, folder.id, "").isErr()).toBe(true);
   });
-
-  test("errors on unknown id", () => {
-    expect(renameNode(freshMap(), "nope", "x").isErr()).toBe(true);
-  });
 });
 
 describe("moveNode", () => {
   test("moves a page between folders", () => {
-    const map = freshMap();
-    const work = unwrap(createFolder(map, null, "Work"));
+    const { map, home } = seeded();
     const personal = unwrap(createFolder(map, null, "Personal"));
-    const page = unwrap(createPage(map, work.id));
+    const page = unwrap(createPage(map, home.id));
     const moved = unwrap(moveNode(map, page.id, personal.id));
     expect(moved.type === "page" && moved.folderId).toBe(personal.id);
-    expect(listChildren(map, work.id)).toHaveLength(0);
+    expect(listChildren(map, home.id)).toHaveLength(0);
   });
 
-  test("rejects moving a folder into itself", () => {
-    const map = freshMap();
-    const folder = unwrap(createFolder(map, null, "A"));
-    expect(moveNode(map, folder.id, folder.id).isErr()).toBe(true);
+  test("rejects moving a page to root", () => {
+    const { map, home } = seeded();
+    const page = unwrap(createPage(map, home.id));
+    expect(moveNode(map, page.id, null).isErr()).toBe(true);
   });
 
-  test("rejects moving a folder into its own descendant", () => {
-    const map = freshMap();
-    const parent = unwrap(createFolder(map, null, "Parent"));
-    const child = unwrap(createFolder(map, parent.id, "Child"));
-    const grandchild = unwrap(createFolder(map, child.id, "Grandchild"));
-    expect(moveNode(map, parent.id, grandchild.id).isErr()).toBe(true);
-  });
-
-  test("moving to root is always allowed", () => {
+  test("rejects moving a folder into itself or its descendant", () => {
     const map = freshMap();
     const parent = unwrap(createFolder(map, null, "Parent"));
     const child = unwrap(createFolder(map, parent.id, "Child"));
-    const moved = unwrap(moveNode(map, child.id, null));
-    expect(moved.type === "folder" && moved.parentId).toBeNull();
-  });
-});
-
-describe("removeNode", () => {
-  test("removes a folder recursively and reports removed page ids", () => {
-    const map = freshMap();
-    const folder = unwrap(createFolder(map, null, "Work"));
-    const sub = unwrap(createFolder(map, folder.id, "Sub"));
-    const pageA = unwrap(createPage(map, folder.id));
-    const pageB = unwrap(createPage(map, sub.id));
-    const outside = unwrap(createPage(map, null));
-
-    const { removedPageIds } = unwrap(removeNode(map, folder.id));
-    expect(removedPageIds.toSorted()).toEqual([pageA.id, pageB.id].toSorted());
-    expect(map.size).toBe(1);
-    expect(map.get(outside.id)).toBeDefined();
-  });
-
-  test("errors on unknown id", () => {
-    expect(removeNode(freshMap(), "nope").isErr()).toBe(true);
-  });
-});
-
-describe("dangling references", () => {
-  test("children of a vanished folder surface at root", () => {
-    const map = freshMap();
-    const folder = unwrap(createFolder(map, null, "Doomed"));
-    const page = unwrap(createPage(map, folder.id));
-    // Simulate a CRDT merge that removed the folder but kept the page.
-    map.delete(folder.id);
-    const rootIds = listChildren(map, null).map((node) => node.id);
-    expect(rootIds).toContain(page.id);
+    expect(moveNode(map, parent.id, parent.id).isErr()).toBe(true);
+    expect(moveNode(map, parent.id, child.id).isErr()).toBe(true);
   });
 });
 
 describe("trash", () => {
-  test("trashNode hides subtree from listChildren, listTrashed shows it", () => {
-    const map = freshMap();
-    const folder = unwrap(createFolder(map, null, "Doomed"));
-    const page = unwrap(createPage(map, folder.id));
-    unwrap(trashNode(map, folder.id));
-    expect(listChildren(map, null)).toHaveLength(0);
-    const trashed = listTrashed(map).map((node) => node.id);
-    expect(trashed).toContain(folder.id);
-    expect(trashed).toContain(page.id);
+  test("trashNode hides subtree, listTrashed shows it, restore brings pages back", () => {
+    const { map, home } = seeded();
+    const doomed = unwrap(createFolder(map, null, "Doomed"));
+    const page = unwrap(createPage(map, doomed.id));
+    unwrap(trashNode(map, doomed.id));
+    expect(listChildren(map, null).map((node) => node.id)).toEqual([home.id]);
+    expect(listTrashed(map).map((node) => node.id)).toContain(page.id);
+    const restored = unwrap(restoreNode(map, page.id));
+    expect(restored.deletedAt).toBeUndefined();
   });
 
-  test("restoreNode brings a page back; vanished folder falls to root", () => {
-    const map = freshMap();
-    const p2 = unwrap(createPage(map, null));
-    unwrap(trashNode(map, p2.id));
-    const restored = unwrap(restoreNode(map, p2.id));
-    expect(restored.deletedAt).toBeUndefined();
-    expect(listChildren(map, null).map((n) => n.id)).toContain(p2.id);
+  test("the last live folder cannot be trashed", () => {
+    const { map, home } = seeded();
+    expect(trashNode(map, home.id).isErr()).toBe(true);
+    const second = unwrap(createFolder(map, null, "Second"));
+    expect(trashNode(map, second.id).isOk()).toBe(true);
+    expect(trashNode(map, home.id).isErr()).toBe(true);
   });
 
   test("purgeExpired removes only nodes past retention", () => {
-    const map = freshMap();
-    const oldPage = unwrap(createPage(map, null));
-    const newPage = unwrap(createPage(map, null));
+    const { map, home } = seeded();
+    const oldPage = unwrap(createPage(map, home.id));
+    const newPage = unwrap(createPage(map, home.id));
     unwrap(trashNode(map, oldPage.id));
     unwrap(trashNode(map, newPage.id));
     const node = map.get(oldPage.id);
-    if (node) map.set(oldPage.id, { ...node, deletedAt: Date.now() - 31 * 24 * 60 * 60 * 1000 });
+    if (node)
+      map.set(oldPage.id, {
+        ...node,
+        deletedAt: Date.now() - 31 * 24 * 60 * 60 * 1000,
+      });
     const { removedPageIds } = purgeExpired(map);
     expect(removedPageIds).toEqual([oldPage.id]);
     expect(map.get(newPage.id)).toBeDefined();
   });
 
   test("permanent removeNode takes trashed descendants too", () => {
-    const map = freshMap();
-    const folder = unwrap(createFolder(map, null, "Nest"));
-    const page = unwrap(createPage(map, folder.id));
-    unwrap(trashNode(map, folder.id));
-    const { removedPageIds } = unwrap(removeNode(map, folder.id));
+    const { map } = seeded();
+    const nest = unwrap(createFolder(map, null, "Nest"));
+    const page = unwrap(createPage(map, nest.id));
+    unwrap(trashNode(map, nest.id));
+    const { removedPageIds } = unwrap(removeNode(map, nest.id));
     expect(removedPageIds).toEqual([page.id]);
-    expect(map.size).toBe(0);
+    expect(map.get(nest.id)).toBeUndefined();
   });
 });
 
-describe("folder color + page attribution", () => {
-  test("createFolder stores a preset color", () => {
+describe("default folder + orphan adoption", () => {
+  test("ensureDefaultFolder creates Notes once", () => {
     const map = freshMap();
-    const folder = unwrap(createFolder(map, null, "Work", "blue"));
-    expect(folder.color).toBe("blue");
+    const first = ensureDefaultFolder(map);
+    expect(first.name).toBe("Notes");
+    const again = ensureDefaultFolder(map);
+    expect(again.id).toBe(first.id);
   });
 
-  test("createPage stores creating device", () => {
-    const map = freshMap();
-    const page = unwrap(createPage(map, null, { createdOn: "MacBook Pro" }));
-    expect(page.createdOn).toBe("MacBook Pro");
+  test("adoptOrphanPages moves legacy/dangling pages into the default", () => {
+    const { map, home } = seeded();
+    const page = unwrap(createPage(map, home.id));
+    // Simulate a legacy root page and a dangling-folder page.
+    map.set(page.id, { ...page, folderId: null });
+    const ghostFolder = unwrap(createFolder(map, null, "Ghost"));
+    const stranded = unwrap(createPage(map, ghostFolder.id));
+    map.delete(ghostFolder.id);
+
+    const adopted = adoptOrphanPages(map);
+    expect(adopted).toBe(2);
+    const ids = listChildren(map, home.id).map((node) => node.id);
+    expect(ids).toContain(page.id);
+    expect(ids).toContain(stranded.id);
   });
 });

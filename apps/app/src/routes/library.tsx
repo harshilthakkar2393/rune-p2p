@@ -11,6 +11,7 @@ import {
 
 import { PageCard } from "@/components/page-card";
 import { useNodes } from "@/hooks/use-index";
+import { composeTargetFolderId } from "@/lib/compose-target";
 import { getDeviceName } from "@/lib/device";
 import { folderColorValue } from "@/lib/folder-colors";
 import { humanTime } from "@/lib/human-time";
@@ -110,13 +111,14 @@ function LibraryView() {
     clearSelection();
   };
 
-  const moveSelected = (folderId: string | null) => {
+  const moveSelected = (folderId: string) => {
     for (const id of selected) moveNode(getNodesMap(), id, folderId);
     clearSelection();
   };
 
   const newPage = () => {
-    const result = createPage(getNodesMap(), folderFilter, {
+    const map = getNodesMap();
+    const result = createPage(map, folderFilter ?? composeTargetFolderId(map), {
       createdOn: getDeviceName(),
     });
     if (result.isOk()) {
@@ -296,7 +298,6 @@ function LibraryView() {
             />
             <DropdownMenuContent align="center" side="top">
               <DropdownMenuGroup>
-                <DropdownMenuItem onClick={() => moveSelected(null)}>Library root</DropdownMenuItem>
                 {folders.map((folder) => (
                   <DropdownMenuItem key={folder.id} onClick={() => moveSelected(folder.id)}>
                     {folder.name}

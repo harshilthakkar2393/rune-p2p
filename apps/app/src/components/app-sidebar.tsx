@@ -1,48 +1,28 @@
 import { useState } from "react";
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { IconSvgElement } from "@hugeicons/react";
 import {
   Add01Icon,
-  ArrowRight01Icon,
   ComputerPhoneSyncIcon,
   DashboardSquare01Icon,
   Delete02Icon,
-  File02Icon,
   Folder01Icon,
-  FolderTransferIcon,
   Home04Icon,
-  MoreHorizontalIcon,
-  PencilEdit01Icon,
   PencilEdit02Icon,
   Search01Icon,
   Tick02Icon,
 } from "@hugeicons/core-free-icons";
 
 import { useNodes } from "@/hooks/use-index";
+import { composeTargetFolderId } from "@/lib/compose-target";
 import { getDeviceName } from "@/lib/device";
 import { FOLDER_COLOR_VALUES, folderColorValue } from "@/lib/folder-colors";
 import { getNodesMap } from "@/lib/index-doc";
-import { createFolder, createPage, moveNode, renameNode, trashNode } from "@/lib/nodes";
+import { createFolder, createPage } from "@/lib/nodes";
 import { setPaletteOpen } from "@/lib/palette";
+import { FOLDER_COLORS, type Folder, type FolderColor } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
-import { FOLDER_COLORS, type Folder, type FolderColor, type Node, type Page } from "@/lib/schema";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@rune/ui/components/collapsible";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@rune/ui/components/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@rune/ui/components/popover";
 import {
   Sidebar,
@@ -55,10 +35,8 @@ import {
   SidebarHeader,
   SidebarInput,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
   SidebarTrigger,
 } from "@rune/ui/components/sidebar";
 
@@ -81,264 +59,11 @@ function Icon({
   );
 }
 
-function childrenOf(nodes: Node[], parentId: string | null): Node[] {
-  const folderIds = new Set(nodes.filter((node) => node.type === "folder").map((node) => node.id));
-  return nodes
-    .filter((node) => {
-      if (node.deletedAt !== undefined) return false;
-      const parent = node.type === "folder" ? node.parentId : node.folderId;
-      const resolved = parent !== null && folderIds.has(parent) ? parent : null;
-      return resolved === parentId;
-    })
-    .toSorted((a, b) => a.sortKey.localeCompare(b.sortKey));
-}
-
-type RowMenuProps = {
-  node: Node;
-  nodes: Node[];
-  onRename: () => void;
-  onTrash: () => void;
-  onNewPageInside?: () => void;
-};
-
-function isDescendantFolder(nodes: Node[], folderId: string, candidateId: string): boolean {
-  let current: string | null = candidateId;
-  const byId = new Map(nodes.map((node) => [node.id, node]));
-  while (current !== null) {
-    if (current === folderId) return true;
-    const node = byId.get(current);
-    current = node?.type === "folder" ? node.parentId : null;
-  }
-  return false;
-}
-
-function RowMenu({ node, nodes, onRename, onTrash, onNewPageInside }: RowMenuProps) {
-  const folders = nodes.filter(
-    (n): n is Folder => n.type === "folder" && n.deletedAt === undefined,
-  );
-  const currentParent = node.type === "folder" ? node.parentId : node.folderId;
-  const moveTargets = folders.filter((folder) => {
-    if (folder.id === currentParent) return false;
-    if (node.type === "folder" && isDescendantFolder(nodes, node.id, folder.id)) return false;
-    return true;
-  });
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <SidebarMenuAction showOnHover aria-label="More actions">
-            <Icon icon={MoreHorizontalIcon} className="size-4!" />
-          </SidebarMenuAction>
-        }
-      />
-      <DropdownMenuContent align="start" side="right">
-        <DropdownMenuGroup>
-          {onNewPageInside && (
-            <DropdownMenuItem onClick={onNewPageInside}>
-              <Icon icon={File02Icon} className="size-4!" />
-              New page inside
-            </DropdownMenuItem>
-          )}
-          <DropdownMenuItem onClick={onRename}>
-            <Icon icon={PencilEdit01Icon} className="size-4!" />
-            Rename
-          </DropdownMenuItem>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icon icon={FolderTransferIcon} className="size-4!" />
-              Move to
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent>
-              {currentParent !== null && (
-                <DropdownMenuItem onClick={() => moveNode(getNodesMap(), node.id, null)}>
-                  Library root
-                </DropdownMenuItem>
-              )}
-              {moveTargets.map((folder) => (
-                <DropdownMenuItem
-                  key={folder.id}
-                  onClick={() => moveNode(getNodesMap(), node.id, folder.id)}
-                >
-                  <Icon
-                    icon={Folder01Icon}
-                    className="size-4!"
-                    color={folderColorValue(folder.color)}
-                  />
-                  {folder.name}
-                </DropdownMenuItem>
-              ))}
-              {moveTargets.length === 0 && currentParent === null && (
-                <DropdownMenuItem disabled>No folders</DropdownMenuItem>
-              )}
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onTrash}>
-          <Icon icon={Delete02Icon} className="size-4!" />
-          Move to trash
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-function RenameInput({
-  initial,
-  onCommit,
-  onCancel,
-}: {
-  initial: string;
-  onCommit: (value: string) => void;
-  onCancel: () => void;
-}) {
-  const [value, setValue] = useState(initial);
-  return (
-    <SidebarInput
-      autoFocus
-      value={value}
-      className="h-7 text-[13px]"
-      onChange={(event) => setValue(event.target.value)}
-      onBlur={() => onCommit(value)}
-      onKeyDown={(event) => {
-        if (event.key === "Enter") onCommit(value);
-        if (event.key === "Escape") onCancel();
-      }}
-    />
-  );
-}
-
-function useTrashNode() {
-  const navigate = useNavigate();
-  const params = useParams({ strict: false });
-  return (id: string) => {
-    trashNode(getNodesMap(), id);
-    const openPage = params.pageId ? getNodesMap().get(params.pageId) : undefined;
-    if (openPage && openPage.deletedAt !== undefined) {
-      void navigate({ to: "/" });
-    }
-  };
-}
-
-function PageItem({ page, nodes }: { page: Page; nodes: Node[] }) {
-  const params = useParams({ strict: false });
-  const [renaming, setRenaming] = useState(false);
-  const sendToTrash = useTrashNode();
-  const title = page.title === "" ? "Untitled" : page.title;
-
-  if (renaming) {
-    return (
-      <SidebarMenuItem>
-        <RenameInput
-          initial={page.title}
-          onCommit={(value) => {
-            renameNode(getNodesMap(), page.id, value);
-            setRenaming(false);
-          }}
-          onCancel={() => setRenaming(false)}
-        />
-      </SidebarMenuItem>
-    );
-  }
-
-  return (
-    <SidebarMenuItem>
-      <SidebarMenuButton
-        isActive={params.pageId === page.id}
-        render={<Link to="/page/$pageId" params={{ pageId: page.id }} />}
-      >
-        <Icon icon={File02Icon} />
-        <span className="truncate">{title}</span>
-      </SidebarMenuButton>
-      <RowMenu
-        node={page}
-        nodes={nodes}
-        onRename={() => setRenaming(true)}
-        onTrash={() => sendToTrash(page.id)}
-      />
-    </SidebarMenuItem>
-  );
-}
-
-function FolderItem({ folder, nodes }: { folder: Folder; nodes: Node[] }) {
-  const [renaming, setRenaming] = useState(false);
-  const navigate = useNavigate();
-  const sendToTrash = useTrashNode();
-
-  const newPageInside = () => {
-    const result = createPage(getNodesMap(), folder.id, {
-      createdOn: getDeviceName(),
-    });
-    if (result.isOk()) {
-      void navigate({
-        to: "/page/$pageId",
-        params: { pageId: result.value.id },
-      });
-    }
-  };
-
-  if (renaming) {
-    return (
-      <SidebarMenuItem>
-        <RenameInput
-          initial={folder.name}
-          onCommit={(value) => {
-            if (value.trim() !== "") renameNode(getNodesMap(), folder.id, value);
-            setRenaming(false);
-          }}
-          onCancel={() => setRenaming(false)}
-        />
-      </SidebarMenuItem>
-    );
-  }
-
-  return (
-    <SidebarMenuItem>
-      <Collapsible defaultOpen>
-        <CollapsibleTrigger
-          render={
-            <SidebarMenuButton>
-              <Icon icon={Folder01Icon} color={folderColorValue(folder.color)} />
-              <span className="truncate">{folder.name}</span>
-              <HugeiconsIcon
-                icon={ArrowRight01Icon}
-                className="ml-auto transition-transform in-data-[panel-open]:rotate-90"
-              />
-            </SidebarMenuButton>
-          }
-        />
-        <RowMenu
-          node={folder}
-          nodes={nodes}
-          onRename={() => setRenaming(true)}
-          onTrash={() => sendToTrash(folder.id)}
-          onNewPageInside={newPageInside}
-        />
-        <CollapsibleContent>
-          <SidebarMenuSub>
-            <TreeLevel nodes={nodes} parentId={folder.id} />
-          </SidebarMenuSub>
-        </CollapsibleContent>
-      </Collapsible>
-    </SidebarMenuItem>
-  );
-}
-
-function TreeLevel({ nodes, parentId }: { nodes: Node[]; parentId: string | null }) {
-  return childrenOf(nodes, parentId).map((node) =>
-    node.type === "folder" ? (
-      <FolderItem key={node.id} folder={node} nodes={nodes} />
-    ) : (
-      <PageItem key={node.id} page={node} nodes={nodes} />
-    ),
-  );
-}
-
 function useComposePage() {
   const navigate = useNavigate();
   return () => {
-    const result = createPage(getNodesMap(), null, {
+    const map = getNodesMap();
+    const result = createPage(map, composeTargetFolderId(map), {
       createdOn: getDeviceName(),
     });
     if (result.isOk()) {
@@ -354,12 +79,19 @@ function NewFolderPopover() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [color, setColor] = useState<FolderColor>("blue");
+  const navigate = useNavigate();
 
   const confirm = () => {
     if (name.trim() === "") return;
-    createFolder(getNodesMap(), null, name.trim(), color);
+    const result = createFolder(getNodesMap(), null, name.trim(), color);
     setName("");
     setOpen(false);
+    if (result.isOk()) {
+      void navigate({
+        to: "/folder/$folderId",
+        params: { folderId: result.value.id },
+      });
+    }
   };
 
   return (
@@ -421,6 +153,13 @@ export function AppSidebar() {
   const nodes = useNodes();
   const compose = useComposePage();
 
+  const folders = nodes
+    .filter(
+      (node): node is Folder =>
+        node.type === "folder" && node.deletedAt === undefined && node.parentId === null,
+    )
+    .toSorted((a, b) => a.sortKey.localeCompare(b.sortKey));
+
   return (
     <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader>
@@ -478,7 +217,16 @@ export function AppSidebar() {
           <NewFolderPopover />
           <SidebarGroupContent>
             <SidebarMenu>
-              <TreeLevel nodes={nodes} parentId={null} />
+              {folders.map((folder) => (
+                <SidebarMenuItem key={folder.id}>
+                  <SidebarMenuButton
+                    render={<Link to="/folder/$folderId" params={{ folderId: folder.id }} />}
+                  >
+                    <Icon icon={Folder01Icon} color={folderColorValue(folder.color)} />
+                    <span className="truncate">{folder.name}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

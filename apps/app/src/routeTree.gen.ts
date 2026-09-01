@@ -14,6 +14,7 @@ import { Route as DevicesRouteImport } from './routes/devices'
 import { Route as LibraryRouteImport } from './routes/library'
 import { Route as TrashRouteImport } from './routes/trash'
 import { Route as TypeRouteImport } from './routes/type'
+import { Route as FolderFolderIdRouteImport } from './routes/folder.$folderId'
 import { Route as PagePageIdRouteImport } from './routes/page.$pageId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -41,6 +42,11 @@ const TypeRoute = TypeRouteImport.update({
   path: '/type',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FolderFolderIdRoute = FolderFolderIdRouteImport.update({
+  id: '/folder/$folderId',
+  path: '/folder/$folderId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PagePageIdRoute = PagePageIdRouteImport.update({
   id: '/page/$pageId',
   path: '/page/$pageId',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/library': typeof LibraryRoute
   '/trash': typeof TrashRoute
   '/type': typeof TypeRoute
+  '/folder/$folderId': typeof FolderFolderIdRoute
   '/page/$pageId': typeof PagePageIdRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/library': typeof LibraryRoute
   '/trash': typeof TrashRoute
   '/type': typeof TypeRoute
+  '/folder/$folderId': typeof FolderFolderIdRoute
   '/page/$pageId': typeof PagePageIdRoute
 }
 export interface FileRoutesById {
@@ -70,14 +78,28 @@ export interface FileRoutesById {
   '/library': typeof LibraryRoute
   '/trash': typeof TrashRoute
   '/type': typeof TypeRoute
+  '/folder/$folderId': typeof FolderFolderIdRoute
   '/page/$pageId': typeof PagePageIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/devices' | '/library' | '/trash' | '/type' | '/page/$pageId'
+    | '/'
+    | '/devices'
+    | '/library'
+    | '/trash'
+    | '/type'
+    | '/folder/$folderId'
+    | '/page/$pageId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/devices' | '/library' | '/trash' | '/type' | '/page/$pageId'
+  to:
+    | '/'
+    | '/devices'
+    | '/library'
+    | '/trash'
+    | '/type'
+    | '/folder/$folderId'
+    | '/page/$pageId'
   id:
     | '__root__'
     | '/'
@@ -85,6 +107,7 @@ export interface FileRouteTypes {
     | '/library'
     | '/trash'
     | '/type'
+    | '/folder/$folderId'
     | '/page/$pageId'
   fileRoutesById: FileRoutesById
 }
@@ -94,6 +117,7 @@ export interface RootRouteChildren {
   LibraryRoute: typeof LibraryRoute
   TrashRoute: typeof TrashRoute
   TypeRoute: typeof TypeRoute
+  FolderFolderIdRoute: typeof FolderFolderIdRoute
   PagePageIdRoute: typeof PagePageIdRoute
 }
 
@@ -134,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TypeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/folder/$folderId': {
+      id: '/folder/$folderId'
+      path: '/folder/$folderId'
+      fullPath: '/folder/$folderId'
+      preLoaderRoute: typeof FolderFolderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/page/$pageId': {
       id: '/page/$pageId'
       path: '/page/$pageId'
@@ -150,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   LibraryRoute: LibraryRoute,
   TrashRoute: TrashRoute,
   TypeRoute: TypeRoute,
+  FolderFolderIdRoute: FolderFolderIdRoute,
   PagePageIdRoute: PagePageIdRoute,
 }
 export const routeTree = rootRouteImport

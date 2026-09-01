@@ -7,7 +7,9 @@ import { Editor } from "@/components/editor";
 import { PageTitle } from "@/components/page-title";
 import { useNodes } from "@/hooks/use-index";
 import { folderColorValue } from "@/lib/folder-colors";
+import { getNodesMap } from "@/lib/index-doc";
 import { setInspectorPage, toggleInspector, useInspector } from "@/lib/inspector";
+import { rememberFolder } from "@/lib/compose-target";
 import { recordOpen } from "@/lib/recents";
 import type { Folder, Page } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
@@ -22,6 +24,8 @@ function PageView() {
   useEffect(() => {
     recordOpen(pageId);
     setInspectorPage(pageId);
+    const node = getNodesMap().get(pageId);
+    if (node?.type === "page" && node.folderId !== null) rememberFolder(node.folderId);
     return () => setInspectorPage(null);
   }, [pageId]);
 
