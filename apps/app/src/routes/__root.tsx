@@ -4,6 +4,8 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 
 import { AppSidebar } from "@/components/app-sidebar";
+import { SearchPalette } from "@/components/search-palette";
+import { Shortcuts } from "@/components/shortcuts";
 import { ThemeProvider } from "@rune/ui/components/theme-provider";
 import { SidebarInset, SidebarProvider } from "@rune/ui/components/sidebar";
 
@@ -22,6 +24,8 @@ function RootComponent() {
           <Outlet />
         </SidebarInset>
       </SidebarProvider>
+      <SearchPalette />
+      <Shortcuts />
       <TanStackDevtools
         config={{
           position: "bottom-right",

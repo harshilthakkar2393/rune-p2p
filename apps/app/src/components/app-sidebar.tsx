@@ -1,15 +1,20 @@
+import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Add01Icon,
   ArrowRight01Icon,
+  ComputerPhoneSyncIcon,
   File02Icon,
+  FileEditIcon,
   Folder01Icon,
+  Home01Icon,
+  Search01Icon,
 } from "@hugeicons/core-free-icons";
 
 import { useNodes } from "@/hooks/use-index";
 import { getNodesMap } from "@/lib/index-doc";
 import { createFolder, createPage } from "@/lib/nodes";
-import { selectPage, usePageSelection } from "@/lib/page-selection";
+import { setPaletteOpen } from "@/lib/palette";
 import type { Folder, Node, Page } from "@/lib/schema";
 import {
   Collapsible,
@@ -26,6 +31,7 @@ import {
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupAction,
   SidebarGroupContent,
@@ -38,32 +44,30 @@ import {
 } from "@rune/ui/components/sidebar";
 
 function childrenOf(nodes: Node[], parentId: string | null): Node[] {
-  const ids = new Set(
+  const folderIds = new Set(
     nodes.filter((node) => node.type === "folder").map((node) => node.id),
   );
   return nodes
     .filter((node) => {
       const parent = node.type === "folder" ? node.parentId : node.folderId;
-      const resolved = parent !== null && ids.has(parent) ? parent : null;
+      const resolved = parent !== null && folderIds.has(parent) ? parent : null;
       return resolved === parentId;
     })
     .toSorted((a, b) => a.sortKey.localeCompare(b.sortKey));
 }
 
-function pageTitle(page: Page): string {
-  return page.title === "" ? "Untitled" : page.title;
-}
-
 function PageItem({ page }: { page: Page }) {
-  const selectedId = usePageSelection();
+  const params = useParams({ strict: false });
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        isActive={selectedId === page.id}
-        onClick={() => selectPage(page.id)}
+        isActive={params.pageId === page.id}
+        render={<Link to="/page/$pageId" params={{ pageId: page.id }} />}
       >
         <HugeiconsIcon icon={File02Icon} />
-        <span className="truncate">{pageTitle(page)}</span>
+        <span className="truncate">
+          {page.title === "" ? "Untitled" : page.title}
+        </span>
       </SidebarMenuButton>
     </SidebarMenuItem>
   );
@@ -111,14 +115,21 @@ function TreeLevel({
   );
 }
 
-function NewNodeAction() {
-  const newPage = () => {
+function useComposePage() {
+  const navigate = useNavigate();
+  return () => {
     const result = createPage(getNodesMap(), null);
-    if (result.isOk()) selectPage(result.value.id);
+    if (result.isOk()) {
+      void navigate({
+        to: "/page/$pageId",
+        params: { pageId: result.value.id },
+      });
+    }
   };
-  const newFolder = () => {
-    createFolder(getNodesMap(), null, "New folder");
-  };
+}
+
+function LibraryAction() {
+  const compose = useComposePage();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -130,11 +141,13 @@ function NewNodeAction() {
       />
       <DropdownMenuContent align="start">
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={newPage}>
+          <DropdownMenuItem onClick={compose}>
             <HugeiconsIcon icon={File02Icon} />
             New page
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={newFolder}>
+          <DropdownMenuItem
+            onClick={() => createFolder(getNodesMap(), null, "New folder")}
+          >
             <HugeiconsIcon icon={Folder01Icon} />
             New folder
           </DropdownMenuItem>
@@ -146,15 +159,49 @@ function NewNodeAction() {
 
 export function AppSidebar() {
   const nodes = useNodes();
+  const compose = useComposePage();
+
   return (
     <Sidebar variant="inset">
       <SidebarHeader>
-        <span className="px-2 py-1 text-lg font-medium">rune</span>
+        <div className="flex items-center justify-between">
+          <span className="px-2 py-1 text-lg font-medium">rune</span>
+          <button
+            type="button"
+            aria-label="New page"
+            className="flex size-8 items-center justify-center rounded-md text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground [&_svg]:size-4"
+            onClick={compose}
+          >
+            <HugeiconsIcon icon={FileEditIcon} />
+          </button>
+        </div>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={() => setPaletteOpen(true)}>
+              <HugeiconsIcon icon={Search01Icon} />
+              Search
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              render={<Link to="/" activeOptions={{ exact: true }} />}
+            >
+              <HugeiconsIcon icon={Home01Icon} />
+              Home
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton render={<Link to="/devices" />}>
+              <HugeiconsIcon icon={ComputerPhoneSyncIcon} />
+              Devices
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Pages</SidebarGroupLabel>
-          <NewNodeAction />
+          <SidebarGroupLabel>Library</SidebarGroupLabel>
+          <LibraryAction />
           <SidebarGroupContent>
             <SidebarMenu>
               <TreeLevel nodes={nodes} parentId={null} />
@@ -162,6 +209,12 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <div className="flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground">
+          <span className="size-1.5 rounded-full bg-muted-foreground/50" />
+          local only
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }
