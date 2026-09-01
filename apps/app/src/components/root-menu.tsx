@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ComputerPhoneSyncIcon,
@@ -29,6 +29,7 @@ import { useTheme } from "@rune/ui/components/theme-provider";
  * entries that are not dock tabs follow.
  */
 export function RootMenu({ action, children }: { action?: ReactNode; children?: ReactNode }) {
+  const navigate = useNavigate();
   const { peers } = useSyncStatus();
   const { resolvedTheme, setTheme } = useTheme();
   const dark = resolvedTheme === "dark";
@@ -52,7 +53,7 @@ export function RootMenu({ action, children }: { action?: ReactNode; children?: 
             </>
           )}
           <DropdownMenuGroup>
-            <DropdownMenuItem render={<Link to="/devices" />}>
+            <DropdownMenuItem onClick={() => void navigate({ to: "/devices" })}>
               <HugeiconsIcon icon={ComputerPhoneSyncIcon} strokeWidth={1.75} />
               Devices
               {peers.length > 0 && (
@@ -68,7 +69,7 @@ export function RootMenu({ action, children }: { action?: ReactNode; children?: 
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem variant="destructive" render={<Link to="/trash" />}>
+            <DropdownMenuItem variant="destructive" onClick={() => void navigate({ to: "/trash" })}>
               <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
               Trash
             </DropdownMenuItem>
