@@ -1,36 +1,28 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Folder01Icon, SidebarRight01Icon } from "@hugeicons/core-free-icons";
 
 import { Editor } from "@/components/editor";
-import { PageInspector } from "@/components/page-inspector";
 import { PageTitle } from "@/components/page-title";
 import { useNodes } from "@/hooks/use-index";
 import { folderColorValue } from "@/lib/folder-colors";
+import { setInspectorPage, toggleInspector, useInspector } from "@/lib/inspector";
 import { recordOpen } from "@/lib/recents";
 import type { Folder, Page } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
 
 export const Route = createFileRoute("/page/$pageId")({ component: PageView });
 
-const INSPECTOR_KEY = "rune-inspector-open";
-
-function readInspectorOpen(): boolean {
-  try {
-    return localStorage.getItem(INSPECTOR_KEY) !== "closed";
-  } catch {
-    return true;
-  }
-}
-
 function PageView() {
   const { pageId } = Route.useParams();
   const nodes = useNodes();
-  const [inspectorOpen, setInspectorOpen] = useState(() => readInspectorOpen());
+  const { open: inspectorOpen } = useInspector();
 
   useEffect(() => {
     recordOpen(pageId);
+    setInspectorPage(pageId);
+    return () => setInspectorPage(null);
   }, [pageId]);
 
   const page = nodes.find((node): node is Page => node.id === pageId && node.type === "page");
@@ -39,16 +31,6 @@ function PageView() {
       ? nodes.find((node): node is Folder => node.id === page.folderId && node.type === "folder")
       : undefined;
   const folderTint = folderColorValue(folder?.color);
-
-  const toggleInspector = () => {
-    const next = !inspectorOpen;
-    setInspectorOpen(next);
-    try {
-      localStorage.setItem(INSPECTOR_KEY, next ? "open" : "closed");
-    } catch {
-      // per-device convenience only
-    }
-  };
 
   return (
     <div className="flex h-full">
@@ -70,7 +52,7 @@ function PageView() {
             size="icon"
             className="ml-auto text-muted-foreground"
             aria-label={inspectorOpen ? "Hide page info" : "Show page info"}
-            onClick={toggleInspector}
+            onClick={() => toggleInspector()}
           >
             <HugeiconsIcon icon={SidebarRight01Icon} strokeWidth={1.75} />
           </Button>
@@ -84,7 +66,6 @@ function PageView() {
           </div>
         </main>
       </div>
-      {inspectorOpen && page && <PageInspector page={page} folder={folder} />}
     </div>
   );
 }

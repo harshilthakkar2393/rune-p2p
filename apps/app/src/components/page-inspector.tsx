@@ -66,7 +66,7 @@ export function PageInspector({ page, folder }: { page: Page; folder: Folder | u
   };
 
   return (
-    <aside className="flex w-[264px] shrink-0 flex-col gap-5 border-l px-4 py-4">
+    <div className="flex h-full flex-col gap-5 overflow-y-auto p-4">
       <section className="flex flex-col gap-1">
         <span className="pb-1 text-[11px] font-medium tracking-wide text-muted-foreground/70 uppercase">
           Properties
@@ -135,6 +135,6 @@ export function PageInspector({ page, folder }: { page: Page; folder: Folder | u
           Move to trash
         </Button>
       </section>
-    </aside>
+    </div>
   );
 }

@@ -4,6 +4,7 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 
 import { AppSidebar } from "@/components/app-sidebar";
+import { InspectorSlot } from "@/components/inspector-slot";
 import { SearchPalette } from "@/components/search-palette";
 import { Shortcuts } from "@/components/shortcuts";
 import { ThemeProvider } from "@rune/ui/components/theme-provider";
@@ -23,6 +24,7 @@ function RootComponent() {
         <SidebarInset className="md:h-[calc(100vh-16px)] h-dvh px-4 md:px-0">
           <Outlet />
         </SidebarInset>
+        <InspectorSlot />
       </SidebarProvider>
       <SearchPalette />
       <Shortcuts />
