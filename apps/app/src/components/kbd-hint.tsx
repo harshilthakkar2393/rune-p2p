@@ -7,7 +7,7 @@ export function KbdHint({ letter }: { letter: string }) {
     <span className="ml-auto font-mono text-[11px] leading-4 text-muted-foreground opacity-0 transition-opacity group-hover/kbd:opacity-100">
       {isMac ? (
         <>
-          <span className="text-[13px] leading-4">⌘</span>
+          <span className="text-[12px] leading-4">⌘</span>
           {letter}
         </>
       ) : (
