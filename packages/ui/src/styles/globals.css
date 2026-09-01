@@ -184,6 +184,16 @@ h6 {
     transparent 100%
   );
 }
+/* Horizontal rows (data-axis="x" on the root): fade the x edges instead. */
+[data-slot="scroll-area"][data-axis="x"] > [data-slot="scroll-area-viewport"] {
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black min(var(--scroll-area-overflow-x-start, 0px), 24px),
+    black calc(100% - min(var(--scroll-area-overflow-x-end, 0px), 24px)),
+    transparent 100%
+  );
+}
 
 /* Scrollbar: invisible at rest; appears while the pointer is over the area
    or while scrolling (Base UI sets data-hovering / data-scrolling). Touch

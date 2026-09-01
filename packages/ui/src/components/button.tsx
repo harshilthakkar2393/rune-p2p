@@ -29,9 +29,6 @@ const buttonVariants = cva(
         "icon-xs": "size-6 [&_svg:not([class*='size-'])]:size-3",
         "icon-sm": "size-7",
         "icon-lg": "size-9",
-        // rune: 44px touch targets for phone headers
-        xl: "h-11 gap-2 px-5 has-data-[icon=inline-end]:pr-4 has-data-[icon=inline-start]:pl-4",
-        "icon-xl": "size-11 [&_svg:not([class*='size-'])]:size-5",
       },
     },
     defaultVariants: {

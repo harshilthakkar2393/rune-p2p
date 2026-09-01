@@ -1,16 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
 import { RootMenu } from "@/components/root-menu";
+import { useComposePage } from "@/hooks/use-compose-page";
 import { useNodes } from "@/hooks/use-index";
-import { getNodesMap } from "@/lib/index-doc";
-import { composeTargetFolderId } from "@/lib/compose-target";
-import { getDeviceName } from "@/lib/device";
-import { createPage } from "@/lib/nodes";
 import { humanTime } from "@/lib/human-time";
 import { readRecents } from "@/lib/recents";
 import type { Folder } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
-import { ScrollArea } from "@rune/ui/components/scroll-area";
+import { ScrollArea, ScrollBar } from "@rune/ui/components/scroll-area";
 import { PageCard } from "@/components/page-card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@rune/ui/components/empty";
 
@@ -68,18 +65,7 @@ function Home() {
     else dayGroups.push({ label, items: [entry] });
   }
 
-  const newPage = () => {
-    const map = getNodesMap();
-    const result = createPage(map, composeTargetFolderId(map), {
-      createdOn: getDeviceName(),
-    });
-    if (result.isOk()) {
-      void navigate({
-        to: "/page/$pageId",
-        params: { pageId: result.value.id },
-      });
-    }
-  };
+  const newPage = useComposePage();
 
   return (
     <div className="flex h-full flex-col">
@@ -109,23 +95,30 @@ function Home() {
                     </span>
                     <span className="grow border-t border-dashed border-foreground/10" />
                   </div>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {group.items.map(({ page, openedAt }) => (
-                      <PageCard
-                        key={page.id}
-                        page={page}
-                        folder={page.folderId !== null ? folderById.get(page.folderId) : undefined}
-                        trailing={
-                          <span className="font-mono text-tiny leading-4 text-muted-foreground">
-                            {humanTime(openedAt)}
-                          </span>
-                        }
-                        onActivate={() =>
-                          void navigate({ to: "/page/$pageId", params: { pageId: page.id } })
-                        }
-                      />
-                    ))}
-                  </div>
+                  {/* Bleed to the gutter edges so the row scrolls edge to edge. */}
+                  <ScrollArea data-axis="x" className="-mx-4 md:-mx-8">
+                    <div className="flex w-max gap-3 px-4 md:px-8">
+                      {group.items.map(({ page, openedAt }) => (
+                        <div key={page.id} className="w-64 shrink-0">
+                          <PageCard
+                            page={page}
+                            folder={
+                              page.folderId !== null ? folderById.get(page.folderId) : undefined
+                            }
+                            trailing={
+                              <span className="font-mono text-tiny leading-4 text-muted-foreground">
+                                {humanTime(openedAt)}
+                              </span>
+                            }
+                            onActivate={() =>
+                              void navigate({ to: "/page/$pageId", params: { pageId: page.id } })
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
                 </div>
               ))
             )}

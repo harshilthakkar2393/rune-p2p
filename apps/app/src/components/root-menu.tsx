@@ -38,7 +38,7 @@ export function RootMenu({ action, children }: { action?: ReactNode; children?: 
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button variant="outline" size="icon-xl" aria-label="More">
+            <Button variant="outline" size="icon-lg" aria-label="More">
               <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={1.75} />
             </Button>
           }
@@ -93,7 +93,7 @@ export function PhoneAction({
   return (
     <Button
       variant="outline"
-      size="icon-xl"
+      size="icon-lg"
       aria-label={label}
       aria-pressed={active}
       onClick={onClick}
