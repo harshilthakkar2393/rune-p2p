@@ -14,12 +14,14 @@ import {
 } from "@hugeicons/core-free-icons";
 
 import { FolderGlyph } from "@/components/folder-glyph";
+import { KbdHint } from "@/components/kbd-hint";
 import { useNodes } from "@/hooks/use-index";
 import { composeTargetFolderId } from "@/lib/compose-target";
 import { getDeviceName } from "@/lib/device";
 import { FOLDER_COLOR_VALUES, folderColorValue } from "@/lib/folder-colors";
 import { getNodesMap } from "@/lib/index-doc";
 import { createFolder, createPage } from "@/lib/nodes";
+import { modLabel } from "@/lib/platform";
 import { setPaletteOpen } from "@/lib/palette";
 import { FOLDER_COLORS, type Folder, type FolderColor } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
@@ -171,25 +173,25 @@ export function AppSidebar() {
         </div>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="New page · ⌘N" className="group/kbd" onClick={compose}>
+            <SidebarMenuButton
+              tooltip={`New page · ${modLabel}N`}
+              className="group/kbd"
+              onClick={compose}
+            >
               <Icon icon={PencilEdit02Icon} />
               New page
-              <span className="ml-auto font-mono text-[11px] text-muted-foreground opacity-0 transition-opacity group-hover/kbd:opacity-100">
-                ⌘N
-              </span>
+              <KbdHint letter="N" />
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
-              tooltip="Search · ⌘K"
+              tooltip={`Search · ${modLabel}K`}
               className="group/kbd"
               onClick={() => setPaletteOpen(true)}
             >
               <Icon icon={Search01Icon} />
               Search
-              <span className="ml-auto font-mono text-[11px] text-muted-foreground opacity-0 transition-opacity group-hover/kbd:opacity-100">
-                ⌘K
-              </span>
+              <KbdHint letter="K" />
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
