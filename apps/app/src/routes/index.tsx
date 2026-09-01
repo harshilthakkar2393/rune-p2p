@@ -5,14 +5,14 @@ import { PageTitle } from "@/components/page-title";
 import { usePageSelection, selectPage } from "@/lib/page-selection";
 import { getNodesMap } from "@/lib/index-doc";
 import { createPage } from "@/lib/nodes";
-import { Button } from "@/components/ui/button";
+import { Button } from "@rune/ui/components/button";
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
-} from "@/components/ui/empty";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+} from "@rune/ui/components/empty";
+import { SidebarTrigger } from "@rune/ui/components/sidebar";
 
 export const Route = createFileRoute("/")({ component: Home });
 

@@ -4,8 +4,8 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 
 import { AppSidebar } from "@/components/app-sidebar";
-import { ThemeProvider } from "@/components/theme-provider";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { ThemeProvider } from "@rune/ui/components/theme-provider";
+import { SidebarInset, SidebarProvider } from "@rune/ui/components/sidebar";
 
 import "../styles.css";
 

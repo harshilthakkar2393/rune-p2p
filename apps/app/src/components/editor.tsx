@@ -4,7 +4,7 @@ import { withCollaboration } from "@blocknote/core/yjs";
 import type * as Y from "yjs";
 
 import { usePageDoc } from "@/hooks/use-page-doc";
-import { useTheme } from "@/components/theme-provider";
+import { useTheme } from "@rune/ui/components/theme-provider";
 
 const PAGE_FRAGMENT = "blocknote";
 

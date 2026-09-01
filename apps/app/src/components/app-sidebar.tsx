@@ -15,14 +15,14 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+} from "@rune/ui/components/collapsible";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@rune/ui/components/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -35,7 +35,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
-} from "@/components/ui/sidebar";
+} from "@rune/ui/components/sidebar";
 
 function childrenOf(nodes: Node[], parentId: string | null): Node[] {
   const ids = new Set(

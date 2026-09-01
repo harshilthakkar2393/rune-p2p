@@ -1,15 +1,15 @@
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ComputerIcon, Moon02Icon, Sun03Icon } from "@hugeicons/core-free-icons";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@rune/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useTheme } from "@/components/theme-provider";
+} from "@rune/ui/components/dropdown-menu";
+import { useTheme } from "@rune/ui/components/theme-provider";
 
 export function ModeToggle() {
   const { resolvedTheme, setTheme } = useTheme();

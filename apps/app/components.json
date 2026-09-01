@@ -5,21 +5,20 @@
   "tsx": true,
   "tailwind": {
     "config": "",
-    "css": "src/styles.css",
+    "css": "../../packages/ui/src/styles/globals.css",
     "baseColor": "neutral",
-    "cssVariables": true,
-    "prefix": ""
-  },
-  "aliases": {
-    "components": "@/components",
-    "utils": "@/lib/utils",
-    "ui": "@/components/ui",
-    "lib": "@/lib",
-    "hooks": "@/hooks"
+    "cssVariables": true
   },
   "iconLibrary": "hugeicons",
   "rtl": false,
   "menuColor": "default-translucent",
   "menuAccent": "subtle",
+  "aliases": {
+    "components": "@/components",
+    "hooks": "@/hooks",
+    "lib": "@/lib",
+    "utils": "@rune/ui/lib/utils",
+    "ui": "@rune/ui/components"
+  },
   "registries": {}
 }

@@ -5,24 +5,24 @@ import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
 import { cva, type VariantProps } from "class-variance-authority"
 
-import { useIsMobile } from "@/hooks/use-mobile"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
+import { useIsMobile } from "@rune/ui/hooks/use-mobile"
+import { cn } from "@rune/ui/lib/utils"
+import { Button } from "@rune/ui/components/button"
+import { Input } from "@rune/ui/components/input"
+import { Separator } from "@rune/ui/components/separator"
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet"
-import { Skeleton } from "@/components/ui/skeleton"
+} from "@rune/ui/components/sheet"
+import { Skeleton } from "@rune/ui/components/skeleton"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@rune/ui/components/tooltip"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { LayoutAlignLeftIcon } from "@hugeicons/core-free-icons"
 
