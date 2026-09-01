@@ -127,6 +127,11 @@ function LibraryView() {
 
   const pageActions = (pageId: string): CardAction[] => [
     { label: "Open", icon: ArrowUpRight01Icon, onSelect: () => openPage(pageId) },
+    {
+      label: "Select",
+      icon: CheckmarkCircle02Icon,
+      onSelect: () => selection.toggle(pageId),
+    },
     "separator",
     {
       label: "Move to trash",

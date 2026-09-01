@@ -1,13 +1,14 @@
 import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { IconSvgElement } from "@hugeicons/react";
-import { MoreHorizontalIcon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { MoreHorizontalIcon } from "@hugeicons/core-free-icons";
 
 import { getPageExcerpt } from "@/lib/excerpt";
 import { folderColorValue } from "@/lib/folder-colors";
 import type { Folder, Page } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
 import { Card } from "@rune/ui/components/card";
+import { Checkbox } from "@rune/ui/components/checkbox";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -112,26 +113,6 @@ export function PageCard({
         if (event.key === "Enter") onActivate?.(event as unknown as MouseEvent);
       }}
     >
-      {onSelectToggle && (
-        <button
-          type="button"
-          aria-label={selected ? "Deselect" : "Select"}
-          onClick={(event) => {
-            event.stopPropagation();
-            onSelectToggle();
-          }}
-          className={cn(
-            "absolute top-3 left-3 z-10 flex size-4.5 items-center justify-center rounded-sm transition-opacity",
-            selected
-              ? "bg-primary text-primary-foreground opacity-100"
-              : "border border-foreground/25 opacity-0 group-hover/card:opacity-100",
-            selecting && "opacity-100",
-          )}
-        >
-          {selected && <HugeiconsIcon icon={Tick02Icon} strokeWidth={2.5} className="size-3!" />}
-        </button>
-      )}
-
       {actions && !selecting && (
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -147,26 +128,35 @@ export function PageCard({
               </Button>
             }
           />
-          <DropdownMenuContent align="start" onClick={(event) => event.stopPropagation()}>
+          <DropdownMenuContent
+            align="start"
+            className="w-auto min-w-44"
+            onClick={(event) => event.stopPropagation()}
+          >
             <DropdownMenuGroup>{actionItems(actions, "dropdown")}</DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       )}
 
-      <span
-        className={cn(
-          "h-5 shrink-0 truncate pr-6 text-sm leading-5",
-          dim && "text-muted-foreground",
-          onSelectToggle && selecting && "pl-6",
+      <span className="flex h-5 shrink-0 items-center gap-2 pr-6">
+        {onSelectToggle && selecting && (
+          <Checkbox
+            checked={selected}
+            onCheckedChange={() => onSelectToggle()}
+            onClick={(event) => event.stopPropagation()}
+            aria-label={selected ? "Deselect" : "Select"}
+            className="size-4.5 rounded-full"
+          />
         )}
-      >
-        {title}
+        <span className={cn("min-w-0 truncate text-sm leading-5", dim && "text-muted-foreground")}>
+          {title}
+        </span>
       </span>
       <span
         className={cn(
           "line-clamp-2 h-9 shrink-0 overflow-hidden text-small break-words text-muted-foreground",
           dim && "text-muted-foreground/60",
-          onSelectToggle && selecting && "pl-6",
+          onSelectToggle && selecting && "pl-6.5",
         )}
       >
         {excerpt === null ? "" : excerpt === "" ? "Empty page" : excerpt}
@@ -174,7 +164,7 @@ export function PageCard({
       <span
         className={cn(
           "mt-auto flex h-4 shrink-0 items-center gap-2",
-          onSelectToggle && selecting && "pl-6",
+          onSelectToggle && selecting && "pl-6.5",
         )}
       >
         {folder && (
@@ -195,7 +185,7 @@ export function PageCard({
   return (
     <ContextMenu>
       <ContextMenuTrigger render={card} />
-      <ContextMenuContent>
+      <ContextMenuContent className="w-auto min-w-44">
         <ContextMenuGroup>{actionItems(actions, "context")}</ContextMenuGroup>
       </ContextMenuContent>
     </ContextMenu>

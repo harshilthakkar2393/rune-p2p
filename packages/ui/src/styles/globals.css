@@ -159,6 +159,18 @@ h6 {
   gap: 0.625rem; /* 10px icon-to-label, up from the default 8px */
 }
 
+/* rune: destructive menu items stay red — the preset's translucent menu
+   style neutralizes data-variant=destructive to accent-foreground; we
+   deliberately override it app-wide, descendants included. */
+[data-slot$="-item"][data-variant="destructive"],
+[data-slot$="-item"][data-variant="destructive"] * {
+  color: var(--destructive) !important;
+}
+[data-slot$="-item"][data-variant="destructive"]:focus,
+[data-slot$="-item"][data-variant="destructive"][data-highlighted] {
+  background: color-mix(in oklab, var(--destructive) 12%, transparent) !important;
+}
+
 /* Scroll fade: Base UI exposes overflow distances as CSS vars on the
    viewport; drive a mask so content fades at scrollable edges. */
 [data-slot="scroll-area-viewport"] {
