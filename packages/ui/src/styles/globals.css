@@ -152,6 +152,11 @@ h6 {
   line-height: 1.125rem; /* 18px — matches the 18px icons so flex centers equal boxes */
 }
 
+[data-slot="sidebar-menu-button"],
+[data-slot="sidebar-menu-sub-button"] {
+  gap: 0.625rem; /* 10px icon-to-label, up from the default 8px */
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
