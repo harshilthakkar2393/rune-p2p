@@ -61,7 +61,7 @@ function Home() {
         <SidebarTrigger />
       </header>
       <main className="mx-auto w-full max-w-3xl py-6 px-8">
-        <h1 className="text-2xl font-medium">{greeting()}, Harshil</h1>
+        <h1 className="text-2xl font-medium">{greeting()}</h1>
 
         <section className="mt-8">
           <h2 className="text-sm font-medium text-muted-foreground">Recent</h2>
