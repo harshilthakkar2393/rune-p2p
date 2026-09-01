@@ -1,0 +1,13 @@
+{
+  "name": "rune",
+  "private": true,
+  "packageManager": "bun@1.4.0",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "bun run --filter @rune/app dev",
+    "build": "bun run --filter @rune/app build",
+    "check": "bun run --filter @rune/app check",
+    "format": "bun run --filter @rune/app format",
+    "test": "bun test"
+  }
+}
