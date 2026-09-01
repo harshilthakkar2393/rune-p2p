@@ -10,6 +10,7 @@ starting, honor its STOP conditions, and update your row when done.
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
 | 001  | Ship the P2P sync core (Phase B1) | P1 | L | — | DONE — reviewed 2026-09-01, APPROVED; on branch `advisor/001-sync-core` (worktree `../rune-wt-001`), awaiting merge + manual two-browser check |
+| 002  | Pairing UX — QR, link route, scanner, presence, cursors | P1 | M | 001 | IN PROGRESS (executor on advisor/002-pairing-ux, worktree ../rune-wt-002) |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
 
