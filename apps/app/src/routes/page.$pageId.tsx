@@ -13,6 +13,7 @@ import { getNodesMap } from "@/lib/index-doc";
 import { setInspectorPage, toggleInspector, useInspector } from "@/lib/inspector";
 import { rememberFolder } from "@/lib/compose-target";
 import { recordOpen } from "@/lib/recents";
+import { setPresencePage } from "@/lib/sync/manager";
 import type { Folder, Page } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
 import { ScrollArea } from "@rune/ui/components/scroll-area";
@@ -27,9 +28,13 @@ function PageView() {
   useEffect(() => {
     recordOpen(pageId);
     setInspectorPage(pageId);
+    setPresencePage(pageId);
     const node = getNodesMap().get(pageId);
     if (node?.type === "page" && node.folderId !== null) rememberFolder(node.folderId);
-    return () => setInspectorPage(null);
+    return () => {
+      setInspectorPage(null);
+      setPresencePage(null);
+    };
   }, [pageId]);
 
   const page = nodes.find((node): node is Page => node.id === pageId && node.type === "page");
