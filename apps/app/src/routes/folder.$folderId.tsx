@@ -133,7 +133,7 @@ function FolderView() {
 
   return (
     <div className="relative flex h-full flex-col">
-      <header className="flex shrink-0 items-baseline gap-3.5 px-8 pt-6 pb-2">
+      <header className="flex shrink-0 items-baseline gap-3.5 px-8 pt-3 pb-2">
         {renaming ? (
           <SidebarInput
             autoFocus

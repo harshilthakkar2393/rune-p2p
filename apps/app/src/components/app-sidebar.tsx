@@ -204,7 +204,11 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Trash" render={<Link to="/trash" />}>
+            <SidebarMenuButton
+              tooltip="Trash"
+              className="text-destructive/75 hover:bg-destructive/10 hover:text-destructive"
+              render={<Link to="/trash" />}
+            >
               <Icon icon={Delete02Icon} />
               Trash
             </SidebarMenuButton>

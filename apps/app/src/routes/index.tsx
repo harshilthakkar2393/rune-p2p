@@ -82,7 +82,7 @@ function Home() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="mx-auto flex h-20 w-full max-w-3xl shrink-0 items-end px-8 pb-2">
+      <header className="mx-auto flex h-14 w-full max-w-3xl shrink-0 items-center px-8">
         <h1 className="text-h1">{greeting()}</h1>
       </header>
       <ScrollArea className="min-h-0 flex-1">

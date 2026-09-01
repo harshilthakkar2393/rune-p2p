@@ -105,7 +105,7 @@ function TrashView() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex shrink-0 items-baseline gap-3.5 px-8 pt-6 pb-2">
+      <header className="flex shrink-0 items-baseline gap-3.5 px-8 pt-3 pb-2">
         <h1 className="text-h1">Trash</h1>
         <span className="font-mono text-[11px] text-muted-foreground">
           deleted forever after 30 days
