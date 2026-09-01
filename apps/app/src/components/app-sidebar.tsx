@@ -5,7 +5,7 @@ import {
   ArrowRight01Icon,
   ComputerPhoneSyncIcon,
   File02Icon,
-  FileEditIcon,
+  PencilEdit02Icon,
   Folder01Icon,
   Home04Icon,
   Search01Icon,
@@ -160,7 +160,7 @@ export function AppSidebar() {
             className="flex size-8 items-center justify-center rounded-md text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground [&_svg]:size-4"
             onClick={compose}
           >
-            <HugeiconsIcon icon={FileEditIcon} strokeWidth={1.75} className="size-4.5!" />
+            <HugeiconsIcon icon={PencilEdit02Icon} strokeWidth={1.75} className="size-4.5!" />
           </button>
         </div>
         <SidebarMenu>
