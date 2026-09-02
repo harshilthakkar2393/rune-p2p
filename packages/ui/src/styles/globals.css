@@ -3,6 +3,7 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 @import "@fontsource-variable/geist-mono";
+@import "@fontsource/noto-sans-runic";
 
 @source "../components";
 
@@ -28,6 +29,9 @@ h6 {
      fallback (Menlo/Apple Symbols) draws them small and thin. */
   --font-sans: "Geist Variable", system-ui, sans-serif;
   --font-mono: "Geist Mono Variable", system-ui, ui-monospace, monospace;
+  /* rune: brand glyph ᚱ (U+16B1) — the real letter, never redrawn */
+  --font-runic: "Noto Sans Runic", system-ui, serif;
+  --tracking-wordmark: -0.04em;
   --text-h1: 1.75rem;
   --text-h1--line-height: 1.25;
   --text-h2: 1.375rem;
@@ -171,6 +175,11 @@ h6 {
 [data-slot$="-item"][data-variant="destructive"]:focus,
 [data-slot$="-item"][data-variant="destructive"][data-highlighted] {
   background: color-mix(in oklab, var(--destructive) 12%, transparent) !important;
+}
+
+/* rune: the wordmark's ᚱ is a single-weight font; never let the browser fake-bold it. */
+[data-slot="wordmark-rune"] {
+  font-synthesis-weight: none;
 }
 
 @layer base {

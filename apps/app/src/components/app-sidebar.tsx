@@ -16,6 +16,7 @@ import {
 import { FolderGlyph } from "@/components/folder-glyph";
 import { KbdHint } from "@/components/kbd-hint";
 import { Tip } from "@/components/tip";
+import { Wordmark } from "@/components/wordmark";
 import { useComposePage } from "@/hooks/use-compose-page";
 import { useNodes } from "@/hooks/use-index";
 import { FOLDER_COLOR_VALUES, folderColorValue } from "@/lib/folder-colors";
@@ -189,9 +190,7 @@ export function AppSidebar() {
     <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader>
         <div className="flex items-center justify-between group-data-[collapsible=icon]:justify-center">
-          <span className="px-2 py-1 text-lg font-medium group-data-[collapsible=icon]:hidden">
-            rune
-          </span>
+          <Wordmark className="px-2 py-1 text-lg group-data-[collapsible=icon]:hidden" />
           <Tip
             label={
               <>
