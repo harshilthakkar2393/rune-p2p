@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { IconSvgElement } from "@hugeicons/react";
@@ -44,7 +45,21 @@ function Tab({
 export function MobileDock() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const compose = useComposePage();
-  if (!useDockVisible(pathname)) return null;
+  const visible = useDockVisible(pathname);
+
+  // iOS scrolls the page under the keyboard while editing and can leave that
+  // offset behind on navigation, which mispositions position:fixed. Reset it
+  // whenever the dock (re)appears and whenever the keyboard goes away.
+  useEffect(() => {
+    if (!visible) return;
+    const reset = () => window.scrollTo(0, 0);
+    reset();
+    const viewport = window.visualViewport;
+    viewport?.addEventListener("resize", reset);
+    return () => viewport?.removeEventListener("resize", reset);
+  }, [visible, pathname]);
+
+  if (!visible) return null;
 
   return (
     <div
