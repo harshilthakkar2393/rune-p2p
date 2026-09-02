@@ -190,7 +190,7 @@ export function AppSidebar() {
     <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader>
         <div className="flex items-center justify-between group-data-[collapsible=icon]:justify-center">
-          <Wordmark className="px-2 py-1 text-lg group-data-[collapsible=icon]:hidden" />
+          <Wordmark className="px-2 py-1 text-h2 group-data-[collapsible=icon]:hidden" />
           <Tip
             label={
               <>
