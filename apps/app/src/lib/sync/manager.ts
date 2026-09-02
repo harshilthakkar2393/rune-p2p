@@ -37,6 +37,9 @@ import { joinPairedRoom } from "@/lib/sync/transport";
 const PAGE_DOC_PREFIX = "page:";
 const INDEX_DOC_ID = "index";
 const DEFAULT_CONCURRENCY = 8;
+/** How long "reconnecting…" stays on after a restart before giving up and
+ *  falling back to "looking for your devices…" if no peer has shown up. */
+const RECONNECT_WAIT_MS = 15_000;
 
 export type ManagerDeps = {
   indexDoc: Y.Doc;
@@ -62,6 +65,7 @@ export class SyncManager {
   private unsubscribeSyncJoin: (() => void) | null = null;
   private unsubscribeSyncLeave: (() => void) | null = null;
   private backoff: BackoffState = initialBackoff();
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
   private readonly pageQueue: string[] = [];
   private readonly inFlight = new Set<string>();
@@ -129,6 +133,14 @@ export class SyncManager {
     this.leaveRoom = null;
     this.syncTransport = null;
 
+    // Only the pending timeout is cleared here — `reconnecting` itself is
+    // left alone, since restart() calls stop() as part of the rejoin and
+    // the flag must stay on for the duration of that rejoin.
+    if (this.reconnectTimer !== null) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+
     this.pageQueue.length = 0;
     this.inFlight.clear();
     this.openedPages.clear();
@@ -140,7 +152,10 @@ export class SyncManager {
    * Attempts to rejoin, honouring reconnect backoff. Returns false if an
    * attempt was made too recently. Page docs re-open instantly because
    * `getPageDoc` caches them — this only redoes the room join and index
-   * registration.
+   * registration. `reconnecting` stays true until a peer joins
+   * (handlePeerCountChange) or RECONNECT_WAIT_MS passes, whichever first —
+   * stop()+start() run synchronously so clearing it here would never let
+   * the UI render the in-between state.
    */
   restart(now = Date.now()): boolean {
     if (!canAttempt(this.backoff, now)) return false;
@@ -148,7 +163,11 @@ export class SyncManager {
     setSyncStatus({ reconnecting: true });
     this.stop();
     this.start();
-    setSyncStatus({ reconnecting: false });
+    // stop() just cleared any previous timer, so this is always a fresh one.
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      setSyncStatus({ reconnecting: false });
+    }, RECONNECT_WAIT_MS);
     return true;
   }
 
@@ -185,8 +204,16 @@ export class SyncManager {
 
   private handlePeerCountChange(): void {
     const connected = this.peerCount() > 0;
-    if (connected) this.backoff = resetBackoff();
-    setSyncStatus({ connected });
+    if (connected) {
+      this.backoff = resetBackoff();
+      if (this.reconnectTimer !== null) {
+        clearTimeout(this.reconnectTimer);
+        this.reconnectTimer = null;
+      }
+      setSyncStatus({ connected, reconnecting: false });
+    } else {
+      setSyncStatus({ connected });
+    }
   }
 
   private observeIndex(): () => void {
@@ -344,6 +371,7 @@ export function stopSync(): void {
   uninstallLifecycle = null;
   currentManager?.stop();
   currentManager = null;
+  setSyncStatus({ reconnecting: false });
 }
 
 /** Publishes the page this device is currently editing, for peers' presence. */

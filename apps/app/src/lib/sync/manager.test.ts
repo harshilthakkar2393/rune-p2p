@@ -402,6 +402,27 @@ describe("SyncManager", () => {
     manager.stop();
   });
 
+  test("reconnecting stays true after restart() until a peer joins", () => {
+    const syncNet = new Map<PeerId, FakeTransport>();
+    const presenceNet = new Map<PeerId, FakeTransport>();
+    const mapA = freshMap();
+    const mapB = freshMap();
+
+    const { manager: managerA, sync: syncA } = buildManager("a", mapA, syncNet, presenceNet);
+    const { manager: managerB, sync: syncB } = buildManager("b", mapB, syncNet, presenceNet);
+
+    managerA.start();
+    expect(managerA.restart(0)).toBe(true);
+    expect(getSyncStatus().reconnecting).toBe(true);
+
+    managerB.start();
+    syncA.connect(syncB);
+    expect(getSyncStatus().reconnecting).toBe(false);
+
+    managerA.stop();
+    managerB.stop();
+  });
+
   test("restart() re-registers the index and re-opens previously opened pages; a remote edit after restart still arrives", async () => {
     const syncNet = new Map<PeerId, FakeTransport>();
     const presenceNet = new Map<PeerId, FakeTransport>();
