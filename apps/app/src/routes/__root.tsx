@@ -45,7 +45,7 @@ function RootComponent() {
           {!isMobile && <AppSidebar />}
           <SidebarInset
             className={cn(
-              "h-dvh overflow-hidden md:h-[calc(100dvh-16px)]",
+              "h-dvh overflow-hidden pt-[env(safe-area-inset-top)] md:h-[calc(100dvh-16px)] md:pt-0",
               // Room for the phone dock so the last card scrolls clear of it.
               dockVisible && "pb-24",
             )}
