@@ -5,6 +5,7 @@ import { createFolder, createPage, removeNode, trashNode } from "@/lib/nodes";
 import type { Node } from "@/lib/schema";
 import { SyncManager, type ManagerDeps } from "@/lib/sync/manager";
 import type { PeerId, Transport } from "@/lib/sync/multiplex";
+import { getSyncStatus } from "@/lib/sync/status";
 
 /**
  * In-memory Transport, copied per repo convention (test helpers stay inside
@@ -58,6 +59,13 @@ class FakeTransport implements Transport {
     other.peerIds.add(this.id);
     for (const handler of this.joinHandlers) handler(other.id);
     for (const handler of other.joinHandlers) handler(this.id);
+  }
+
+  leave(other: FakeTransport) {
+    this.peerIds.delete(other.id);
+    other.peerIds.delete(this.id);
+    for (const handler of this.leaveHandlers) handler(other.id);
+    for (const handler of other.leaveHandlers) handler(this.id);
   }
 }
 
@@ -354,5 +362,121 @@ describe("SyncManager", () => {
     await tick(2);
     managerA.stop();
     managerB.stop();
+  });
+
+  test("connected reflects peer presence: false alone, true after join, false after leave", () => {
+    const syncNet = new Map<PeerId, FakeTransport>();
+    const presenceNet = new Map<PeerId, FakeTransport>();
+    const mapA = freshMap();
+    const mapB = freshMap();
+
+    const { manager: managerA, sync: syncA } = buildManager("a", mapA, syncNet, presenceNet);
+    const { manager: managerB, sync: syncB } = buildManager("b", mapB, syncNet, presenceNet);
+
+    managerA.start();
+    expect(getSyncStatus().connected).toBe(false);
+
+    managerB.start();
+    syncA.connect(syncB);
+    expect(getSyncStatus().connected).toBe(true);
+
+    syncA.leave(syncB);
+    expect(getSyncStatus().connected).toBe(false);
+
+    managerA.stop();
+    managerB.stop();
+  });
+
+  test("restart() honours backoff: a second immediate call is refused, +5000ms allows it", () => {
+    const syncNet = new Map<PeerId, FakeTransport>();
+    const presenceNet = new Map<PeerId, FakeTransport>();
+    const map = freshMap();
+
+    const { manager } = buildManager("a", map, syncNet, presenceNet);
+    manager.start();
+
+    expect(manager.restart(0)).toBe(true);
+    expect(manager.restart(0)).toBe(false);
+    expect(manager.restart(5_000)).toBe(true);
+
+    manager.stop();
+  });
+
+  test("restart() re-registers the index and re-opens previously opened pages; a remote edit after restart still arrives", async () => {
+    const syncNet = new Map<PeerId, FakeTransport>();
+    const presenceNet = new Map<PeerId, FakeTransport>();
+    const mapA = freshMap();
+    const home = unwrap(createFolder(mapA, null, "Home"));
+    const page = unwrap(createPage(mapA, home.id));
+    const mapB = freshMap();
+
+    const openCalls: string[] = [];
+    const {
+      manager: managerA,
+      sync: syncA,
+      presence: presenceA,
+    } = buildManager("a", mapA, syncNet, presenceNet, {
+      openPage: async (pageId) => {
+        openCalls.push(pageId);
+        return new Y.Doc();
+      },
+    });
+    const {
+      manager: managerB,
+      sync: syncB,
+      presence: presenceB,
+    } = buildManager("b", mapB, syncNet, presenceNet);
+
+    managerA.start();
+    managerB.start();
+    syncA.connect(syncB);
+    presenceA.connect(presenceB);
+    await tick(3);
+
+    expect(managerA.openedPageIds()).toContain(page.id);
+    const openCallsBeforeRestart = openCalls.length;
+
+    expect(managerA.restart(0)).toBe(true);
+    await tick(3);
+
+    expect(openCalls.length).toBeGreaterThan(openCallsBeforeRestart);
+    expect(managerA.openedPageIds()).toContain(page.id);
+
+    const homeOnB = mapB.get(home.id);
+    if (!homeOnB) throw new Error("expected home folder to have synced to B");
+    const page2 = unwrap(createPage(mapB, homeOnB.id));
+    await tick(3);
+
+    expect(mapA.get(page2.id)).toEqual(page2);
+
+    managerA.stop();
+    managerB.stop();
+  });
+
+  test("local removeNode does not call destroyPage but unregisters the page", async () => {
+    const syncNet = new Map<PeerId, FakeTransport>();
+    const presenceNet = new Map<PeerId, FakeTransport>();
+    const mapA = freshMap();
+    const home = unwrap(createFolder(mapA, null, "Home"));
+    const page = unwrap(createPage(mapA, home.id));
+
+    const destroyedOnA: string[] = [];
+    const { manager: managerA } = buildManager("a", mapA, syncNet, presenceNet, {
+      destroyPage: async (pageId) => {
+        destroyedOnA.push(pageId);
+      },
+    });
+
+    managerA.start();
+    await tick(3);
+    expect(managerA.openedPageIds()).toContain(page.id);
+
+    unwrap(removeNode(mapA, page.id));
+    await tick(3);
+
+    expect(destroyedOnA).toEqual([]);
+    expect(managerA.openedPageIds()).not.toContain(page.id);
+
+    managerA.stop();
   });
 });
