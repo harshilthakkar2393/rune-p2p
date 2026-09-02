@@ -50,7 +50,7 @@ export function MobileDock() {
     <div
       className={cn(
         "pointer-events-none fixed inset-x-0 bottom-0 z-40 flex items-center justify-between px-4 md:hidden",
-        "pb-[calc(env(safe-area-inset-bottom)+--spacing(4))]",
+        "pb-[max(env(safe-area-inset-bottom),--spacing(4))]",
       )}
     >
       <nav className="pointer-events-auto flex items-center gap-0.5 rounded-full border bg-card p-1 shadow-lg">
