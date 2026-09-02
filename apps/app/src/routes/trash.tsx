@@ -9,6 +9,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { createFileRoute } from "@tanstack/react-router";
 
+import { EmptyState } from "@/components/empty-state";
 import { PageCard, type CardAction } from "@/components/page-card";
 import { PhoneAction, RootMenu } from "@/components/root-menu";
 import { SelectionBar, SelectionBarButton } from "@/components/selection-bar";
@@ -48,7 +49,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@rune/ui/components/dropdown-menu";
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@rune/ui/components/empty";
 import { ScrollArea } from "@rune/ui/components/scroll-area";
 import { cn } from "@rune/ui/lib/utils";
 
@@ -333,23 +333,28 @@ function TrashView() {
       <ScrollArea className="min-h-0 flex-1">
         <main className="px-4 md:px-8 py-4">
           {trashed.length === 0 ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyTitle>Trash is empty</EmptyTitle>
-                <EmptyDescription>
-                  Pages you trash wait here for 30 days before disappearing.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
+            <EmptyState
+              icon={<HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />}
+              title="Trash is empty"
+              description="Pages you trash wait here for 30 days before disappearing."
+            />
           ) : trashedFolders.length + trashedPages.length === 0 ? (
-            <Empty>
-              <EmptyHeader>
-                <EmptyTitle>Nothing matches</EmptyTitle>
-                <EmptyDescription>
-                  Clear the filters to see everything in the trash.
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
+            <EmptyState
+              icon={<HugeiconsIcon icon={FilterMailIcon} strokeWidth={1.75} />}
+              title="Nothing matches"
+              description="No trashed pages fit these filters."
+              action={
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setDateFilter(null);
+                    setFolderFilter(null);
+                  }}
+                >
+                  Clear filters
+                </Button>
+              }
+            />
           ) : (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
               {trashedFolders.map((folder) => {

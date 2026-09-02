@@ -1,4 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { PencilEdit02Icon } from "@hugeicons/core-free-icons";
 
 import { RootMenu } from "@/components/root-menu";
 import { useComposePage } from "@/hooks/use-compose-page";
@@ -8,8 +10,8 @@ import { humanTime } from "@/lib/human-time";
 import type { Folder } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
 import { ScrollArea, ScrollBar } from "@rune/ui/components/scroll-area";
+import { EmptyState } from "@/components/empty-state";
 import { PageCard } from "@/components/page-card";
-import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@rune/ui/components/empty";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [{ title: "Home — Rune" }] }),
@@ -83,13 +85,12 @@ function Home() {
         <main className="mx-auto w-full max-w-3xl px-4 md:px-8 pt-4 pb-8">
           <section className="flex flex-col gap-6">
             {recents.length === 0 ? (
-              <Empty>
-                <EmptyHeader>
-                  <EmptyTitle>Nothing recent</EmptyTitle>
-                  <EmptyDescription>Pages you open show up here.</EmptyDescription>
-                </EmptyHeader>
-                <Button onClick={newPage}>New page</Button>
-              </Empty>
+              <EmptyState
+                icon={<HugeiconsIcon icon={PencilEdit02Icon} strokeWidth={1.75} />}
+                title="Nothing recent"
+                description="Pages you open show up here."
+                action={<Button onClick={newPage}>New page</Button>}
+              />
             ) : (
               dayGroups.map((group) => (
                 <div key={group.label} className="flex flex-col gap-3.5">
