@@ -9,6 +9,7 @@ import { InspectorSlot } from "@/components/inspector-slot";
 import { MobileDock, useDockVisible } from "@/components/mobile-dock";
 import { SearchPalette } from "@/components/search-palette";
 import { Shortcuts } from "@/components/shortcuts";
+import { UpdatePrompt } from "@/components/update-prompt";
 import { captureInstallPrompt, isStandalone, setPwaStatus } from "@/lib/pwa";
 import { ThemeProvider } from "@rune/ui/components/theme-provider";
 import { SidebarInset, SidebarProvider } from "@rune/ui/components/sidebar";
@@ -56,6 +57,7 @@ function RootComponent() {
         </SidebarProvider>
       </TooltipProvider>
       <SearchPalette />
+      <UpdatePrompt />
       <Shortcuts />
       <TanStackDevtools
         config={{
