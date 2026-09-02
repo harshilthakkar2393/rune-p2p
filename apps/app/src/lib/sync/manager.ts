@@ -6,6 +6,13 @@ import { getIndexDoc, getNodesMap } from "@/lib/index-doc";
 import type { NodesMap } from "@/lib/nodes";
 import { destroyPageDoc, getPageDoc } from "@/lib/page-doc";
 import type { Node } from "@/lib/schema";
+import {
+  canAttempt,
+  initialBackoff,
+  recordAttempt,
+  resetBackoff,
+  type BackoffState,
+} from "@/lib/sync/backoff";
 import { Multiplexer, type Transport } from "@/lib/sync/multiplex";
 import { Presence, type PresenceState } from "@/lib/sync/presence";
 import {
@@ -50,6 +57,10 @@ export class SyncManager {
   private leaveRoom: (() => void) | null = null;
   private unobserveIndex: (() => void) | null = null;
   private unsubscribePresence: (() => void) | null = null;
+  private syncTransport: Transport | null = null;
+  private unsubscribeSyncJoin: (() => void) | null = null;
+  private unsubscribeSyncLeave: (() => void) | null = null;
+  private backoff: BackoffState = initialBackoff();
 
   private readonly pageQueue: string[] = [];
   private readonly inFlight = new Set<string>();
@@ -67,6 +78,7 @@ export class SyncManager {
 
     const { sync, presence, leave } = this.deps.join();
     this.leaveRoom = leave;
+    this.syncTransport = sync;
 
     const multiplexer = new Multiplexer(sync);
     multiplexer.onUnknownDoc = (docId) => this.handleUnknownDoc(docId);
@@ -78,7 +90,13 @@ export class SyncManager {
     this.unsubscribePresence = presenceInstance.onChange(() => {
       setSyncStatus({ peers: presenceInstance.peers() });
     });
-    setSyncStatus({ connected: true, peers: presenceInstance.peers() });
+
+    this.unsubscribeSyncJoin = sync.onPeerJoin(() => this.handlePeerCountChange());
+    this.unsubscribeSyncLeave = sync.onPeerLeave(() => this.handlePeerCountChange());
+    // "connected" reflects the presence of a peer, not merely having joined
+    // the room — Trystero never rejects on relay failure, so joining alone
+    // tells us nothing about whether anyone is actually reachable.
+    setSyncStatus({ peers: presenceInstance.peers(), connected: sync.peers().length > 0 });
 
     this.unobserveIndex = this.observeIndex();
 
@@ -97,6 +115,10 @@ export class SyncManager {
     this.unobserveIndex = null;
     this.unsubscribePresence?.();
     this.unsubscribePresence = null;
+    this.unsubscribeSyncJoin?.();
+    this.unsubscribeSyncJoin = null;
+    this.unsubscribeSyncLeave?.();
+    this.unsubscribeSyncLeave = null;
 
     this.presence?.destroy();
     this.presence = null;
@@ -104,12 +126,35 @@ export class SyncManager {
     this.multiplexer = null;
     this.leaveRoom?.();
     this.leaveRoom = null;
+    this.syncTransport = null;
 
     this.pageQueue.length = 0;
     this.inFlight.clear();
     this.openedPages.clear();
 
     setSyncStatus({ connected: false, peers: [], pendingDocs: 0 });
+  }
+
+  /**
+   * Attempts to rejoin, honouring reconnect backoff. Returns false if an
+   * attempt was made too recently. Page docs re-open instantly because
+   * `getPageDoc` caches them — this only redoes the room join and index
+   * registration.
+   */
+  restart(now = Date.now()): boolean {
+    if (!canAttempt(this.backoff, now)) return false;
+    this.backoff = recordAttempt(this.backoff, now);
+    setSyncStatus({ reconnecting: true });
+    this.stop();
+    this.start();
+    setSyncStatus({ reconnecting: false });
+    return true;
+  }
+
+  /** Restarts only if this device currently has no peers — used by lifecycle wiring. */
+  restartIfAlone(now = Date.now()): boolean {
+    if (this.peerCount() === 0) return this.restart(now);
+    return false;
   }
 
   /** Page ids currently opened and registered with the multiplexer. */
@@ -132,6 +177,17 @@ export class SyncManager {
     return this.presence?.awareness ?? null;
   }
 
+  /** Peers currently visible on the sync transport (not presence — that lags). */
+  private peerCount(): number {
+    return this.syncTransport?.peers().length ?? 0;
+  }
+
+  private handlePeerCountChange(): void {
+    const connected = this.peerCount() > 0;
+    if (connected) this.backoff = resetBackoff();
+    setSyncStatus({ connected });
+  }
+
   private observeIndex(): () => void {
     const handler = (event: Y.YMapEvent<Node>) => {
       let changed = false;
@@ -139,7 +195,11 @@ export class SyncManager {
         if (change.action === "delete") {
           const removed = change.oldValue as Node | undefined;
           if (removed?.type === "page") {
-            this.handlePageRemoved(key);
+            // Local permanent deletes are already destroyed by the caller
+            // (trash.tsx / use-index.ts) — only unregister here. Remote
+            // deletes must also destroy the local content db.
+            this.unregisterPage(key);
+            if (!event.transaction.local) this.handlePageRemoved(key);
             changed = true;
           }
         } else if (change.action === "add") {
@@ -200,14 +260,17 @@ export class SyncManager {
       });
   }
 
-  private handlePageRemoved(pageId: string): void {
+  private unregisterPage(pageId: string): void {
     this.openedPages.delete(pageId);
     this.inFlight.delete(pageId);
     const queueIndex = this.pageQueue.indexOf(pageId);
     if (queueIndex !== -1) this.pageQueue.splice(queueIndex, 1);
     this.multiplexer?.unregister(PAGE_DOC_PREFIX + pageId);
-    // Permanent delete always drops the local content db, whether or not
-    // this device had opened the page yet.
+  }
+
+  /** Remote permanent delete: drop the local content db too (local deletes
+   *  already had this done by the caller before the index change lands). */
+  private handlePageRemoved(pageId: string): void {
     void this.deps.destroyPage(pageId);
   }
 
