@@ -3,6 +3,7 @@ import { useSyncExternalStore } from "react";
 import { getNodesMap, initIndexPersistence } from "@/lib/index-doc";
 import { adoptOrphanPages, ensureDefaultFolder, purgeExpired } from "@/lib/nodes";
 import { destroyPageDoc } from "@/lib/page-doc";
+import { getRecentsMap, importLegacyRecents } from "@/lib/recents";
 import type { Node } from "@/lib/schema";
 import { startSyncIfPaired } from "@/lib/sync/manager";
 
@@ -31,6 +32,8 @@ function start() {
     // No-root-pages model: always at least one folder; orphans adopt it.
     ensureDefaultFolder(map);
     adoptOrphanPages(map);
+    // One-time move of this device's pre-sync recents into the synced map.
+    importLegacyRecents(getRecentsMap());
     startSyncIfPaired();
   });
   refreshSnapshot();

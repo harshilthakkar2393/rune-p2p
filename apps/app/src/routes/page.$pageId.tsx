@@ -12,7 +12,7 @@ import { folderColorValue } from "@/lib/folder-colors";
 import { getNodesMap } from "@/lib/index-doc";
 import { setInspectorPage, toggleInspector, useInspector } from "@/lib/inspector";
 import { rememberFolder } from "@/lib/compose-target";
-import { recordOpen } from "@/lib/recents";
+import { getRecentsMap, recordOpen } from "@/lib/recents";
 import { setPresencePage } from "@/lib/sync/manager";
 import type { Folder, Page } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
@@ -26,7 +26,7 @@ function PageView() {
   const { open: inspectorOpen } = useInspector();
 
   useEffect(() => {
-    recordOpen(pageId);
+    recordOpen(getRecentsMap(), pageId);
     setInspectorPage(pageId);
     setPresencePage(pageId);
     const node = getNodesMap().get(pageId);

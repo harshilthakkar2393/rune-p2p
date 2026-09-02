@@ -3,8 +3,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { RootMenu } from "@/components/root-menu";
 import { useComposePage } from "@/hooks/use-compose-page";
 import { useNodes } from "@/hooks/use-index";
+import { useRecents } from "@/hooks/use-recents";
 import { humanTime } from "@/lib/human-time";
-import { readRecents } from "@/lib/recents";
 import type { Folder } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
 import { ScrollArea, ScrollBar } from "@rune/ui/components/scroll-area";
@@ -49,7 +49,8 @@ function Home() {
       .map((folder) => [folder.id, folder]),
   );
 
-  const recents = readRecents()
+  const recentEntries = useRecents();
+  const recents = recentEntries
     .map((entry) => {
       const node = nodes.find(
         (candidate) => candidate.id === entry.pageId && candidate.type === "page",
