@@ -1,0 +1,16 @@
+/* Marketing + docs share the app's design system: tokens, fonts, radius. */
+@import "@rune/ui/styles/globals.css";
+/* Fumadocs adopts the shadcn variables above (background, primary, sidebar…). */
+@import "fumadocs-ui/css/shadcn.css";
+@import "fumadocs-ui/css/preset.css";
+
+@source "../../../packages/ui/src/**/*.tsx";
+
+html {
+  scrollbar-gutter: stable;
+}
+
+html > body[data-scroll-locked] {
+  margin-right: 0px !important;
+  --removed-body-scroll-bar-size: 0px !important;
+}
