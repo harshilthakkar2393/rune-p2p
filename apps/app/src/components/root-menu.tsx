@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  ComputerPhoneSyncIcon,
+  LaptopPhoneSyncIcon,
   Delete02Icon,
   MoreHorizontalIcon,
   Moon02Icon,
@@ -59,7 +59,7 @@ export function RootMenu({ action, children }: { action?: ReactNode; children?: 
           )}
           <DropdownMenuGroup>
             <DropdownMenuItem onClick={() => void navigate({ to: "/devices" })}>
-              <HugeiconsIcon icon={ComputerPhoneSyncIcon} strokeWidth={1.75} />
+              <HugeiconsIcon icon={LaptopPhoneSyncIcon} strokeWidth={1.75} />
               Devices
               {peers.length > 0 && (
                 <span className="ml-auto font-mono text-tiny text-muted-foreground">
