@@ -295,12 +295,7 @@ function FolderView() {
         <main className="px-4 md:px-8 py-4">
           {pages.length === 0 ? (
             <EmptyState
-              icon={
-                <FolderGlyph
-                  className="size-5"
-                  color={folderColorValue(folder.color) ?? "var(--muted-foreground)"}
-                />
-              }
+              glyph="folder"
               title={`Nothing in ${folder.name} yet`}
               description="Pages you create here stay in this folder on every device."
               action={<Button onClick={newPage}>New page</Button>}

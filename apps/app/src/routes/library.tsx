@@ -7,7 +7,6 @@ import {
   CheckmarkCircle02Icon,
   Delete02Icon,
   FilterMailIcon,
-  PencilEdit02Icon,
   Sorting01Icon,
 } from "@hugeicons/core-free-icons";
 
@@ -291,7 +290,7 @@ function LibraryView() {
           {pages.length === 0 ? (
             activeFolder !== undefined || dateFilter !== null ? (
               <EmptyState
-                icon={<HugeiconsIcon icon={FilterMailIcon} strokeWidth={1.75} />}
+                glyph="filter"
                 title="Nothing matches"
                 description="No pages fit these filters."
                 action={
@@ -308,7 +307,7 @@ function LibraryView() {
               />
             ) : (
               <EmptyState
-                icon={<HugeiconsIcon icon={PencilEdit02Icon} strokeWidth={1.75} />}
+                glyph="pages"
                 title="No pages yet"
                 description="Everything you write shows up here, across all folders."
                 action={<Button onClick={newPage}>New page</Button>}

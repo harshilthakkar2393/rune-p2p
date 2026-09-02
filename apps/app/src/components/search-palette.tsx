@@ -3,6 +3,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { File02Icon, Folder01Icon } from "@hugeicons/core-free-icons";
 
 import { useNodes } from "@/hooks/use-index";
+import { EmptyGlyph } from "@/components/empty-glyph";
 import { setPaletteOpen, usePaletteOpen } from "@/lib/palette";
 import type { Folder, Page } from "@/lib/schema";
 import {
@@ -37,7 +38,10 @@ export function SearchPalette() {
       <Command>
         <CommandInput placeholder="Search pages and folders…" />
         <CommandList>
-          <CommandEmpty>No pages match. Try another word.</CommandEmpty>
+          <CommandEmpty className="flex flex-col items-center gap-1 py-8 text-muted-foreground">
+            <EmptyGlyph name="search" className="size-20" />
+            No pages match
+          </CommandEmpty>
           <CommandGroup heading="Pages">
             {pages.map((page) => (
               <CommandItem

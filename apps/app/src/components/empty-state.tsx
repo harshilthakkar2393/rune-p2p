@@ -1,25 +1,26 @@
 import type { ReactNode } from "react";
 
+import { EmptyGlyph, type EmptyGlyphName } from "@/components/empty-glyph";
 import {
   Empty,
   EmptyContent,
   EmptyDescription,
   EmptyHeader,
-  EmptyMedia,
   EmptyTitle,
 } from "@rune/ui/components/empty";
 
 /**
- * One empty-state grammar for every view (Linear's): a small icon tile, a
- * short title, one line of copy, at most one action. Nothing decorative.
+ * Empty-state grammar (Linear's): glyph, one line, at most one action.
+ * On phones only the glyph and the line show — the dock already carries
+ * New page, so a button there would be a second one.
  */
 export function EmptyState({
-  icon,
+  glyph,
   title,
   description,
   action,
 }: {
-  icon: ReactNode;
+  glyph: EmptyGlyphName;
   title: string;
   description?: string;
   action?: ReactNode;
@@ -27,11 +28,13 @@ export function EmptyState({
   return (
     <Empty>
       <EmptyHeader>
-        <EmptyMedia variant="icon">{icon}</EmptyMedia>
-        <EmptyTitle>{title}</EmptyTitle>
-        {description && <EmptyDescription>{description}</EmptyDescription>}
+        <EmptyGlyph name={glyph} className="mb-2 max-md:size-20" />
+        <EmptyTitle className="font-normal">{title}</EmptyTitle>
+        {description && (
+          <EmptyDescription className="max-md:hidden">{description}</EmptyDescription>
+        )}
       </EmptyHeader>
-      {action && <EmptyContent>{action}</EmptyContent>}
+      {action && <EmptyContent className="max-md:hidden">{action}</EmptyContent>}
     </Empty>
   );
 }

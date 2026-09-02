@@ -333,14 +333,10 @@ function TrashView() {
       <ScrollArea className="min-h-0 flex-1">
         <main className="px-4 md:px-8 py-4">
           {trashed.length === 0 ? (
-            <EmptyState
-              icon={<HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />}
-              title="Trash is empty"
-              description="Pages you trash wait here for 30 days before disappearing."
-            />
+            <EmptyState glyph="trash" title="Trash is empty" />
           ) : trashedFolders.length + trashedPages.length === 0 ? (
             <EmptyState
-              icon={<HugeiconsIcon icon={FilterMailIcon} strokeWidth={1.75} />}
+              glyph="filter"
               title="Nothing matches"
               description="No trashed pages fit these filters."
               action={

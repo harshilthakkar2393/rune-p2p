@@ -1,6 +1,4 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { PencilEdit02Icon } from "@hugeicons/core-free-icons";
 
 import { RootMenu } from "@/components/root-menu";
 import { useComposePage } from "@/hooks/use-compose-page";
@@ -86,7 +84,7 @@ function Home() {
           <section className="flex flex-col gap-6">
             {recents.length === 0 ? (
               <EmptyState
-                icon={<HugeiconsIcon icon={PencilEdit02Icon} strokeWidth={1.75} />}
+                glyph="home"
                 title="Nothing recent"
                 description="Pages you open show up here."
                 action={<Button onClick={newPage}>New page</Button>}
