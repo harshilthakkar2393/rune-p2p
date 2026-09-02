@@ -37,7 +37,7 @@ export function SearchPalette() {
       <Command>
         <CommandInput placeholder="Search pages and folders…" />
         <CommandList>
-          <CommandEmpty>No pages match. Try another word.</CommandEmpty>
+          <CommandEmpty>No results.</CommandEmpty>
           <CommandGroup heading="Pages">
             {pages.map((page) => (
               <CommandItem

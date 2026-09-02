@@ -12,7 +12,6 @@ import {
 } from "@hugeicons/core-free-icons";
 
 import { FolderGlyph } from "@/components/folder-glyph";
-import { EmptyState } from "@/components/empty-state";
 import { PageCard, type CardAction } from "@/components/page-card";
 import { PhoneAction, RootMenu } from "@/components/root-menu";
 import { SelectionBar, SelectionBarButton } from "@/components/selection-bar";
@@ -293,53 +292,39 @@ function FolderView() {
 
       <ScrollArea className="min-h-0 flex-1">
         <main className="px-4 md:px-8 py-4">
-          {pages.length === 0 ? (
-            <EmptyState
-              icon={
-                <FolderGlyph
-                  className="size-5"
-                  color={folderColorValue(folder.color) ?? "var(--muted-foreground)"}
-                />
-              }
-              title={`Nothing in ${folder.name} yet`}
-              description="Pages you create here stay in this folder on every device."
-              action={<Button onClick={newPage}>New page</Button>}
-            />
-          ) : (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
-              {pages.map((page) => (
-                <PageCard
-                  key={page.id}
-                  page={page}
-                  folder={undefined}
-                  selected={selected.has(page.id)}
-                  selecting={selecting}
-                  trailing={
-                    <span className="font-mono text-tiny text-muted-foreground">
-                      {humanTime(page.updatedAt)}
-                    </span>
-                  }
-                  actions={pageActions(page.id)}
-                  onSelectToggle={() => selection.toggle(page.id)}
-                  onActivate={(event) =>
-                    selection.handleCardClick(page.id, event, () => openPage(page.id))
-                  }
-                />
-              ))}
-              <Card
-                role="button"
-                tabIndex={0}
-                onClick={newPage}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") newPage();
-                }}
-                className="flex h-36 cursor-pointer flex-row items-center justify-center gap-2 border border-dashed bg-transparent p-4 ring-0 text-small text-muted-foreground shadow-none transition-colors hover:border-foreground/25 hover:text-foreground"
-              >
-                <HugeiconsIcon icon={Add01Icon} strokeWidth={1.75} className="size-4!" />
-                New page
-              </Card>
-            </div>
-          )}
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
+            {pages.map((page) => (
+              <PageCard
+                key={page.id}
+                page={page}
+                folder={undefined}
+                selected={selected.has(page.id)}
+                selecting={selecting}
+                trailing={
+                  <span className="font-mono text-tiny text-muted-foreground">
+                    {humanTime(page.updatedAt)}
+                  </span>
+                }
+                actions={pageActions(page.id)}
+                onSelectToggle={() => selection.toggle(page.id)}
+                onActivate={(event) =>
+                  selection.handleCardClick(page.id, event, () => openPage(page.id))
+                }
+              />
+            ))}
+            <Card
+              role="button"
+              tabIndex={0}
+              onClick={newPage}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") newPage();
+              }}
+              className="flex h-36 cursor-pointer flex-row items-center justify-center gap-2 border border-dashed bg-transparent p-4 ring-0 text-small text-muted-foreground shadow-none transition-colors hover:border-foreground/25 hover:text-foreground"
+            >
+              <HugeiconsIcon icon={Add01Icon} strokeWidth={1.75} className="size-4!" />
+              New page
+            </Card>
+          </div>
         </main>
       </ScrollArea>
 
