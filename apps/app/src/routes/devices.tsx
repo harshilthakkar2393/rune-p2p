@@ -26,6 +26,7 @@ import { PairQr } from "@/components/pair-qr";
 import { QrScanDialog } from "@/components/qr-scan-dialog";
 import { useNodes } from "@/hooks/use-index";
 import { getDeviceName } from "@/lib/device";
+import { promptInstall, usePwaStatus } from "@/lib/pwa";
 import { pairWithSecret, unpair } from "@/lib/sync/manager";
 import { buildPairLink, parsePairInput } from "@/lib/sync/pair-link";
 import { generateSecret, readStoredSecret, secretToPhrase } from "@/lib/sync/secret";
@@ -40,6 +41,8 @@ export const Route = createFileRoute("/devices")({
 function DevicesView() {
   const status = useSyncStatus();
   const nodes = useNodes();
+  const pwa = usePwaStatus();
+  const isIOS = /iPhone|iPad/.test(navigator.userAgent);
   const [phraseInput, setPhraseInput] = useState("");
   const [phraseError, setPhraseError] = useState<string | null>(null);
   const [revealedSecret, setRevealedSecret] = useState<Uint8Array | null>(null);
@@ -219,6 +222,53 @@ function DevicesView() {
             </Button>
           </div>
         )}
+
+        <Card className="mt-8 p-6">
+          <CardHeader className="px-0">
+            <CardTitle className="text-h3">This device</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3 px-0">
+            <div className="flex items-center justify-between text-sm">
+              <span>Installed</span>
+              {pwa.standalone ? (
+                <Badge variant="secondary">app</Badge>
+              ) : pwa.canInstall ? (
+                <Button size="sm" onClick={() => void promptInstall()}>
+                  Install
+                </Button>
+              ) : (
+                <span className="text-small text-muted-foreground">
+                  {isIOS ? "Share → Add to Home Screen" : "Open in a browser that supports install"}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center justify-between text-sm">
+                <span>Storage</span>
+                <span className="font-mono text-tiny text-muted-foreground">
+                  {pwa.persisted === true
+                    ? "persistent"
+                    : pwa.persisted === false
+                      ? "not yet persistent"
+                      : "unknown"}
+                </span>
+              </div>
+              {pwa.persisted === false && (
+                <span className="text-small text-muted-foreground">
+                  {isIOS
+                    ? "Install the app to keep notes safe from browser cleanup."
+                    : "Grant persistent storage when asked."}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span>Offline</span>
+              <span className="text-small text-muted-foreground">
+                {pwa.offlineReady ? "ready" : "after first load"}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
 
         <AlertDialog
           open={confirmUnpair}

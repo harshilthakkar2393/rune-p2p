@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { HeadContent, Outlet, createRootRoute, useRouterState } from "@tanstack/react-router";
 
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
@@ -8,6 +9,8 @@ import { InspectorSlot } from "@/components/inspector-slot";
 import { MobileDock, useDockVisible } from "@/components/mobile-dock";
 import { SearchPalette } from "@/components/search-palette";
 import { Shortcuts } from "@/components/shortcuts";
+import { UpdatePrompt } from "@/components/update-prompt";
+import { captureInstallPrompt, isStandalone, setPwaStatus } from "@/lib/pwa";
 import { ThemeProvider } from "@rune/ui/components/theme-provider";
 import { SidebarInset, SidebarProvider } from "@rune/ui/components/sidebar";
 import { useIsMobile } from "@rune/ui/hooks/use-mobile";
@@ -26,6 +29,14 @@ function RootComponent() {
   const isMobile = useIsMobile();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const dockVisible = isMobile && useDockVisible(pathname);
+  useEffect(() => captureInstallPrompt(), []);
+  useEffect(
+    () =>
+      setPwaStatus({
+        standalone: isStandalone(window as unknown as Parameters<typeof isStandalone>[0]),
+      }),
+    [],
+  );
   return (
     <ThemeProvider>
       <HeadContent />
@@ -46,6 +57,7 @@ function RootComponent() {
         </SidebarProvider>
       </TooltipProvider>
       <SearchPalette />
+      <UpdatePrompt />
       <Shortcuts />
       <TanStackDevtools
         config={{

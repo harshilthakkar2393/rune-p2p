@@ -3,6 +3,7 @@ import { useSyncExternalStore } from "react";
 import { getNodesMap, initIndexPersistence } from "@/lib/index-doc";
 import { adoptOrphanPages, ensureDefaultFolder, purgeExpired } from "@/lib/nodes";
 import { destroyPageDoc } from "@/lib/page-doc";
+import { requestPersistentStorage } from "@/lib/pwa";
 import { getRecentsMap, importLegacyRecents } from "@/lib/recents";
 import type { Node } from "@/lib/schema";
 import { startSyncIfPaired } from "@/lib/sync/manager";
@@ -34,6 +35,7 @@ function start() {
     adoptOrphanPages(map);
     // One-time move of this device's pre-sync recents into the synced map.
     importLegacyRecents(getRecentsMap());
+    void requestPersistentStorage();
     startSyncIfPaired();
   });
   refreshSnapshot();
