@@ -69,9 +69,12 @@ type PersistenceStorage = {
 /**
  * Ask the browser to keep IndexedDB out of eviction. Never throws — a
  * rejected or missing API resolves to `null` ("unknown"), not an error.
+ * Defaults to `navigator.storage`, which is undefined in unsupported
+ * browsers (older Safari, insecure context) — the caller normally omits
+ * `storage`; tests inject fakes or pass `null` to force "no API".
  */
 export async function requestPersistentStorage(
-  storage?: PersistenceStorage | null,
+  storage: PersistenceStorage | null = navigator.storage,
 ): Promise<boolean | null> {
   if (!storage?.persist || !storage.persisted) {
     setPwaStatus({ persisted: null });
