@@ -13,6 +13,7 @@ import {
   resetBackoff,
   type BackoffState,
 } from "@/lib/sync/backoff";
+import { installSyncLifecycle } from "@/lib/sync/lifecycle";
 import { Multiplexer, type Transport } from "@/lib/sync/multiplex";
 import { Presence, type PresenceState } from "@/lib/sync/presence";
 import {
@@ -288,6 +289,7 @@ export class SyncManager {
 
 let currentManager: SyncManager | null = null;
 let startInFlight = false;
+let uninstallLifecycle: (() => void) | null = null;
 
 function buildLocalState(): PresenceState {
   return { deviceId: getDeviceId(), name: getDeviceName(), pageId: null };
@@ -327,6 +329,7 @@ export function startSyncIfPaired(): void {
       });
       currentManager = manager;
       manager.start();
+      uninstallLifecycle = installSyncLifecycle(manager);
       setSyncStatus({ paired: true, error: null });
     })
     .catch((error: unknown) => {
@@ -337,6 +340,8 @@ export function startSyncIfPaired(): void {
 }
 
 export function stopSync(): void {
+  uninstallLifecycle?.();
+  uninstallLifecycle = null;
   currentManager?.stop();
   currentManager = null;
 }
