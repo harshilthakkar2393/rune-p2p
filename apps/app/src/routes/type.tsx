@@ -6,7 +6,10 @@ import { BlockNoteView } from "@blocknote/shadcn";
 import { useTheme } from "@rune/ui/components/theme-provider";
 import { Separator } from "@rune/ui/components/separator";
 
-export const Route = createFileRoute("/type")({ component: TypePlayground });
+export const Route = createFileRoute("/type")({
+  head: () => ({ meta: [{ title: "Type — Rune" }] }),
+  component: TypePlayground,
+});
 
 /**
  * Throwaway type-tuning page. The editor's rendering is the REFERENCE;

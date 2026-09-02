@@ -14,7 +14,10 @@ import { pairWithSecret } from "@/lib/sync/manager";
 import { parsePairInput } from "@/lib/sync/pair-link";
 import { useSyncStatus } from "@/lib/sync/status";
 
-export const Route = createFileRoute("/pair")({ component: PairView });
+export const Route = createFileRoute("/pair")({
+  head: () => ({ meta: [{ title: "Pair this device — Rune" }] }),
+  component: PairView,
+});
 
 function PairView() {
   const navigate = useNavigate();

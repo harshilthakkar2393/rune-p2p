@@ -46,7 +46,10 @@ import {
   DropdownMenuTrigger,
 } from "@rune/ui/components/dropdown-menu";
 
-export const Route = createFileRoute("/library")({ component: LibraryView });
+export const Route = createFileRoute("/library")({
+  head: () => ({ meta: [{ title: "Library — Rune" }] }),
+  component: LibraryView,
+});
 
 function LibraryView() {
   const nodes = useNodes();

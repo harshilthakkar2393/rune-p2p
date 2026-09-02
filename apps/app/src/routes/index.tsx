@@ -11,7 +11,10 @@ import { ScrollArea, ScrollBar } from "@rune/ui/components/scroll-area";
 import { PageCard } from "@/components/page-card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@rune/ui/components/empty";
 
-export const Route = createFileRoute("/")({ component: Home });
+export const Route = createFileRoute("/")({
+  head: () => ({ meta: [{ title: "Home — Rune" }] }),
+  component: Home,
+});
 
 function dayKey(timestamp: number): string {
   const date = new Date(timestamp);

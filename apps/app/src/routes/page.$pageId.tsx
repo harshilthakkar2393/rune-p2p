@@ -44,6 +44,10 @@ function PageView() {
       : undefined;
   const folderTint = folderColorValue(folder?.color);
 
+  useEffect(() => {
+    document.title = `${page?.title === "" || !page ? "Untitled" : page.title} — Rune`;
+  }, [page?.title, page]);
+
   return (
     <div className="flex h-full">
       <div className="flex min-w-0 flex-1 flex-col">

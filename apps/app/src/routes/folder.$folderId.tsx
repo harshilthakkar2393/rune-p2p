@@ -70,6 +70,10 @@ function FolderView() {
       node.type === "folder" && node.deletedAt === undefined && node.id !== folderId,
   );
 
+  useEffect(() => {
+    document.title = `${folder?.name ?? "Folder"} — Rune`;
+  }, [folder?.name]);
+
   const pages = useMemo(() => {
     const inFolder = nodes.filter(
       (node): node is Page =>

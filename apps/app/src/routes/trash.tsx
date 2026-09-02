@@ -52,7 +52,10 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@rune/ui/compo
 import { ScrollArea } from "@rune/ui/components/scroll-area";
 import { cn } from "@rune/ui/lib/utils";
 
-export const Route = createFileRoute("/trash")({ component: TrashView });
+export const Route = createFileRoute("/trash")({
+  head: () => ({ meta: [{ title: "Trash — Rune" }] }),
+  component: TrashView,
+});
 
 type TrashSort = "deleted" | "expiring";
 

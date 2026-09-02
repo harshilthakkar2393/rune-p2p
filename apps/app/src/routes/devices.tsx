@@ -32,7 +32,10 @@ import { generateSecret, readStoredSecret, secretToPhrase } from "@/lib/sync/sec
 import { useSyncStatus } from "@/lib/sync/status";
 import type { Page } from "@/lib/schema";
 
-export const Route = createFileRoute("/devices")({ component: DevicesView });
+export const Route = createFileRoute("/devices")({
+  head: () => ({ meta: [{ title: "Devices — Rune" }] }),
+  component: DevicesView,
+});
 
 function DevicesView() {
   const status = useSyncStatus();

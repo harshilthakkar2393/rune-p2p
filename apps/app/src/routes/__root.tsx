@@ -1,4 +1,4 @@
-import { Outlet, createRootRoute, useRouterState } from "@tanstack/react-router";
+import { HeadContent, Outlet, createRootRoute, useRouterState } from "@tanstack/react-router";
 
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
@@ -18,6 +18,7 @@ import { cn } from "@rune/ui/lib/utils";
 import "../styles.css";
 
 export const Route = createRootRoute({
+  head: () => ({ meta: [{ title: "Rune" }] }),
   component: RootComponent,
 });
 
@@ -27,6 +28,7 @@ function RootComponent() {
   const dockVisible = isMobile && useDockVisible(pathname);
   return (
     <ThemeProvider>
+      <HeadContent />
       <TooltipProvider delay={300}>
         <SidebarProvider>
           {!isMobile && <AppSidebar />}
