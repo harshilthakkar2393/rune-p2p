@@ -7,7 +7,9 @@ import type * as Y from "yjs";
 import { setActiveEditor } from "@/lib/editor-ref";
 import { usePageDoc } from "@/hooks/use-page-doc";
 import { getDeviceName } from "@/lib/device";
+import { deviceColor } from "@/lib/sync/device-color";
 import { getSyncAwareness } from "@/lib/sync/manager";
+import { getDeviceId } from "@/lib/sync/secret";
 import { useTheme } from "@rune/ui/components/theme-provider";
 
 const PAGE_FRAGMENT = "blocknote";
@@ -23,7 +25,7 @@ function BoundEditor({ doc }: { doc: Y.Doc }) {
         // cursor plugin only renders positions that resolve inside this
         // page's doc, so peers editing elsewhere show no cursor here.
         provider: awareness ? { awareness } : undefined,
-        user: { name: getDeviceName(), color: "#737373" },
+        user: { name: getDeviceName(), color: deviceColor(getDeviceId()) },
         showCursorLabels: "activity",
       },
     }),
