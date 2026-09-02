@@ -11,7 +11,7 @@ starting, honor its STOP conditions, and update your row when done.
 |------|-------|----------|--------|------------|--------|
 | 001  | Ship the P2P sync core (Phase B1) | P1 | L | — | DONE — reviewed 2026-09-01, APPROVED; on branch `advisor/001-sync-core` (worktree `../rune-wt-001`), awaiting merge + manual two-browser check |
 | 002  | Pairing UX — QR, link route, scanner, presence, cursors | P1 | M | 001 | DONE — reviewed 2026-09-01 (one revision: scanner effect keyed on `open`), merged to main; manual phone QR test pending |
-| 003  | Sync hardening — rejoin, backoff, cursor colours, single destroy | P1 | M | 001, 002 | IN PROGRESS (executor on advisor/003-hardening, worktree ../rune-wt-003) |
+| 003  | Sync hardening — rejoin, backoff, cursor colours, single destroy | P1 | M | 001, 002 | DONE — reviewed 2026-09-02 (one revision: reconnecting persists until peer/15 s), merged; phone background/foreground + 3-device test pending |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
 
@@ -48,3 +48,12 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJE
 - Cursors: BlockNote accepts `provider: { awareness }` (plain object). One
   Awareness is shared across pages; cursors from peers on other pages resolve
   to null positions and are not drawn. Colors are all `#737373` — B3 candidate.
+
+## Review notes (003)
+
+- One REVISE round: `restart()` cleared `reconnecting` synchronously so the UI
+  could never show it. Now stays on until the first peer joins or 15 s pass.
+- `connected` now means "≥1 peer on the sync transport". A lone paired device
+  shows "looking for your devices…", which is normal.
+- Local permanent deletes are unregistered by the manager but destroyed only
+  by the caller (`event.transaction.local` gate). Remote deletes destroy.
