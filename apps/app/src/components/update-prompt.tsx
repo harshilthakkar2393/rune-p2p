@@ -9,6 +9,8 @@ import { Button } from "@rune/ui/components/button";
  * user-driven (registerType: "prompt") — Yjs persists every keystroke, but
  * a reload mid-edit still loses caret/scroll, so we never auto-update.
  */
+const UPDATE_CHECK_MS = 60 * 60 * 1000;
+
 export function UpdatePrompt() {
   const [dismissed, setDismissed] = useState(false);
   const { needRefresh, updateServiceWorker } = useRegisterSW({
@@ -17,6 +19,16 @@ export function UpdatePrompt() {
     },
     onNeedRefresh() {
       setPwaStatus({ needRefresh: true });
+    },
+    // Installed iOS apps rarely check for a new worker on their own. Ask on
+    // every foreground and once an hour so updates actually surface.
+    onRegisteredSW(_url, registration) {
+      if (!registration) return;
+      const check = () => void registration.update().catch(() => undefined);
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") check();
+      });
+      setInterval(check, UPDATE_CHECK_MS);
     },
   });
   const [refreshNeeded] = needRefresh;
