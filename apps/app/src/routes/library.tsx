@@ -7,10 +7,12 @@ import {
   CheckmarkCircle02Icon,
   Delete02Icon,
   FilterMailIcon,
+  PencilEdit02Icon,
   Sorting01Icon,
 } from "@hugeicons/core-free-icons";
 
 import { FolderGlyph } from "@/components/folder-glyph";
+import { EmptyState } from "@/components/empty-state";
 import { PageCard, type CardAction } from "@/components/page-card";
 import { PhoneAction, RootMenu } from "@/components/root-menu";
 import { SelectionBar, SelectionBarButton } from "@/components/selection-bar";
@@ -286,41 +288,69 @@ function LibraryView() {
 
       <ScrollArea className="min-h-0 flex-1">
         <main className="px-4 md:px-8 py-4">
-          <div className="w-full">
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
-              {pages.map((page) => (
-                <PageCard
-                  key={page.id}
-                  page={page}
-                  folder={page.folderId !== null ? folderById.get(page.folderId) : undefined}
-                  selected={selected.has(page.id)}
-                  selecting={selecting}
-                  trailing={
-                    <span className="font-mono text-tiny text-muted-foreground">
-                      {humanTime(page.updatedAt)}
-                    </span>
-                  }
-                  actions={pageActions(page.id)}
-                  onSelectToggle={() => selection.toggle(page.id)}
-                  onActivate={(event) =>
-                    selection.handleCardClick(page.id, event, () => openPage(page.id))
-                  }
-                />
-              ))}
-              <Card
-                role="button"
-                tabIndex={0}
-                onClick={newPage}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") newPage();
-                }}
-                className="flex h-36 cursor-pointer flex-row items-center justify-center gap-2 border border-dashed bg-transparent p-4 ring-0 text-small text-muted-foreground shadow-none transition-colors hover:border-foreground/25 hover:text-foreground"
-              >
-                <HugeiconsIcon icon={Add01Icon} strokeWidth={1.75} className="size-4!" />
-                New page
-              </Card>
+          {pages.length === 0 ? (
+            activeFolder !== undefined || dateFilter !== null ? (
+              <EmptyState
+                icon={<HugeiconsIcon icon={FilterMailIcon} strokeWidth={1.75} />}
+                title="Nothing matches"
+                description="No pages fit these filters."
+                action={
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setDateFilter(null);
+                      setFolderFilter(null);
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                }
+              />
+            ) : (
+              <EmptyState
+                icon={<HugeiconsIcon icon={PencilEdit02Icon} strokeWidth={1.75} />}
+                title="No pages yet"
+                description="Everything you write shows up here, across all folders."
+                action={<Button onClick={newPage}>New page</Button>}
+              />
+            )
+          ) : (
+            <div className="w-full">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
+                {pages.map((page) => (
+                  <PageCard
+                    key={page.id}
+                    page={page}
+                    folder={page.folderId !== null ? folderById.get(page.folderId) : undefined}
+                    selected={selected.has(page.id)}
+                    selecting={selecting}
+                    trailing={
+                      <span className="font-mono text-tiny text-muted-foreground">
+                        {humanTime(page.updatedAt)}
+                      </span>
+                    }
+                    actions={pageActions(page.id)}
+                    onSelectToggle={() => selection.toggle(page.id)}
+                    onActivate={(event) =>
+                      selection.handleCardClick(page.id, event, () => openPage(page.id))
+                    }
+                  />
+                ))}
+                <Card
+                  role="button"
+                  tabIndex={0}
+                  onClick={newPage}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") newPage();
+                  }}
+                  className="flex h-36 cursor-pointer flex-row items-center justify-center gap-2 border border-dashed bg-transparent p-4 ring-0 text-small text-muted-foreground shadow-none transition-colors hover:border-foreground/25 hover:text-foreground"
+                >
+                  <HugeiconsIcon icon={Add01Icon} strokeWidth={1.75} className="size-4!" />
+                  New page
+                </Card>
+              </div>
             </div>
-          </div>
+          )}
         </main>
       </ScrollArea>
 
