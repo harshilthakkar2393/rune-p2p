@@ -18,7 +18,7 @@ import type { PeerId, Transport } from "@/lib/sync/multiplex";
 export type RoomHandle = {
   sync: Transport;
   presence: Transport;
-  leave(): void;
+  leave(): Promise<void>;
   selfId: string;
 };
 
@@ -85,7 +85,7 @@ export function joinPairedRoom(keys: { roomId: string; password: string }): Room
     sync: makeTransport(syncAction, peers, onJoin, onLeave),
     presence: makeTransport(presenceAction, peers, onJoin, onLeave),
     leave() {
-      void room.leave();
+      return room.leave();
     },
     selfId,
   };

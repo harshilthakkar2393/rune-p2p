@@ -6,23 +6,23 @@
  */
 
 type LifecycleManager = {
-  restartIfAlone(now?: number): boolean;
+  restartIfAlone(now?: number): boolean | Promise<boolean>;
 };
 
 /**
  * Installs `visibilitychange` / `online` / `pageshow` (bfcache restore)
- * listeners that call `manager.restartIfAlone()`. Returns a function that
+ * listeners that call `void manager.restartIfAlone()`. Returns a function that
  * removes all three listeners.
  */
 export function installSyncLifecycle(manager: LifecycleManager): () => void {
   if (typeof document === "undefined") return () => undefined;
 
   const onVisibilityChange = () => {
-    if (document.visibilityState === "visible") manager.restartIfAlone();
+    if (document.visibilityState === "visible") void manager.restartIfAlone();
   };
-  const onOnline = () => manager.restartIfAlone();
+  const onOnline = () => void manager.restartIfAlone();
   const onPageShow = (event: PageTransitionEvent) => {
-    if (event.persisted) manager.restartIfAlone();
+    if (event.persisted) void manager.restartIfAlone();
   };
 
   document.addEventListener("visibilitychange", onVisibilityChange);

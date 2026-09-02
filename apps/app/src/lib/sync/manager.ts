@@ -40,13 +40,15 @@ const DEFAULT_CONCURRENCY = 8;
 /** How long "reconnecting…" stays on after a restart before giving up and
  *  falling back to "looking for your devices…" if no peer has shown up. */
 const RECONNECT_WAIT_MS = 15_000;
+/** Launch-time visibility/pageshow events must not restart a join that just started. */
+const START_GRACE_MS = 10_000;
 
 export type ManagerDeps = {
   indexDoc: Y.Doc;
   nodesMap: NodesMap;
   openPage: (pageId: string) => Promise<Y.Doc>;
   destroyPage: (pageId: string) => Promise<void>;
-  join: () => { sync: Transport; presence: Transport; leave(): void };
+  join: () => { sync: Transport; presence: Transport; leave(): void | Promise<void> };
   local: PresenceState;
   concurrency?: number;
 };
@@ -58,7 +60,12 @@ export class SyncManager {
 
   private multiplexer: Multiplexer | null = null;
   private presence: Presence | null = null;
-  private leaveRoom: (() => void) | null = null;
+  private leaveRoom: (() => void | Promise<void>) | null = null;
+  /** Resolves when the last room leave completed (Trystero hands back the OLD room if you rejoin before it does). */
+  private lastLeave: Promise<void> = Promise.resolve();
+  private startedAt = 0;
+  private restarting = false;
+  private detached = false;
   private unobserveIndex: (() => void) | null = null;
   private unsubscribePresence: (() => void) | null = null;
   private syncTransport: Transport | null = null;
@@ -77,9 +84,10 @@ export class SyncManager {
   }
 
   /** Joins the room, registers the index doc, and starts the page queue. */
-  start(): void {
-    if (this.started) return;
+  start(now = Date.now()): void {
+    if (this.started || this.detached) return;
     this.started = true;
+    this.startedAt = now;
 
     const { sync, presence, leave } = this.deps.join();
     this.leaveRoom = leave;
@@ -129,7 +137,7 @@ export class SyncManager {
     this.presence = null;
     this.multiplexer?.destroy();
     this.multiplexer = null;
-    this.leaveRoom?.();
+    this.lastLeave = Promise.resolve(this.leaveRoom?.()).catch(() => undefined);
     this.leaveRoom = null;
     this.syncTransport = null;
 
@@ -157,12 +165,19 @@ export class SyncManager {
    * stop()+start() run synchronously so clearing it here would never let
    * the UI render the in-between state.
    */
-  restart(now = Date.now()): boolean {
-    if (!canAttempt(this.backoff, now)) return false;
+  async restart(now = Date.now()): Promise<boolean> {
+    if (this.restarting || this.detached || !canAttempt(this.backoff, now)) return false;
+    this.restarting = true;
     this.backoff = recordAttempt(this.backoff, now);
     setSyncStatus({ reconnecting: true });
     this.stop();
-    this.start();
+    // Wait for the old room to actually leave: Trystero returns the still-
+    // occupied room object for a re-join of the same id, and that room is
+    // being torn down — sync would come back dead.
+    await this.lastLeave;
+    this.restarting = false;
+    if (this.detached) return false;
+    this.start(now);
     // stop() just cleared any previous timer, so this is always a fresh one.
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
@@ -172,9 +187,18 @@ export class SyncManager {
   }
 
   /** Restarts only if this device currently has no peers — used by lifecycle wiring. */
-  restartIfAlone(now = Date.now()): boolean {
+  restartIfAlone(now = Date.now()): Promise<boolean> {
+    if (!this.started && !this.restarting) return Promise.resolve(false);
+    // A join that just started has no peers yet; give it time before judging it dead.
+    if (now - this.startedAt < START_GRACE_MS) return Promise.resolve(false);
     if (this.peerCount() === 0) return this.restart(now);
-    return false;
+    return Promise.resolve(false);
+  }
+
+  /** Permanent stop: also cancels any restart that is mid-await. */
+  detach(): void {
+    this.detached = true;
+    this.stop();
   }
 
   /** Page ids currently opened and registered with the multiplexer. */
@@ -369,7 +393,7 @@ export function startSyncIfPaired(): void {
 export function stopSync(): void {
   uninstallLifecycle?.();
   uninstallLifecycle = null;
-  currentManager?.stop();
+  currentManager?.detach();
   currentManager = null;
   setSyncStatus({ reconnecting: false });
 }

@@ -387,7 +387,7 @@ describe("SyncManager", () => {
     managerB.stop();
   });
 
-  test("restart() honours backoff: a second immediate call is refused, +5000ms allows it", () => {
+  test("restart() honours backoff: a second immediate call is refused, +5000ms allows it", async () => {
     const syncNet = new Map<PeerId, FakeTransport>();
     const presenceNet = new Map<PeerId, FakeTransport>();
     const map = freshMap();
@@ -395,14 +395,14 @@ describe("SyncManager", () => {
     const { manager } = buildManager("a", map, syncNet, presenceNet);
     manager.start();
 
-    expect(manager.restart(0)).toBe(true);
-    expect(manager.restart(0)).toBe(false);
-    expect(manager.restart(5_000)).toBe(true);
+    expect(await manager.restart(0)).toBe(true);
+    expect(await manager.restart(0)).toBe(false);
+    expect(await manager.restart(5_000)).toBe(true);
 
     manager.stop();
   });
 
-  test("reconnecting stays true after restart() until a peer joins", () => {
+  test("reconnecting stays true after restart() until a peer joins", async () => {
     const syncNet = new Map<PeerId, FakeTransport>();
     const presenceNet = new Map<PeerId, FakeTransport>();
     const mapA = freshMap();
@@ -412,7 +412,7 @@ describe("SyncManager", () => {
     const { manager: managerB, sync: syncB } = buildManager("b", mapB, syncNet, presenceNet);
 
     managerA.start();
-    expect(managerA.restart(0)).toBe(true);
+    expect(await managerA.restart(0)).toBe(true);
     expect(getSyncStatus().reconnecting).toBe(true);
 
     managerB.start();
@@ -457,7 +457,7 @@ describe("SyncManager", () => {
     expect(managerA.openedPageIds()).toContain(page.id);
     const openCallsBeforeRestart = openCalls.length;
 
-    expect(managerA.restart(0)).toBe(true);
+    expect(await managerA.restart(0)).toBe(true);
     await tick(3);
 
     expect(openCalls.length).toBeGreaterThan(openCallsBeforeRestart);
@@ -499,5 +499,64 @@ describe("SyncManager", () => {
     expect(managerA.openedPageIds()).not.toContain(page.id);
 
     managerA.stop();
+  });
+
+  test("restart() waits for the previous leave to finish before rejoining", async () => {
+    const mapA = freshMap();
+    let joins = 0;
+    let resolveLeave: () => void = () => undefined;
+    const sync = new FakeTransport("a", new Map());
+    const presence = new FakeTransport("a-p", new Map());
+    const manager = new SyncManager({
+      indexDoc: mapA.doc as Y.Doc,
+      nodesMap: mapA,
+      openPage: async () => new Y.Doc(),
+      destroyPage: async () => undefined,
+      join: () => {
+        joins += 1;
+        return {
+          sync,
+          presence,
+          leave: () =>
+            new Promise<void>((resolve) => {
+              resolveLeave = resolve;
+            }),
+        };
+      },
+      local: { deviceId: "a", name: "A", pageId: null },
+    });
+    manager.start();
+    expect(joins).toBe(1);
+    const restarted = manager.restart(0);
+    await Promise.resolve();
+    expect(joins).toBe(1);
+    resolveLeave();
+    expect(await restarted).toBe(true);
+    expect(joins).toBe(2);
+    manager.stop();
+  });
+
+  test("restartIfAlone() refuses during the launch grace period, then restarts when alone", async () => {
+    const mapA = freshMap();
+    const sync = new FakeTransport("a", new Map());
+    const presence = new FakeTransport("a-p", new Map());
+    let joins = 0;
+    const manager = new SyncManager({
+      indexDoc: mapA.doc as Y.Doc,
+      nodesMap: mapA,
+      openPage: async () => new Y.Doc(),
+      destroyPage: async () => undefined,
+      join: () => {
+        joins += 1;
+        return { sync, presence, leave: () => undefined };
+      },
+      local: { deviceId: "a", name: "A", pageId: null },
+    });
+    manager.start(1_000);
+    expect(await manager.restartIfAlone(1_500)).toBe(false);
+    expect(joins).toBe(1);
+    expect(await manager.restartIfAlone(20_000)).toBe(true);
+    expect(joins).toBe(2);
+    manager.stop();
   });
 });
