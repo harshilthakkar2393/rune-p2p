@@ -12,6 +12,7 @@ starting, honor its STOP conditions, and update your row when done.
 | 001  | Ship the P2P sync core (Phase B1) | P1 | L | — | DONE — reviewed 2026-09-01, APPROVED; on branch `advisor/001-sync-core` (worktree `../rune-wt-001`), awaiting merge + manual two-browser check |
 | 002  | Pairing UX — QR, link route, scanner, presence, cursors | P1 | M | 001 | DONE — reviewed 2026-09-01 (one revision: scanner effect keyed on `open`), merged to main; manual phone QR test pending |
 | 003  | Sync hardening — rejoin, backoff, cursor colours, single destroy | P1 | M | 001, 002 | DONE — reviewed 2026-09-02 (one revision: reconnecting persists until peer/15 s), merged; phone background/foreground + 3-device test pending |
+| 004  | PWA — service worker, persistent storage, update prompt, install | P1 | M | 001–003 | IN PROGRESS (executor on advisor/004-pwa, worktree ../rune-wt-004) |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
 
