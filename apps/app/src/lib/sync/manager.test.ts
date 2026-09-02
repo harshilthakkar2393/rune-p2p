@@ -559,4 +559,27 @@ describe("SyncManager", () => {
     expect(joins).toBe(2);
     manager.stop();
   });
+
+  test("restart() gives up waiting for a leave that never resolves and rejoins", async () => {
+    const mapA = freshMap();
+    let joins = 0;
+    const sync = new FakeTransport("a", new Map());
+    const presence = new FakeTransport("a-p", new Map());
+    const manager = new SyncManager({
+      indexDoc: mapA.doc as Y.Doc,
+      nodesMap: mapA,
+      openPage: async () => new Y.Doc(),
+      destroyPage: async () => undefined,
+      join: () => {
+        joins += 1;
+        return { sync, presence, leave: () => new Promise<void>(() => undefined) };
+      },
+      local: { deviceId: "a", name: "A", pageId: null },
+      leaveTimeoutMs: 10,
+    });
+    manager.start();
+    expect(await manager.restart(0)).toBe(true);
+    expect(joins).toBe(2);
+    manager.stop();
+  });
 });

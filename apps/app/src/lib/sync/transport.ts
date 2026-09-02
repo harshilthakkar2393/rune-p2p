@@ -85,6 +85,10 @@ export function joinPairedRoom(keys: { roomId: string; password: string }): Room
     sync: makeTransport(syncAction, peers, onJoin, onLeave),
     presence: makeTransport(presenceAction, peers, onJoin, onLeave),
     leave() {
+      // Close peer connections first. On a dead network a data channel can
+      // sit "open" with an undrainable buffer, and Trystero's leave() waits
+      // on that drain; closed channels make it return immediately.
+      for (const connection of Object.values(room.getPeers())) connection.close();
       return room.leave();
     },
     selfId,

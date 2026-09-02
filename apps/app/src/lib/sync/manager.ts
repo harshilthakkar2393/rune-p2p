@@ -42,6 +42,7 @@ const DEFAULT_CONCURRENCY = 8;
 const RECONNECT_WAIT_MS = 15_000;
 /** Launch-time visibility/pageshow events must not restart a join that just started. */
 const START_GRACE_MS = 10_000;
+const DEFAULT_LEAVE_TIMEOUT_MS = 5_000;
 
 export type ManagerDeps = {
   indexDoc: Y.Doc;
@@ -51,11 +52,14 @@ export type ManagerDeps = {
   join: () => { sync: Transport; presence: Transport; leave(): void | Promise<void> };
   local: PresenceState;
   concurrency?: number;
+  /** Upper bound on waiting for the old room to leave before rejoining. */
+  leaveTimeoutMs?: number;
 };
 
 export class SyncManager {
   private readonly deps: ManagerDeps;
   private readonly concurrency: number;
+  private readonly leaveTimeoutMs: number;
   private started = false;
 
   private multiplexer: Multiplexer | null = null;
@@ -81,6 +85,7 @@ export class SyncManager {
   constructor(deps: ManagerDeps) {
     this.deps = deps;
     this.concurrency = deps.concurrency ?? DEFAULT_CONCURRENCY;
+    this.leaveTimeoutMs = deps.leaveTimeoutMs ?? DEFAULT_LEAVE_TIMEOUT_MS;
   }
 
   /** Joins the room, registers the index doc, and starts the page queue. */
@@ -174,7 +179,11 @@ export class SyncManager {
     // Wait for the old room to actually leave: Trystero returns the still-
     // occupied room object for a re-join of the same id, and that room is
     // being torn down — sync would come back dead.
-    await this.lastLeave;
+    const leftInTime = await Promise.race([
+      this.lastLeave.then(() => true),
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), this.leaveTimeoutMs)),
+    ]);
+    if (!leftInTime) console.warn("sync manager: room leave timed out; rejoining anyway");
     this.restarting = false;
     if (this.detached) return false;
     this.start(now);
