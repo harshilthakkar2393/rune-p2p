@@ -173,52 +173,6 @@ h6 {
   background: color-mix(in oklab, var(--destructive) 12%, transparent) !important;
 }
 
-/* Scroll fade: Base UI exposes overflow distances as CSS vars on the
-   viewport; drive a mask so content fades at scrollable edges. */
-[data-slot="scroll-area-viewport"] {
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    black min(var(--scroll-area-overflow-y-start, 0px), 24px),
-    black calc(100% - min(var(--scroll-area-overflow-y-end, 0px), 24px)),
-    transparent 100%
-  );
-}
-/* Horizontal rows (data-axis="x" on the root): fade the x edges instead. */
-[data-slot="scroll-area"][data-axis="x"] > [data-slot="scroll-area-viewport"] {
-  mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    black min(var(--scroll-area-overflow-x-start, 0px), 24px),
-    black calc(100% - min(var(--scroll-area-overflow-x-end, 0px), 24px)),
-    transparent 100%
-  );
-}
-
-/* Scrollbar: invisible at rest; appears while the pointer is over the area
-   or while scrolling (Base UI sets data-hovering / data-scrolling). Touch
-   devices get no scrollbar at all — the viewport scrolls natively. */
-[data-slot="scroll-area-scrollbar"] {
-  opacity: 0;
-  transition: opacity 150ms ease-out;
-}
-[data-slot="scroll-area-scrollbar"][data-hovering],
-[data-slot="scroll-area-scrollbar"][data-scrolling] {
-  opacity: 1;
-}
-@media (pointer: coarse) {
-  [data-slot="scroll-area-scrollbar"] {
-    display: none;
-  }
-}
-
-[data-slot="scroll-area-thumb"] {
-  background: color-mix(in oklab, var(--muted-foreground) 35%, transparent);
-}
-[data-slot="scroll-area-scrollbar"]:hover [data-slot="scroll-area-thumb"] {
-  background: color-mix(in oklab, var(--muted-foreground) 55%, transparent);
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
