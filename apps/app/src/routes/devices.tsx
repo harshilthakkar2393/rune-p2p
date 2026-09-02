@@ -165,7 +165,11 @@ function DevicesView() {
                   );
                 })}
                 <span className="font-mono text-tiny text-muted-foreground">
-                  {status.connected ? "connected" : "connecting…"}
+                  {status.reconnecting
+                    ? "reconnecting…"
+                    : status.connected
+                      ? "connected"
+                      : "looking for your devices…"}
                   {status.pendingDocs > 0 ? ` · syncing ${status.pendingDocs}` : ""}
                 </span>
                 {status.error && (
