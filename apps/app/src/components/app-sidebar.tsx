@@ -189,8 +189,8 @@ export function AppSidebar() {
     <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader>
         <div className="flex items-center justify-between group-data-[collapsible=icon]:justify-center">
-          <span className="px-2 py-1 text-lg font-medium group-data-[collapsible=icon]:hidden">
-            rune
+          <span className="px-2 py-1 text-lg font-medium tracking-tight group-data-[collapsible=icon]:hidden">
+            Rune
           </span>
           <Tip
             label={
