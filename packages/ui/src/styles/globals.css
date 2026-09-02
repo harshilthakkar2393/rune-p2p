@@ -202,7 +202,7 @@ h6 {
   stroke-dasharray: 2.5 3;
 }
 [data-slot="empty-glyph"] [data-reflection] {
-  opacity: 0.22;
+  opacity: 0.35;
 }
 
 @layer base {
