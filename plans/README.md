@@ -12,7 +12,7 @@ starting, honor its STOP conditions, and update your row when done.
 | 001  | Ship the P2P sync core (Phase B1) | P1 | L | — | DONE — reviewed 2026-09-01, APPROVED; on branch `advisor/001-sync-core` (worktree `../rune-wt-001`), awaiting merge + manual two-browser check |
 | 002  | Pairing UX — QR, link route, scanner, presence, cursors | P1 | M | 001 | DONE — reviewed 2026-09-01 (one revision: scanner effect keyed on `open`), merged to main; manual phone QR test pending |
 | 003  | Sync hardening — rejoin, backoff, cursor colours, single destroy | P1 | M | 001, 002 | DONE — reviewed 2026-09-02 (one revision: reconnecting persists until peer/15 s), merged; phone background/foreground + 3-device test pending |
-| 004  | PWA — service worker, persistent storage, update prompt, install | P1 | M | 001–003 | IN PROGRESS (executor on advisor/004-pwa, worktree ../rune-wt-004) |
+| 004  | PWA — service worker, persistent storage, update prompt, install | P1 | M | 001–003 | DONE — reviewed 2026-09-02 (one STOP: workbox-window peer dep, resolved), merged; phone install/offline test pending |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJECTED (with one-line rationale)
 
@@ -58,3 +58,13 @@ Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) | REJE
   shows "looking for your devices…", which is normal.
 - Local permanent deletes are unregistered by the manager but destroyed only
   by the caller (`event.transaction.local` gate). Remote deletes destroy.
+
+## Review notes (004)
+
+- Executor STOPped correctly on `Rolldown failed to resolve import "workbox-window"`.
+  Cause: vite-plugin-pwa declares `workbox-window` as a PEER dependency and bun's
+  isolated install does not hoist it. Fix: direct devDependency in apps/app.
+- Static `public/manifest.webmanifest` is the manifest of record (`manifest: false`
+  in the plugin). Icons in `public/`. Keep in sync by hand.
+- Service worker is not registered in dev (`devOptions.enabled: false`); test on
+  `vite preview --host` (basic-ssl applies) or a deploy.

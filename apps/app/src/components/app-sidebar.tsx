@@ -4,7 +4,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import type { IconSvgElement } from "@hugeicons/react";
 import {
   Add01Icon,
-  ComputerPhoneSyncIcon,
+  LaptopPhoneSyncIcon,
   DashboardSquare01Icon,
   Delete02Icon,
   Home04Icon,
@@ -28,7 +28,11 @@ import { FOLDER_COLORS, type Folder, type FolderColor } from "@/lib/schema";
 import { useSyncStatus } from "@/lib/sync/status";
 import { Button } from "@rune/ui/components/button";
 import { Kbd } from "@rune/ui/components/kbd";
-import { Popover, PopoverContent, PopoverTrigger } from "@rune/ui/components/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@rune/ui/components/popover";
 import {
   Sidebar,
   SidebarContent,
@@ -99,7 +103,10 @@ function NewFolderPopover() {
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
             <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-secondary">
-              <FolderGlyph className="size-4" color={FOLDER_COLOR_VALUES[color]} />
+              <FolderGlyph
+                className="size-4"
+                color={FOLDER_COLOR_VALUES[color]}
+              />
             </span>
             <SidebarInput
               autoFocus
@@ -126,7 +133,10 @@ function NewFolderPopover() {
                 onClick={() => setColor(candidate)}
                 className="flex size-5 items-center justify-center rounded-full"
                 style={{
-                  outline: candidate === color ? "2px solid var(--foreground)" : undefined,
+                  outline:
+                    candidate === color
+                      ? "2px solid var(--foreground)"
+                      : undefined,
                   outlineOffset: 2,
                 }}
               >
@@ -182,7 +192,9 @@ export function AppSidebar() {
   const folders = nodes
     .filter(
       (node): node is Folder =>
-        node.type === "folder" && node.deletedAt === undefined && node.parentId === null,
+        node.type === "folder" &&
+        node.deletedAt === undefined &&
+        node.parentId === null,
     )
     .toSorted((a, b) => a.sortKey.localeCompare(b.sortKey));
 
@@ -230,17 +242,24 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Library" render={<Link to="/library" />}>
+            <SidebarMenuButton
+              tooltip="Library"
+              render={<Link to="/library" />}
+            >
               <Icon icon={DashboardSquare01Icon} />
               Library
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
-              tooltip={peers.length > 0 ? `Devices · ${peers.length} online` : "Devices"}
+              tooltip={
+                peers.length > 0
+                  ? `Devices · ${peers.length} online`
+                  : "Devices"
+              }
               render={<Link to="/devices" />}
             >
-              <Icon icon={ComputerPhoneSyncIcon} />
+              <Icon icon={LaptopPhoneSyncIcon} />
               Devices
               {peers.length > 0 && (
                 <span className="ml-auto font-mono text-tiny text-muted-foreground group-data-[collapsible=icon]:hidden">
@@ -270,11 +289,19 @@ export function AppSidebar() {
               {folders.map((folder) => (
                 <SidebarMenuItem key={folder.id}>
                   <SidebarMenuButton
-                    render={<Link to="/folder/$folderId" params={{ folderId: folder.id }} />}
+                    render={
+                      <Link
+                        to="/folder/$folderId"
+                        params={{ folderId: folder.id }}
+                      />
+                    }
                   >
                     <FolderGlyph
                       className="size-4.5!"
-                      color={folderColorValue(folder.color) ?? "var(--muted-foreground)"}
+                      color={
+                        folderColorValue(folder.color) ??
+                        "var(--muted-foreground)"
+                      }
                     />
                     <span className="truncate">{folder.name}</span>
                   </SidebarMenuButton>
@@ -287,7 +314,9 @@ export function AppSidebar() {
       <SidebarFooter>
         <div className="flex items-center gap-2 px-2 py-1 font-mono text-xs text-muted-foreground group-data-[collapsible=icon]:justify-center">
           <span className="size-1.5 shrink-0 rounded-full bg-muted-foreground/50" />
-          <span className="group-data-[collapsible=icon]:hidden">local only</span>
+          <span className="group-data-[collapsible=icon]:hidden">
+            local only
+          </span>
         </div>
       </SidebarFooter>
     </Sidebar>
