@@ -40,22 +40,47 @@ export function resetWindowScroll() {
 }
 
 /**
- * Force iOS to re-lay out the page. After a keyboard session or a background
- * resume, standalone Safari can keep the layout viewport at a stale height
- * until something like a rotation forces it to recompute; bottom-anchored
- * fixed elements then sit too high. Nudging the root's height across two
- * frames is the smallest change that makes it recompute.
+ * Standalone iOS PWAs shrink the viewport and never grow it back: after a
+ * keyboard session or a trip to the background, window.innerHeight,
+ * visualViewport.height and 100dvh all come back smaller and stay that way
+ * until the app is force-quit or rotated. Bottom-anchored fixed elements
+ * then float above the real bottom. Scroll resets do not touch this; the
+ * viewport itself is mis-measured. What does work is forcing WebKit to
+ * re-measure by hiding and re-showing a full-height element with a
+ * synchronous reflow in between (a route change has the same effect).
+ * See https://dev.to/cederhook/fixing-the-ios-standalone-pwa-keyboard-bug-that-shrinks-your-viewport-for-good-63d
  */
-export function nudgeLayout() {
-  const root = document.documentElement;
-  root.style.height = "100.01%";
-  requestAnimationFrame(() => {
-    root.style.height = "";
-  });
+const tallest = new Map<number, number>(); // innerWidth → tallest innerHeight seen
+
+function recordHeight() {
+  const width = window.innerWidth;
+  tallest.set(width, Math.max(tallest.get(width) ?? 0, window.innerHeight));
 }
 
-/** Everything a resume needs: scroll pinned, layout recomputed. */
+export function viewportIsShrunk(): boolean {
+  const expected = tallest.get(window.innerWidth) ?? 0;
+  return expected - window.innerHeight > 4;
+}
+
+export function healViewport() {
+  recordHeight();
+  if (!viewportIsShrunk()) return;
+  const root = document.getElementById("app");
+  if (!root) return;
+  // display:none drops descendant scroll offsets; keep them.
+  const scrollers = Array.from(
+    root.querySelectorAll<HTMLElement>('[data-slot="scroll-area-viewport"]'),
+  ).map((el) => [el, el.scrollTop] as const);
+  root.style.display = "none";
+  void root.offsetHeight; // synchronous reflow
+  root.style.display = "";
+  for (const [el, top] of scrollers) el.scrollTop = top;
+}
+
+/** Everything a resume needs: scroll pinned, viewport re-measured. */
 export function settleViewport() {
   resetWindowScroll();
-  nudgeLayout();
+  healViewport();
 }
+
+if (typeof window !== "undefined") recordHeight();
