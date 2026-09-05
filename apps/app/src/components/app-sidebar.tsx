@@ -79,7 +79,7 @@ function NewFolderPopover() {
     setOpen(false);
     if (result.isOk()) {
       void navigate({
-        to: "/folder/$folderId",
+        to: "/pages/$folderId",
         params: { folderId: result.value.id },
       });
     }
@@ -243,7 +243,10 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Pages" render={<Link to="/pages" />}>
+            <SidebarMenuButton
+              tooltip="Pages"
+              render={<Link to="/pages" activeOptions={{ exact: true }} />}
+            >
               <Icon icon={DashboardSquare01Icon} />
               Pages
             </SidebarMenuButton>
@@ -283,7 +286,7 @@ export function AppSidebar() {
               {folders.map((folder) => (
                 <SidebarMenuItem key={folder.id}>
                   <SidebarMenuButton
-                    render={<Link to="/folder/$folderId" params={{ folderId: folder.id }} />}
+                    render={<Link to="/pages/$folderId" params={{ folderId: folder.id }} />}
                   >
                     <FolderGlyph
                       className="size-4.5!"

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Add01Icon,
   ArrowUpRight01Icon,
   CheckmarkCircle02Icon,
   Delete02Icon,
+  FilterMailIcon,
   MoreHorizontalIcon,
   PencilEdit01Icon,
   Sorting01Icon,
@@ -19,18 +20,21 @@ import { SelectionBar, SelectionBarButton } from "@/components/selection-bar";
 import { Tip } from "@/components/tip";
 import { useNodes } from "@/hooks/use-index";
 import { useSelection } from "@/hooks/use-selection";
-import { rememberFolder } from "@/lib/compose-target";
+import { composeTargetFolderId, rememberFolder } from "@/lib/compose-target";
+import { DATE_PRESETS, presetLabel, withinPreset, type DatePresetId } from "@/lib/date-presets";
 import { getDeviceName } from "@/lib/device";
 import { FOLDER_COLOR_VALUES, folderColorValue } from "@/lib/folder-colors";
+import { readGridPrefs, writeGridPrefs, type GridPrefs } from "@/lib/grid-prefs";
 import { humanTime } from "@/lib/human-time";
 import { getNodesMap } from "@/lib/index-doc";
 import { createPage, moveNode, renameNode, trashNode, updateFolderColor } from "@/lib/nodes";
-import { readGridPrefs, writeGridPrefs, type GridPrefs } from "@/lib/grid-prefs";
 import { FOLDER_COLORS, type Folder, type Page } from "@/lib/schema";
+import { Badge } from "@rune/ui/components/badge";
 import { Button } from "@rune/ui/components/button";
 import { Card } from "@rune/ui/components/card";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
@@ -46,48 +50,49 @@ import {
 import { ScrollArea } from "@rune/ui/components/scroll-area";
 import { SidebarInput } from "@rune/ui/components/sidebar";
 
-export const Route = createFileRoute("/folder/$folderId")({
-  component: FolderView,
-});
-
-function FolderView() {
-  const { folderId } = Route.useParams();
+/**
+ * The Pages grid, in two states: every live page (`/pages`), or one folder's
+ * pages (`/pages/$folderId`). A folder is a scope, not a filter — picking one
+ * navigates, and the header becomes the folder's (name, colour, rename, ⋯).
+ * Routes mount this keyed by folderId so filter/rename state resets per scope.
+ */
+export function PagesView({ folderId }: { folderId?: string }) {
   const nodes = useNodes();
   const navigate = useNavigate();
   const [prefs, setPrefs] = useState<GridPrefs>(() => readGridPrefs());
+  const [dateFilter, setDateFilter] = useState<DatePresetId | null>(null);
   const [renaming, setRenaming] = useState(false);
 
+  const folders = nodes.filter(
+    (node): node is Folder => node.type === "folder" && node.deletedAt === undefined,
+  );
+  const folderById = new Map(folders.map((folder) => [folder.id, folder]));
+  const folder = folderId !== undefined ? folderById.get(folderId) : undefined;
+  const scoped = folderId !== undefined;
+  const moveTargets = folders.filter((candidate) => candidate.id !== folderId);
+
   useEffect(() => {
-    rememberFolder(folderId);
-    setRenaming(false);
+    if (folderId !== undefined) rememberFolder(folderId);
   }, [folderId]);
 
-  const folder = nodes.find(
-    (node): node is Folder =>
-      node.id === folderId && node.type === "folder" && node.deletedAt === undefined,
-  );
-  const otherFolders = nodes.filter(
-    (node): node is Folder =>
-      node.type === "folder" && node.deletedAt === undefined && node.id !== folderId,
-  );
-
   useEffect(() => {
-    document.title = `${folder?.name ?? "Folder"} — Rune`;
-  }, [folder?.name]);
+    document.title = `${scoped ? (folder?.name ?? "Folder") : "Pages"} — Rune`;
+  }, [scoped, folder?.name]);
 
   const pages = useMemo(() => {
-    const inFolder = nodes.filter(
-      (node): node is Page =>
-        node.type === "page" && node.deletedAt === undefined && node.folderId === folderId,
+    let live = nodes.filter(
+      (node): node is Page => node.type === "page" && node.deletedAt === undefined,
     );
-    if (prefs.sort === "updated") return inFolder.toSorted((a, b) => b.updatedAt - a.updatedAt);
-    return inFolder.toSorted((a, b) => b.createdAt - a.createdAt);
-  }, [nodes, folderId, prefs.sort]);
+    if (folderId !== undefined) live = live.filter((page) => page.folderId === folderId);
+    if (dateFilter !== null) live = live.filter((page) => withinPreset(page.updatedAt, dateFilter));
+    if (prefs.sort === "updated") return live.toSorted((a, b) => b.updatedAt - a.updatedAt);
+    return live.toSorted((a, b) => b.createdAt - a.createdAt);
+  }, [nodes, folderId, dateFilter, prefs.sort]);
 
   const selection = useSelection(pages.map((page) => page.id));
   const { selected, selecting } = selection;
 
-  if (!folder) {
+  if (scoped && folder === undefined) {
     return (
       <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
         This folder no longer exists.
@@ -95,16 +100,20 @@ function FolderView() {
     );
   }
 
-  const tint = folderColorValue(folder.color);
-
   const updatePrefs = (patch: Partial<GridPrefs>) => {
     const next = { ...prefs, ...patch };
     setPrefs(next);
     writeGridPrefs(next);
   };
 
+  const goToScope = (target: string | undefined) => {
+    if (target === undefined) void navigate({ to: "/pages" });
+    else void navigate({ to: "/pages/$folderId", params: { folderId: target } });
+  };
+
   const newPage = () => {
-    const result = createPage(getNodesMap(), folder.id, {
+    const map = getNodesMap();
+    const result = createPage(map, folder?.id ?? composeTargetFolderId(map), {
       createdOn: getDeviceName(),
     });
     if (result.isOk()) {
@@ -112,9 +121,14 @@ function FolderView() {
     }
   };
 
+  const openPage = (pageId: string) => {
+    void navigate({ to: "/page/$pageId", params: { pageId } });
+  };
+
   const trashFolder = () => {
+    if (folder === undefined) return;
     const result = trashNode(getNodesMap(), folder.id);
-    if (result.isOk()) void navigate({ to: "/" });
+    if (result.isOk()) void navigate({ to: "/pages" });
   };
 
   const moveSelected = (targetId: string) => {
@@ -125,10 +139,6 @@ function FolderView() {
   const trashSelected = () => {
     for (const id of selected) trashNode(getNodesMap(), id);
     selection.clear();
-  };
-
-  const openPage = (pageId: string) => {
-    void navigate({ to: "/page/$pageId", params: { pageId } });
   };
 
   const pageActions = (pageId: string): CardAction[] => [
@@ -142,19 +152,49 @@ function FolderView() {
     },
   ];
 
-  const sortItems = (
+  const filterItems = (
     <>
-      <DropdownMenuRadioGroup
-        value={prefs.sort}
-        onValueChange={(value) => updatePrefs({ sort: value as GridPrefs["sort"] })}
-      >
-        <DropdownMenuLabel>Sort</DropdownMenuLabel>
-        <DropdownMenuRadioItem value="newest">Newest first</DropdownMenuRadioItem>
-        <DropdownMenuRadioItem value="updated">Recently updated</DropdownMenuRadioItem>
-      </DropdownMenuRadioGroup>
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>Date</DropdownMenuLabel>
+        {DATE_PRESETS.map((preset) => (
+          <DropdownMenuCheckboxItem
+            key={preset.id}
+            checked={dateFilter === preset.id}
+            onCheckedChange={() => setDateFilter(dateFilter === preset.id ? null : preset.id)}
+          >
+            {preset.label}
+          </DropdownMenuCheckboxItem>
+        ))}
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuGroup>
+        <DropdownMenuLabel>Folder</DropdownMenuLabel>
+        {folders.map((candidate) => (
+          <DropdownMenuCheckboxItem
+            key={candidate.id}
+            checked={folderId === candidate.id}
+            onCheckedChange={() => goToScope(folderId === candidate.id ? undefined : candidate.id)}
+          >
+            {candidate.name}
+          </DropdownMenuCheckboxItem>
+        ))}
+        {folders.length === 0 && <DropdownMenuItem disabled>No folders yet</DropdownMenuItem>}
+      </DropdownMenuGroup>
     </>
   );
-  const folderItems = (
+
+  const sortItems = (
+    <DropdownMenuRadioGroup
+      value={prefs.sort}
+      onValueChange={(value) => updatePrefs({ sort: value as GridPrefs["sort"] })}
+    >
+      <DropdownMenuLabel>Sort</DropdownMenuLabel>
+      <DropdownMenuRadioItem value="newest">Newest first</DropdownMenuRadioItem>
+      <DropdownMenuRadioItem value="updated">Recently updated</DropdownMenuRadioItem>
+    </DropdownMenuRadioGroup>
+  );
+
+  const folderItems = folder !== undefined && (
     <>
       <DropdownMenuGroup>
         <DropdownMenuItem onClick={() => setRenaming(true)}>
@@ -187,10 +227,43 @@ function FolderView() {
     </>
   );
 
+  const iconButton = (label: string, icon: typeof FilterMailIcon) => (
+    <Button variant="ghost" size="icon" aria-label={label} className="text-muted-foreground">
+      <HugeiconsIcon icon={icon} strokeWidth={1.75} />
+    </Button>
+  );
+
+  const emptyState =
+    dateFilter !== null ? (
+      <EmptyState
+        title="Nothing matches"
+        description="No pages fit this filter."
+        action={
+          <Button variant="secondary" onClick={() => setDateFilter(null)}>
+            Clear filter
+          </Button>
+        }
+      />
+    ) : folder !== undefined ? (
+      <EmptyState
+        glyph="folder"
+        title={`Nothing in ${folder.name} yet`}
+        description="Pages you create here stay in this folder on every device."
+        action={<Button onClick={newPage}>New page</Button>}
+      />
+    ) : (
+      <EmptyState
+        glyph="pages"
+        title="No pages yet"
+        description="Everything you write shows up here, across all folders."
+        action={<Button onClick={newPage}>New page</Button>}
+      />
+    );
+
   return (
     <div className="relative flex h-full flex-col">
       <header className="flex shrink-0 items-baseline gap-3.5 px-4 md:px-8 pt-3 pb-2 max-md:h-14 max-md:items-center max-md:py-0">
-        {renaming ? (
+        {folder !== undefined && renaming ? (
           <SidebarInput
             autoFocus
             defaultValue={folder.name}
@@ -205,14 +278,16 @@ function FolderView() {
               if (event.key === "Escape") setRenaming(false);
             }}
           />
-        ) : (
+        ) : folder !== undefined ? (
           <h1 className="flex items-center gap-3 text-h1">
             <span
               className="size-3 rounded-full"
-              style={{ background: tint ?? "var(--muted-foreground)" }}
+              style={{ background: folderColorValue(folder.color) ?? "var(--muted-foreground)" }}
             />
             {folder.name}
           </h1>
+        ) : (
+          <h1 className="text-h1">Pages</h1>
         )}
         <span className="font-mono text-tiny text-muted-foreground">
           {pages.length} {pages.length === 1 ? "page" : "pages"}
@@ -230,44 +305,31 @@ function FolderView() {
             </Button>
           </Tip>
           <DropdownMenu>
+            <Tip label="Filter">
+              <DropdownMenuTrigger render={iconButton("Filter", FilterMailIcon)} />
+            </Tip>
+            <DropdownMenuContent align="end" className="w-52">
+              {filterItems}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
             <Tip label="Sort">
-              <DropdownMenuTrigger
-                render={
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Sort"
-                    className="text-muted-foreground"
-                  >
-                    <HugeiconsIcon icon={Sorting01Icon} strokeWidth={1.75} />
-                  </Button>
-                }
-              />
+              <DropdownMenuTrigger render={iconButton("Sort", Sorting01Icon)} />
             </Tip>
             <DropdownMenuContent align="end" className="w-48">
               {sortItems}
             </DropdownMenuContent>
           </DropdownMenu>
-
-          <DropdownMenu>
-            <Tip label="Folder actions">
-              <DropdownMenuTrigger
-                render={
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Folder actions"
-                    className="text-muted-foreground"
-                  >
-                    <HugeiconsIcon icon={MoreHorizontalIcon} strokeWidth={1.75} />
-                  </Button>
-                }
-              />
-            </Tip>
-            <DropdownMenuContent align="end" className="w-52">
-              {folderItems}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {folderItems && (
+            <DropdownMenu>
+              <Tip label="Folder actions">
+                <DropdownMenuTrigger render={iconButton("Folder actions", MoreHorizontalIcon)} />
+              </Tip>
+              <DropdownMenuContent align="end" className="w-52">
+                {folderItems}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
         <RootMenu
           action={
@@ -282,6 +344,13 @@ function FolderView() {
         >
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
+              <HugeiconsIcon icon={FilterMailIcon} strokeWidth={1.75} />
+              Filter
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>{filterItems}</DropdownMenuSubContent>
+          </DropdownMenuSub>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
               <HugeiconsIcon icon={Sorting01Icon} strokeWidth={1.75} />
               Sort
             </DropdownMenuSubTrigger>
@@ -291,22 +360,32 @@ function FolderView() {
         </RootMenu>
       </header>
 
+      {dateFilter !== null && (
+        <div className="flex w-full shrink-0 items-center gap-2 px-4 md:px-8 pt-2">
+          <Badge
+            variant="secondary"
+            className="cursor-pointer gap-1.5 font-normal"
+            onClick={() => setDateFilter(null)}
+          >
+            {presetLabel(dateFilter)}
+            <span className="text-muted-foreground">×</span>
+          </Badge>
+        </div>
+      )}
+
       <ScrollArea className="min-h-0 flex-1">
         <main className="px-4 md:px-8 py-4">
           {pages.length === 0 ? (
-            <EmptyState
-              glyph="folder"
-              title={`Nothing in ${folder.name} yet`}
-              description="Pages you create here stay in this folder on every device."
-              action={<Button onClick={newPage}>New page</Button>}
-            />
+            emptyState
           ) : (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
               {pages.map((page) => (
                 <PageCard
                   key={page.id}
                   page={page}
-                  folder={undefined}
+                  folder={
+                    scoped || page.folderId === null ? undefined : folderById.get(page.folderId)
+                  }
                   selected={selected.has(page.id)}
                   selecting={selecting}
                   trailing={
@@ -350,7 +429,7 @@ function FolderView() {
           />
           <DropdownMenuContent align="center" side="top">
             <DropdownMenuGroup>
-              {otherFolders.map((target) => (
+              {moveTargets.map((target) => (
                 <DropdownMenuItem key={target.id} onClick={() => moveSelected(target.id)}>
                   <FolderGlyph
                     className="size-4"
@@ -359,7 +438,7 @@ function FolderView() {
                   {target.name}
                 </DropdownMenuItem>
               ))}
-              {otherFolders.length === 0 && (
+              {moveTargets.length === 0 && (
                 <DropdownMenuItem disabled>No other folders</DropdownMenuItem>
               )}
             </DropdownMenuGroup>
