@@ -1,35 +1,31 @@
-import { useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { IconSvgElement } from "@hugeicons/react";
 import {
   Add01Icon,
   LaptopPhoneSyncIcon,
-  DashboardSquare01Icon,
+  File02Icon,
   Delete02Icon,
   Home04Icon,
   PencilEdit02Icon,
   Search01Icon,
-  Tick02Icon,
 } from "@hugeicons/core-free-icons";
 
 import { FolderGlyph } from "@/components/folder-glyph";
+import { NewFolderPopover } from "@/components/new-folder-popover";
 import { KbdHint } from "@/components/kbd-hint";
 import { Tip } from "@/components/tip";
 import { Wordmark } from "@/components/wordmark";
 import { useComposePage } from "@/hooks/use-compose-page";
 import { useNodes } from "@/hooks/use-index";
-import { FOLDER_COLOR_VALUES, folderColorValue } from "@/lib/folder-colors";
-import { getNodesMap } from "@/lib/index-doc";
-import { createFolder } from "@/lib/nodes";
+import { folderColorValue } from "@/lib/folder-colors";
 import { modLabel } from "@/lib/platform";
 import { setPaletteOpen } from "@/lib/palette";
-import { FOLDER_COLORS, type Folder, type FolderColor } from "@/lib/schema";
+import type { Folder } from "@/lib/schema";
 import { useSyncStatus } from "@/lib/sync/status";
 import { Button } from "@rune/ui/components/button";
 import { cn } from "@rune/ui/lib/utils";
 import { Kbd } from "@rune/ui/components/kbd";
-import { Popover, PopoverContent, PopoverTrigger } from "@rune/ui/components/popover";
 import {
   Sidebar,
   SidebarContent,
@@ -39,7 +35,6 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
-  SidebarInput,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -63,84 +58,6 @@ function Icon({
       className={className ?? "size-4.5!"}
       style={color ? { color } : undefined}
     />
-  );
-}
-
-function NewFolderPopover() {
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [color, setColor] = useState<FolderColor>("blue");
-  const navigate = useNavigate();
-
-  const confirm = () => {
-    if (name.trim() === "") return;
-    const result = createFolder(getNodesMap(), null, name.trim(), color);
-    setName("");
-    setOpen(false);
-    if (result.isOk()) {
-      void navigate({
-        to: "/folders/$folderId",
-        params: { folderId: result.value.id },
-      });
-    }
-  };
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <Tip label="New folder">
-        <PopoverTrigger
-          render={
-            <SidebarGroupAction aria-label="New folder">
-              <Icon icon={Add01Icon} className="size-4!" />
-            </SidebarGroupAction>
-          }
-        />
-      </Tip>
-      <PopoverContent align="start" className="w-72 p-3">
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-2">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-secondary">
-              <FolderGlyph className="size-4" color={FOLDER_COLOR_VALUES[color]} />
-            </span>
-            <SidebarInput
-              autoFocus
-              placeholder="Folder name"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") confirm();
-                if (event.key === "Escape") setOpen(false);
-              }}
-            />
-            <Tip label="Create folder">
-              <Button size="icon" aria-label="Create folder" onClick={confirm}>
-                <Icon icon={Tick02Icon} className="size-4!" />
-              </Button>
-            </Tip>
-          </div>
-          <div className="flex items-center gap-2 px-1">
-            {FOLDER_COLORS.map((candidate) => (
-              <button
-                key={candidate}
-                type="button"
-                aria-label={`Color ${candidate}`}
-                onClick={() => setColor(candidate)}
-                className="flex size-5 items-center justify-center rounded-full"
-                style={{
-                  outline: candidate === color ? "2px solid var(--foreground)" : undefined,
-                  outlineOffset: 2,
-                }}
-              >
-                <span
-                  className="size-4 rounded-full"
-                  style={{ background: FOLDER_COLOR_VALUES[candidate] }}
-                />
-              </button>
-            ))}
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
   );
 }
 
@@ -247,7 +164,7 @@ export function AppSidebar() {
               tooltip="Pages"
               render={<Link to="/pages" activeOptions={{ exact: true }} />}
             >
-              <Icon icon={DashboardSquare01Icon} />
+              <Icon icon={File02Icon} />
               Pages
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -279,8 +196,19 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-          <SidebarGroupLabel>Folders</SidebarGroupLabel>
-          <NewFolderPopover />
+          <SidebarGroupLabel
+            render={<Link to="/folders" activeOptions={{ exact: true }} />}
+            className="hover:text-sidebar-foreground data-[status=active]:text-sidebar-foreground"
+          >
+            Folders
+          </SidebarGroupLabel>
+          <NewFolderPopover
+            trigger={
+              <SidebarGroupAction aria-label="New folder">
+                <Icon icon={Add01Icon} className="size-4!" />
+              </SidebarGroupAction>
+            }
+          />
           <SidebarGroupContent>
             <SidebarMenu>
               {folders.map((folder) => (

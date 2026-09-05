@@ -14,6 +14,7 @@ import { Route as DevicesRouteImport } from './routes/devices'
 import { Route as PairRouteImport } from './routes/pair'
 import { Route as TrashRouteImport } from './routes/trash'
 import { Route as TypeRouteImport } from './routes/type'
+import { Route as FoldersIndexRouteImport } from './routes/folders.index'
 import { Route as FoldersFolderIdRouteImport } from './routes/folders.$folderId'
 import { Route as PagePageIdRouteImport } from './routes/page.$pageId'
 import { Route as PagesIndexRouteImport } from './routes/pages.index'
@@ -43,6 +44,11 @@ const TypeRoute = TypeRouteImport.update({
   path: '/type',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FoldersIndexRoute = FoldersIndexRouteImport.update({
+  id: '/folders/',
+  path: '/folders/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FoldersFolderIdRoute = FoldersFolderIdRouteImport.update({
   id: '/folders/$folderId',
   path: '/folders/$folderId',
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/type': typeof TypeRoute
   '/folders/$folderId': typeof FoldersFolderIdRoute
   '/page/$pageId': typeof PagePageIdRoute
+  '/folders/': typeof FoldersIndexRoute
   '/pages/': typeof PagesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/type': typeof TypeRoute
   '/folders/$folderId': typeof FoldersFolderIdRoute
   '/page/$pageId': typeof PagePageIdRoute
+  '/folders': typeof FoldersIndexRoute
   '/pages': typeof PagesIndexRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/type': typeof TypeRoute
   '/folders/$folderId': typeof FoldersFolderIdRoute
   '/page/$pageId': typeof PagePageIdRoute
+  '/folders/': typeof FoldersIndexRoute
   '/pages/': typeof PagesIndexRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/type'
     | '/folders/$folderId'
     | '/page/$pageId'
+    | '/folders/'
     | '/pages/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/type'
     | '/folders/$folderId'
     | '/page/$pageId'
+    | '/folders'
     | '/pages'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/type'
     | '/folders/$folderId'
     | '/page/$pageId'
+    | '/folders/'
     | '/pages/'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   TypeRoute: typeof TypeRoute
   FoldersFolderIdRoute: typeof FoldersFolderIdRoute
   PagePageIdRoute: typeof PagePageIdRoute
+  FoldersIndexRoute: typeof FoldersIndexRoute
   PagesIndexRoute: typeof PagesIndexRoute
 }
 
@@ -171,6 +184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TypeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/folders/': {
+      id: '/folders/'
+      path: '/folders'
+      fullPath: '/folders/'
+      preLoaderRoute: typeof FoldersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/folders/$folderId': {
       id: '/folders/$folderId'
       path: '/folders/$folderId'
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   TypeRoute: TypeRoute,
   FoldersFolderIdRoute: FoldersFolderIdRoute,
   PagePageIdRoute: PagePageIdRoute,
+  FoldersIndexRoute: FoldersIndexRoute,
   PagesIndexRoute: PagesIndexRoute,
 }
 export const routeTree = rootRouteImport

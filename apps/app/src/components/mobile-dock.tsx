@@ -3,7 +3,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
 import type { IconSvgElement } from "@hugeicons/react";
 import {
-  DashboardSquare01Icon,
+  Folder01Icon,
   Home04Icon,
   PencilEdit02Icon,
   Search01Icon,
@@ -14,7 +14,9 @@ import { setPaletteOpen } from "@/lib/palette";
 import { Button } from "@rune/ui/components/button";
 import { cn } from "@rune/ui/lib/utils";
 
-/** Phone nav: tabs pill left (Home · Pages · Search), New page right. Hidden while a page is open. */
+/** Phone nav: tabs pill left (Home · Folders · Search), New page right. Hidden while a page is open.
+ * Folders is the phone's way to every list: its screen carries "All pages" first, so the
+ * tab also lights up on /pages (Apple Files' Browse, Todoist's Browse). */
 
 const TAB_CLASS =
   "flex size-12 items-center justify-center rounded-full text-muted-foreground transition-colors data-[status=active]:bg-accent data-[status=active]:text-foreground";
@@ -28,15 +30,21 @@ function Tab({
   to,
   icon,
   label,
-  exact = false,
+  active,
 }: {
-  to: "/" | "/pages";
+  to: "/" | "/folders";
   icon: IconSvgElement;
   label: string;
-  exact?: boolean;
+  active: boolean;
 }) {
   return (
-    <Link to={to} aria-label={label} activeOptions={{ exact }} className={TAB_CLASS}>
+    <Link
+      to={to}
+      aria-label={label}
+      aria-current={active ? "page" : undefined}
+      data-status={active ? "active" : undefined}
+      className={TAB_CLASS}
+    >
       <HugeiconsIcon icon={icon} strokeWidth={1.75} className="size-6" />
     </Link>
   );
@@ -69,8 +77,13 @@ export function MobileDock() {
       )}
     >
       <nav className="pointer-events-auto flex items-center gap-0.5 rounded-full border bg-card p-1 shadow-lg">
-        <Tab to="/" icon={Home04Icon} label="Home" exact />
-        <Tab to="/pages" icon={DashboardSquare01Icon} label="Pages" />
+        <Tab to="/" icon={Home04Icon} label="Home" active={pathname === "/"} />
+        <Tab
+          to="/folders"
+          icon={Folder01Icon}
+          label="Folders"
+          active={pathname.startsWith("/folders") || pathname.startsWith("/pages")}
+        />
         <button
           type="button"
           aria-label="Search"

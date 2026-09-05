@@ -378,7 +378,7 @@ export function PagesView({ folderId }: { folderId?: string }) {
           {pages.length === 0 ? (
             emptyState
           ) : (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4 max-md:grid-cols-2 max-md:gap-3">
               {pages.map((page) => (
                 <PageCard
                   key={page.id}
