@@ -30,7 +30,7 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <Empty className="min-h-[60dvh] pb-[8dvh] md:min-h-[66dvh]">
+    <Empty className="min-h-[60svh] pb-[8svh] md:min-h-[66svh]">
       <EmptyHeader>
         {glyph && <EmptyGlyph name={glyph} className="mb-2 max-md:h-[96px] max-md:w-[112px]" />}
         <EmptyTitle className="font-normal">{title}</EmptyTitle>

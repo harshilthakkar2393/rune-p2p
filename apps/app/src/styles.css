@@ -8,14 +8,25 @@
   box-sizing: border-box;
 }
 
+/* App shell: full height, document never scrolls.
+   svh, not dvh: in standalone (and in a tab whose document never scrolls, so
+   Safari's toolbars never collapse) the small viewport IS the full height,
+   and unlike dvh it is not re-derived from the dynamic measurement that iOS
+   gets wrong after a keyboard or a background trip. The body is fixed so
+   iOS cannot rubber-band the document even when the layout viewport and the
+   content disagree for a frame. */
 html,
 body,
 #app {
-  height: 100dvh;
+  height: 100svh;
   overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body {
+  position: fixed;
+  inset: 0;
+  width: 100%;
   margin: 0;
 }
 
