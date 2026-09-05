@@ -50,21 +50,27 @@ export function resetWindowScroll() {
  * synchronous reflow in between (a route change has the same effect).
  * See https://dev.to/cederhook/fixing-the-ios-standalone-pwa-keyboard-bug-that-shrinks-your-viewport-for-good-63d
  */
-const tallest = new Map<number, number>(); // innerWidth → tallest innerHeight seen
+let probe: HTMLElement | null = null;
 
-function recordHeight() {
-  const width = window.innerWidth;
-  tallest.set(width, Math.max(tallest.get(width) ?? 0, window.innerHeight));
+/** The screen-true height. 100lvh keeps reporting the full height even when
+ * iOS has shrunk the layout viewport (measured: innerHeight 793 vs lvh 852). */
+export function fullViewportHeight(): number {
+  if (!probe) {
+    probe = document.createElement("div");
+    probe.setAttribute("aria-hidden", "true");
+    probe.style.cssText =
+      "position:fixed;top:0;left:0;width:1px;height:100lvh;visibility:hidden;pointer-events:none";
+    document.body.appendChild(probe);
+  }
+  return probe.getBoundingClientRect().height;
 }
 
 export function viewportIsShrunk(): boolean {
-  const expected = tallest.get(window.innerWidth) ?? 0;
-  return expected - window.innerHeight > 4;
+  return fullViewportHeight() - window.innerHeight > 4;
 }
 
-export function healViewport() {
-  recordHeight();
-  if (!viewportIsShrunk()) return;
+export function healViewport(force = false) {
+  if (!force && !viewportIsShrunk()) return;
   const root = document.getElementById("app");
   if (!root) return;
   // display:none drops descendant scroll offsets; keep them.
@@ -82,5 +88,3 @@ export function settleViewport() {
   resetWindowScroll();
   healViewport();
 }
-
-if (typeof window !== "undefined") recordHeight();

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { onViewportChange } from "@/lib/viewport";
+import { fullViewportHeight, healViewport, onViewportChange } from "@/lib/viewport";
 
 export const Route = createFileRoute("/viewport")({
   head: () => ({ meta: [{ title: "Viewport — Rune" }] }),
@@ -40,6 +40,7 @@ function ViewportProbe() {
         ["100svh", px("svh")],
         ["100lvh", px("lvh")],
         ["100dvh", px("dvh")],
+        ["fullViewportHeight()", fullViewportHeight().toFixed(1)],
         ["safe-area-bottom", getComputedStyle(document.getElementById("probe-sab")!).height],
         ["time", new Date().toLocaleTimeString()],
       ]);
@@ -56,7 +57,16 @@ function ViewportProbe() {
 
   return (
     <div className="relative h-full overflow-hidden bg-background p-4 font-mono text-sm">
-      <div className="mb-3 text-muted-foreground">viewport probe · updates {tick}</div>
+      <div className="mb-3 flex items-center gap-3 text-muted-foreground">
+        <span>viewport probe · updates {tick}</span>
+        <button
+          type="button"
+          onClick={() => healViewport(true)}
+          className="rounded-full border px-3 py-1 text-foreground"
+        >
+          Heal now
+        </button>
+      </div>
       <table>
         <tbody>
           {rows.map(([k, v]) => (
@@ -106,7 +116,7 @@ function ViewportProbe() {
         title="top from 100dvh"
       />
       <div className="fixed inset-x-0 bottom-6 text-center text-[11px] text-muted-foreground">
-        red = fixed bottom:0 · green = 100svh · blue = 100dvh
+        red = bottom:0 · green = svh · blue = dvh · yellow = lvh
       </div>
     </div>
   );
