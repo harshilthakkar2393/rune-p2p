@@ -243,9 +243,9 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton tooltip="Library" render={<Link to="/library" />}>
+            <SidebarMenuButton tooltip="Pages" render={<Link to="/pages" />}>
               <Icon icon={DashboardSquare01Icon} />
-              Library
+              Pages
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>

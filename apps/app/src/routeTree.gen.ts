@@ -11,7 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DevicesRouteImport } from './routes/devices'
-import { Route as LibraryRouteImport } from './routes/library'
+import { Route as PagesRouteImport } from './routes/pages'
 import { Route as PairRouteImport } from './routes/pair'
 import { Route as TrashRouteImport } from './routes/trash'
 import { Route as TypeRouteImport } from './routes/type'
@@ -28,9 +28,9 @@ const DevicesRoute = DevicesRouteImport.update({
   path: '/devices',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LibraryRoute = LibraryRouteImport.update({
-  id: '/library',
-  path: '/library',
+const PagesRoute = PagesRouteImport.update({
+  id: '/pages',
+  path: '/pages',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PairRoute = PairRouteImport.update({
@@ -62,7 +62,7 @@ const PagePageIdRoute = PagePageIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/devices': typeof DevicesRoute
-  '/library': typeof LibraryRoute
+  '/pages': typeof PagesRoute
   '/pair': typeof PairRoute
   '/trash': typeof TrashRoute
   '/type': typeof TypeRoute
@@ -72,7 +72,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/devices': typeof DevicesRoute
-  '/library': typeof LibraryRoute
+  '/pages': typeof PagesRoute
   '/pair': typeof PairRoute
   '/trash': typeof TrashRoute
   '/type': typeof TypeRoute
@@ -83,7 +83,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/devices': typeof DevicesRoute
-  '/library': typeof LibraryRoute
+  '/pages': typeof PagesRoute
   '/pair': typeof PairRoute
   '/trash': typeof TrashRoute
   '/type': typeof TypeRoute
@@ -95,7 +95,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/devices'
-    | '/library'
+    | '/pages'
     | '/pair'
     | '/trash'
     | '/type'
@@ -105,7 +105,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/devices'
-    | '/library'
+    | '/pages'
     | '/pair'
     | '/trash'
     | '/type'
@@ -115,7 +115,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/devices'
-    | '/library'
+    | '/pages'
     | '/pair'
     | '/trash'
     | '/type'
@@ -126,7 +126,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DevicesRoute: typeof DevicesRoute
-  LibraryRoute: typeof LibraryRoute
+  PagesRoute: typeof PagesRoute
   PairRoute: typeof PairRoute
   TrashRoute: typeof TrashRoute
   TypeRoute: typeof TypeRoute
@@ -150,11 +150,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DevicesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/library': {
-      id: '/library'
-      path: '/library'
-      fullPath: '/library'
-      preLoaderRoute: typeof LibraryRouteImport
+    '/pages': {
+      id: '/pages'
+      path: '/pages'
+      fullPath: '/pages'
+      preLoaderRoute: typeof PagesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pair': {
@@ -198,7 +198,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DevicesRoute: DevicesRoute,
-  LibraryRoute: LibraryRoute,
+  PagesRoute: PagesRoute,
   PairRoute: PairRoute,
   TrashRoute: TrashRoute,
   TypeRoute: TypeRoute,

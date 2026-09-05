@@ -25,7 +25,7 @@ import { FOLDER_COLOR_VALUES, folderColorValue } from "@/lib/folder-colors";
 import { humanTime } from "@/lib/human-time";
 import { getNodesMap } from "@/lib/index-doc";
 import { createPage, moveNode, renameNode, trashNode, updateFolderColor } from "@/lib/nodes";
-import { readLibraryPrefs, writeLibraryPrefs, type LibraryPrefs } from "@/lib/library-prefs";
+import { readGridPrefs, writeGridPrefs, type GridPrefs } from "@/lib/grid-prefs";
 import { FOLDER_COLORS, type Folder, type Page } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
 import { Card } from "@rune/ui/components/card";
@@ -54,7 +54,7 @@ function FolderView() {
   const { folderId } = Route.useParams();
   const nodes = useNodes();
   const navigate = useNavigate();
-  const [prefs, setPrefs] = useState<LibraryPrefs>(() => readLibraryPrefs());
+  const [prefs, setPrefs] = useState<GridPrefs>(() => readGridPrefs());
   const [renaming, setRenaming] = useState(false);
 
   useEffect(() => {
@@ -97,10 +97,10 @@ function FolderView() {
 
   const tint = folderColorValue(folder.color);
 
-  const updatePrefs = (patch: Partial<LibraryPrefs>) => {
+  const updatePrefs = (patch: Partial<GridPrefs>) => {
     const next = { ...prefs, ...patch };
     setPrefs(next);
-    writeLibraryPrefs(next);
+    writeGridPrefs(next);
   };
 
   const newPage = () => {
@@ -146,7 +146,7 @@ function FolderView() {
     <>
       <DropdownMenuRadioGroup
         value={prefs.sort}
-        onValueChange={(value) => updatePrefs({ sort: value as LibraryPrefs["sort"] })}
+        onValueChange={(value) => updatePrefs({ sort: value as GridPrefs["sort"] })}
       >
         <DropdownMenuLabel>Sort</DropdownMenuLabel>
         <DropdownMenuRadioItem value="newest">Newest first</DropdownMenuRadioItem>

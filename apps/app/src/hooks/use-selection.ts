@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 
 /**
- * Grid selection shared by Library/Folder/Trash: explicit select mode,
+ * Grid selection shared by Pages/Folder/Trash: explicit select mode,
  * ⌘-click toggle, shift-click ranges (over the caller's current order),
  * Esc clears. `selecting` = mode on OR anything selected.
  */

@@ -14,7 +14,7 @@ import { setPaletteOpen } from "@/lib/palette";
 import { Button } from "@rune/ui/components/button";
 import { cn } from "@rune/ui/lib/utils";
 
-/** Phone nav: tabs pill left (Home · Library · Search), New page right. Hidden while a page is open. */
+/** Phone nav: tabs pill left (Home · Pages · Search), New page right. Hidden while a page is open. */
 
 const TAB_CLASS =
   "flex size-12 items-center justify-center rounded-full text-muted-foreground transition-colors data-[status=active]:bg-accent data-[status=active]:text-foreground";
@@ -30,7 +30,7 @@ function Tab({
   label,
   exact = false,
 }: {
-  to: "/" | "/library";
+  to: "/" | "/pages";
   icon: IconSvgElement;
   label: string;
   exact?: boolean;
@@ -70,7 +70,7 @@ export function MobileDock() {
     >
       <nav className="pointer-events-auto flex items-center gap-0.5 rounded-full border bg-card p-1 shadow-lg">
         <Tab to="/" icon={Home04Icon} label="Home" exact />
-        <Tab to="/library" icon={DashboardSquare01Icon} label="Library" />
+        <Tab to="/pages" icon={DashboardSquare01Icon} label="Pages" />
         <button
           type="button"
           aria-label="Search"

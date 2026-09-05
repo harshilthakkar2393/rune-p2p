@@ -1,4 +1,4 @@
-/** Relative date windows shared by grid filters (Library: updated-within, Trash: deleted-within). */
+/** Relative date windows shared by grid filters (Pages: updated-within, Trash: deleted-within). */
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
