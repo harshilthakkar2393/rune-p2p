@@ -115,21 +115,11 @@ const GLYPHS: Record<EmptyGlyphName, () => React.JSX.Element> = {
   folder: () => (
     <g transform="translate(0 2)">
       <path
-        d="M-46 -30 Q-46 -38 -38 -38 L-14 -38 Q-8 -38 -6 -34 L-2 -28 L38 -28 Q46 -28 46 -20 L46 30 L-46 30 Z"
-        transform="translate(0 4)"
-        data-line="fill"
-      />
-      <path
-        d="M-46 -30 Q-46 -38 -38 -38 L-14 -38 Q-8 -38 -6 -34 L-2 -28 L38 -28 Q46 -28 46 -20 L46 30 L-46 30 Z"
-        data-line="fill"
-      />
-      <path d="M-36 0 L36 0" data-line="soft" />
-      <path
-        d="M-48 -6 L48 -6 L44 28 Q43 36 36 36 L-36 36 Q-43 36 -44 28 Z"
-        transform="translate(0 4)"
+        d="M-43 -30 Q-43 -38 -35 -38 L-14 -38 Q-8 -38 -6 -34 L-2 -28 L35 -28 Q43 -28 43 -20 L43 20 L-43 20 Z"
         data-line="fill"
       />
       <path d="M-48 -6 L48 -6 L44 28 Q43 36 36 36 L-36 36 Q-43 36 -44 28 Z" data-line="fill" />
+      <path d="M-47.62 -2 L47.62 -2" />
     </g>
   ),
   devices: () => (

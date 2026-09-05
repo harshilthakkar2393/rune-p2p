@@ -139,18 +139,27 @@ const GLYPHS = {
     container(root, { w: 76, h: 88, rim: 24, taper: 8, rb: 10 });
     return root;
   },
-  /** Folder: open folder, frontal — back panel with tab, front panel, gap between. */
+  /** Folder: open folder, frontal — back panel with tab, front panel, gap between.
+   *  Thickness shows only where an edge is seen from above: a lip along the
+   *  front panel's top. Slanted sides stay single lines (a shifted copy reads
+   *  as a mismatch there, not as depth). */
   folder() {
     const root = g({ transform: "translate(0 2)" });
     const w = 92;
     const rb = 8;
-    const back = `M${-w / 2} -30 Q${-w / 2} -38 ${-w / 2 + 8} -38 L-14 -38 Q-8 -38 -6 -34 L-2 -28 L${w / 2 - 8} -28 Q${w / 2} -28 ${w / 2} -20 L${w / 2} 30 L${-w / 2} 30 Z`;
-    put(root, el("path", { d: back, transform: "translate(0 4)", line: FILL }));
+    /* back panel: narrower than the front's bottom and ending behind it, so it never peeks out */
+    const bw = w / 2 - 3;
+    const back = `M${-bw} -30 Q${-bw} -38 ${-bw + 8} -38 L-14 -38 Q-8 -38 -6 -34 L-2 -28 L${bw - 8} -28 Q${bw} -28 ${bw} -20 L${bw} 20 L${-bw} 20 Z`;
     put(root, el("path", { d: back, line: FILL }));
-    put(root, el("path", { d: `M${-w / 2 + 10} 0 L${w / 2 - 10} 0`, line: SOFT }));
-    const front = `M${-w / 2 - 2} -6 L${w / 2 + 2} -6 L${w / 2 - 2} ${36 - rb} Q${w / 2 - 3} 36 ${w / 2 - 2 - rb} 36 L${-w / 2 + 2 + rb} 36 Q${-w / 2 + 3} 36 ${-w / 2 + 2} ${36 - rb} Z`;
-    put(root, el("path", { d: front, transform: "translate(0 4)", line: FILL }));
+    const top = -6;
+    const bot = 36;
+    const xTop = w / 2 + 2;
+    const xBot = w / 2 - 2;
+    const front = `M${-xTop} ${top} L${xTop} ${top} L${xBot} ${bot - rb} Q${xBot - 1} ${bot} ${xBot - rb} ${bot} L${-xBot + rb} ${bot} Q${-xBot + 1} ${bot} ${-xBot} ${bot - rb} Z`;
     put(root, el("path", { d: front, line: FILL }));
+    const lipY = top + 4;
+    const xLip = xTop - ((xTop - xBot) * (lipY - top)) / (bot - top);
+    put(root, el("path", { d: `M${(-xLip).toFixed(2)} ${lipY} L${xLip.toFixed(2)} ${lipY}` }));
     return root;
   },
   /** Devices: laptop and phone, frontal — the Devices icon, physical. */
