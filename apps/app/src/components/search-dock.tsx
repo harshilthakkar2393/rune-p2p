@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Cancel01Icon, CancelCircleIcon, Search01Icon } from "@hugeicons/core-free-icons";
+import { Cancel01Icon, Search01Icon } from "@hugeicons/core-free-icons";
 
 import { useKeyboardInset } from "@/hooks/use-keyboard-inset";
 import {
@@ -80,20 +80,21 @@ export function SearchDock() {
           }}
           className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
         />
-        {/* Clear addon: lives inside the field, keeps focus so the keyboard stays. */}
-        <button
-          type="button"
+        {/* Clear addon: a primary pill inside the field; keeps focus so the keyboard stays. */}
+        <Button
+          variant="default"
+          size="icon-sm"
           aria-label="Clear search"
           tabIndex={-1}
           onPointerDown={(event) => event.preventDefault()}
           onClick={() => setSearchQuery("")}
           className={cn(
-            "-mr-1.5 flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-opacity hover:text-foreground",
+            "-mr-1.5 shrink-0 rounded-full transition-opacity",
             query === "" && "pointer-events-none opacity-0",
           )}
         >
-          <HugeiconsIcon icon={CancelCircleIcon} strokeWidth={1.75} className="size-5" />
-        </button>
+          <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-3.5!" />
+        </Button>
       </label>
       <Button
         variant="outline"
