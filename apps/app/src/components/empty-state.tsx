@@ -11,6 +11,10 @@ import {
 
 /**
  * Empty-state grammar (Linear's): glyph, one line, at most one action.
+ * Places are glyphed; transient states (a filter that hides everything) are
+ * text only — pass no glyph. The block sits at Linear's height: its centre
+ * lands around 44% of the pane, so the min-height and bottom padding are
+ * what put it there, not the parent.
  * On phones only the glyph and the line show — the dock already carries
  * New page, so a button there would be a second one.
  */
@@ -20,15 +24,15 @@ export function EmptyState({
   description,
   action,
 }: {
-  glyph: EmptyGlyphName;
+  glyph?: EmptyGlyphName;
   title: string;
   description?: string;
   action?: ReactNode;
 }) {
   return (
-    <Empty>
+    <Empty className="min-h-[60dvh] pb-[8dvh] md:min-h-[66dvh]">
       <EmptyHeader>
-        <EmptyGlyph name={glyph} className="mb-2 max-md:size-20" />
+        {glyph && <EmptyGlyph name={glyph} className="mb-2 max-md:h-[96px] max-md:w-[112px]" />}
         <EmptyTitle className="font-normal">{title}</EmptyTitle>
         {description && (
           <EmptyDescription className="max-md:hidden">{description}</EmptyDescription>

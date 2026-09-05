@@ -336,7 +336,6 @@ function TrashView() {
             <EmptyState glyph="trash" title="Trash is empty" />
           ) : trashedFolders.length + trashedPages.length === 0 ? (
             <EmptyState
-              glyph="filter"
               title="Nothing matches"
               description="No trashed pages fit these filters."
               action={

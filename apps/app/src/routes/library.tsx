@@ -290,7 +290,6 @@ function LibraryView() {
           {pages.length === 0 ? (
             activeFolder !== undefined || dateFilter !== null ? (
               <EmptyState
-                glyph="filter"
                 title="Nothing matches"
                 description="No pages fit these filters."
                 action={

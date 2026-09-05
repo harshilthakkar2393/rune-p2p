@@ -182,27 +182,21 @@ h6 {
   font-synthesis-weight: none;
 }
 
-/* rune: empty-state glyphs — one stroke in the text neutral, no fills. */
-[data-slot="empty-glyph"] path {
+/* rune: empty-state glyphs — one 1.5px stroke in the text neutral, faces filled
+   with the page ground so the slab contour occludes what sits behind it. */
+[data-slot="empty-glyph"] :is(path, rect) {
   fill: none;
   stroke: color-mix(in oklab, var(--foreground) 70%, transparent);
-  stroke-width: 1.25;
+  stroke-width: 1.5;
   stroke-linejoin: round;
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
 }
-[data-slot="empty-glyph"] path[data-line="fill"] {
+[data-slot="empty-glyph"] :is(path, rect)[data-line="fill"] {
   fill: var(--background);
 }
-[data-slot="empty-glyph"] path[data-line="soft"] {
+[data-slot="empty-glyph"] :is(path, rect)[data-line="soft"] {
   stroke: color-mix(in oklab, var(--foreground) 38%, transparent);
-}
-[data-slot="empty-glyph"] path[data-line="dash"] {
-  stroke: color-mix(in oklab, var(--foreground) 38%, transparent);
-  stroke-dasharray: 2.5 3;
-}
-[data-slot="empty-glyph"] [data-reflection] {
-  opacity: 0.35;
 }
 
 @layer base {
