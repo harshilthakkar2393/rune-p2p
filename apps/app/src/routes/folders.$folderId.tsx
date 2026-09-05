@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { PagesView } from "@/components/pages-view";
 
-export const Route = createFileRoute("/pages/$folderId")({
+export const Route = createFileRoute("/folders/$folderId")({
   component: FolderScope,
 });
 

@@ -52,7 +52,7 @@ import { SidebarInput } from "@rune/ui/components/sidebar";
 
 /**
  * The Pages grid, in two states: every live page (`/pages`), or one folder's
- * pages (`/pages/$folderId`). A folder is a scope, not a filter — picking one
+ * pages (`/folders/$folderId`). A folder is a scope, not a filter — picking one
  * navigates, and the header becomes the folder's (name, colour, rename, ⋯).
  * Routes mount this keyed by folderId so filter/rename state resets per scope.
  */
@@ -108,7 +108,7 @@ export function PagesView({ folderId }: { folderId?: string }) {
 
   const goToScope = (target: string | undefined) => {
     if (target === undefined) void navigate({ to: "/pages" });
-    else void navigate({ to: "/pages/$folderId", params: { folderId: target } });
+    else void navigate({ to: "/folders/$folderId", params: { folderId: target } });
   };
 
   const newPage = () => {

@@ -79,7 +79,7 @@ function NewFolderPopover() {
     setOpen(false);
     if (result.isOk()) {
       void navigate({
-        to: "/pages/$folderId",
+        to: "/folders/$folderId",
         params: { folderId: result.value.id },
       });
     }
@@ -286,7 +286,7 @@ export function AppSidebar() {
               {folders.map((folder) => (
                 <SidebarMenuItem key={folder.id}>
                   <SidebarMenuButton
-                    render={<Link to="/pages/$folderId" params={{ folderId: folder.id }} />}
+                    render={<Link to="/folders/$folderId" params={{ folderId: folder.id }} />}
                   >
                     <FolderGlyph
                       className="size-4.5!"
