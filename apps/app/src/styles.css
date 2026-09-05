@@ -9,23 +9,35 @@
 }
 
 /* App shell: full height, document never scrolls.
-   svh, not dvh: in standalone (and in a tab whose document never scrolls, so
-   Safari's toolbars never collapse) the small viewport IS the full height,
-   and unlike dvh it is not re-derived from the dynamic measurement that iOS
-   gets wrong after a keyboard or a background trip. The body is fixed so
-   iOS cannot rubber-band the document even when the layout viewport and the
-   content disagree for a frame. */
+   --app-h is the screen-true height. In a Safari tab that is svh (toolbars
+   never collapse because the document never scrolls). In the installed app
+   it is lvh: after a keyboard or a background trip iOS lays the document
+   out 59px short (the status bar height, with black-translucent +
+   viewport-fit=cover) and innerHeight/svh/dvh all follow it, but lvh keeps
+   reporting the real height (measured 793 vs 852). Everything anchored to
+   the bottom derives from --app-h, never from bottom:0. */
+:root {
+  --app-h: 100svh;
+  --dock-inset: max(env(safe-area-inset-bottom), 1rem);
+}
+@media (display-mode: standalone) {
+  :root {
+    --app-h: 100lvh;
+  }
+}
+
 html,
 body,
 #app {
-  height: 100svh;
+  height: var(--app-h);
   overflow: hidden;
   overscroll-behavior: none;
 }
 
 body {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
   width: 100%;
   margin: 0;
 }

@@ -13,7 +13,6 @@ import { useComposePage } from "@/hooks/use-compose-page";
 import { focusSearchInput } from "@/lib/search-state";
 import { onViewportChange, settleViewport } from "@/lib/viewport";
 import { Button } from "@rune/ui/components/button";
-import { cn } from "@rune/ui/lib/utils";
 
 /** Phone nav: tabs pill left (Home · Folders · Search), New page right. Hidden while a page is open and on /search, where the pill morphs into the search field (shared view-transition names).
  * Folders is the phone's way to every list: its screen carries "All pages" first, so the
@@ -77,10 +76,10 @@ export function MobileDock() {
 
   return (
     <div
-      className={cn(
-        "pointer-events-none fixed inset-x-0 bottom-0 z-40 flex items-center justify-between px-4 md:hidden",
-        "pb-[max(env(safe-area-inset-bottom),--spacing(4))]",
-      )}
+      // Anchored from the top via --app-h (lvh in standalone): bottom:0 would
+      // follow the layout viewport, which iOS gets 59px short after a resume.
+      className="pointer-events-none fixed inset-x-0 z-40 flex h-14.5 items-center justify-between px-4 md:hidden"
+      style={{ top: "calc(var(--app-h) - 3.625rem - var(--dock-inset))" }}
     >
       <nav className="pointer-events-auto flex items-center gap-0.5 rounded-full border bg-card p-1 shadow-lg [view-transition-name:dock]">
         <Tab to="/" icon={Home04Icon} label="Home" active={pathname === "/"} />

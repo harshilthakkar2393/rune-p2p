@@ -116,7 +116,7 @@ function ViewportProbe() {
         title="top from 100dvh"
       />
       <div className="fixed inset-x-0 bottom-6 text-center text-[11px] text-muted-foreground">
-        red = bottom:0 · green = svh · blue = dvh · yellow = lvh
+        red bottom:0 · green svh · blue dvh · yellow lvh · white --app-h
       </div>
     </div>
   );

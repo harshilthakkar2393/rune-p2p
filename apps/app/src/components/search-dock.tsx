@@ -26,6 +26,9 @@ export function SearchDock() {
   const searching = pathname.startsWith("/search");
   const query = useSearchQuery();
   const keyboard = useKeyboardInset();
+  const viewport = typeof window !== "undefined" ? window.visualViewport : null;
+  const keyboardTop =
+    viewport !== null ? Math.round(viewport.offsetTop + viewport.height) - 48 - 12 : 0;
   const navigate = useNavigate();
   const router = useRouter();
 
@@ -49,9 +52,13 @@ export function SearchDock() {
         "fixed inset-x-4 z-50 flex items-center gap-2.5",
         !searching && "pointer-events-none opacity-0",
       )}
-      style={{
-        bottom: keyboard > 0 ? keyboard + 12 : "max(env(safe-area-inset-bottom), 1rem)",
-      }}
+      style={
+        keyboard > 0
+          ? // On the keyboard: the visible bottom from the visual viewport.
+            { top: keyboardTop }
+          : // Otherwise the screen-true bottom via --app-h, like the dock.
+            { top: "calc(var(--app-h) - 3rem - var(--dock-inset))" }
+      }
     >
       <label
         className={cn(
