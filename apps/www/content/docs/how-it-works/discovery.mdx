@@ -1,0 +1,31 @@
+---
+title: How devices find each other
+description: A meeting point that learns almost nothing, then a direct line.
+---
+
+Your phone and your Mac are behind different routers, with changing addresses, and neither can be dialled from the outside. For them to talk directly, someone has to introduce them. That introduction is the only moment a third party is involved, and it is designed to learn as little as possible.
+
+## Three steps
+
+**1. Agree on a room name.** Both devices hold the same pairing secret. Each runs it through a one-way function (HKDF with SHA-256) to derive a room name. Same secret, same name, on every device, with the secret itself never leaving the device. The room name reveals nothing about the secret; that is what one-way means.
+
+**2. Meet.** Each device announces the room name to a handful of public relays. Rune uses the [Nostr](https://nostr.com) relay network, through a library called [Trystero](https://github.com/dmotz/trystero), and announces to five relays at once so a slow or dead one doesn't matter. A relay sees: a room name that looks like random hex, your IP address, and a small encrypted blob. It cannot see who you are, what the room is for, or anything you wrote.
+
+**3. Connect directly.** Through the relay the two devices exchange the small encrypted blob, which contains what each needs to reach the other. Then they open a direct [WebRTC](https://webrtc.org) connection, the same technology video calls use. From here on the relay is out of the picture. On the same Wi-Fi, the connection is local and never touches the internet.
+
+## What the relay learns, exactly
+
+| It sees | It does not see |
+|---|---|
+| A random-looking room name | Your secret, your name, your email |
+| Your IP address | Any note, title, or folder |
+| That two IPs asked for the same room | What the room is |
+| One encrypted blob per handshake | The contents of the blob (encrypted with a second key from the secret) |
+
+Two devices announcing the same room from two IPs is the one piece of metadata that correlates them. That is accepted; see [Encryption and the threat model](/docs/how-it-works/encryption).
+
+## When it can't work
+
+- **No internet at all.** Even on the same Wi-Fi, the introduction needs a relay. Browsers have no way to discover neighbours on a network. Once introduced, the link itself is local.
+- **A network that blocks WebRTC.** Some corporate networks do. Nothing to do but move networks.
+- **One device asleep.** The introduction needs both sides awake; see [Limits by design](/docs/how-it-works/limits).

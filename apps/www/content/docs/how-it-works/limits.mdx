@@ -1,0 +1,30 @@
+---
+title: Limits by design
+description: The things Rune deliberately doesn't do, and the reason for each.
+---
+
+Every limit here follows from the same decision: no server. Each could be removed by adding one. None of them will be.
+
+## iPhone syncs only while the app is open
+
+iOS suspends a web app's connections the moment it leaves the foreground or the screen locks. Rune rejoins the room when it comes back, and catches up in a few seconds. But an edit made on the Mac while the phone is in your pocket arrives when you next open the phone, not before.
+
+## Both devices have to be open at once
+
+Sync is a conversation between two live devices. With no always-on party, two devices that are never awake together never sync. In practice this is rarer than it sounds: you open the app on the phone, then later on the Mac while the phone still has it open, and the gap closes. If it bothers you, leave a tab open on a machine that stays on. It becomes the always-awake party without becoming a server.
+
+## No sync without internet
+
+Even on the same Wi-Fi, the first introduction needs a relay; see [How devices find each other](/docs/how-it-works/discovery). After the introduction the traffic is local. A network with no internet can't complete the introduction.
+
+## One person
+
+The pairing secret is the membership model. Sharing it shares everything. There is no per-page sharing, no read-only link, no invite. Adding them would mean permissions, identity, and a place to enforce them, which is a server by another name.
+
+## No history to browse
+
+Pages keep their full change history internally, that's how sync works, but Rune shows only the current state. Version browsing is possible on top of this model and is not built.
+
+## No content search yet
+
+Search covers titles and folder names. Searching inside pages means indexing every page's content on the device, which is planned.

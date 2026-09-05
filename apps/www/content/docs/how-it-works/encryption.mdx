@@ -1,0 +1,35 @@
+---
+title: Encryption and the threat model
+description: What's encrypted, what isn't, and what Rune is actually defending against.
+---
+
+Honest version, in one paragraph: **in transit, everything is encrypted; at rest, nothing is.** Notes travel between your devices over an encrypted direct connection that no one in the middle can read. On the device they sit in the browser's database as plain data, protected by whatever protects the device.
+
+## In transit
+
+- The direct connection between devices is WebRTC, which encrypts every packet with DTLS. This is the same protection a video call has.
+- The introduction handshake that passes through relays is a small blob encrypted with a password derived from the pairing secret. Relays carry it, they can't open it.
+- The pairing secret itself is never transmitted. Each device derives the room name and password from it locally.
+
+## At rest
+
+Not encrypted by Rune. IndexedDB on your Mac is a file on disk. On an iPhone it is inside the app's sandbox.
+
+This is a choice, not an oversight. Encrypting at rest inside a browser means a passphrase you type every launch and a key held in memory by JavaScript, which protects mainly against someone with the unlocked device already in hand. Your device lock, FileVault on the Mac, and the iPhone's hardware encryption do that job better. If that stops being enough for you, it is the first thing that would be added.
+
+## The threat model, ranked
+
+What Rune is defending against, most to least worrying:
+
+1. **A lost or stolen device.** Defended by your device lock and full-disk encryption, not by Rune. Unpair the remaining devices so the lost one stops receiving.
+2. **A bad dependency.** The app is built from a small set of libraries, pinned, and open source. Fewer moving parts than a cloud service, but not zero.
+3. **A script injected into the page.** The usual web risk. Mitigated by keeping the app small and the surface plain: no third-party scripts, no ads, no analytics.
+4. **Relay metadata.** A relay operator can see that two IP addresses asked for the same random room name. It cannot see what the room is or who you are. Accepted.
+
+## What Rune cannot promise
+
+- That a device you no longer control forgets what it already had.
+- That the operator of a relay never logs IPs.
+- Anything at all if the device itself is compromised.
+
+If you need "even I can't read it" guarantees, you want a different tool. Rune's guarantee is simpler: **no one else has a copy.**

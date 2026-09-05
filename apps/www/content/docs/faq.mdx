@@ -1,0 +1,34 @@
+---
+title: FAQ
+description: Short answers to the questions the rest of the docs raise.
+---
+
+**Is it end-to-end encrypted?**
+In transit, yes: devices talk over an encrypted direct connection and relays can't read the handshake. At rest, no: notes sit in the browser's database protected by your device's own encryption. See [Encryption and the threat model](/docs/how-it-works/encryption).
+
+**Can I use it on Android?**
+Yes, in Chrome, including installed. Sync between an Android phone and a Mac works the same way. The docs lean on iPhone because that's where the sharp edges are.
+
+**Can two people share a space?**
+Technically, by sharing the twelve words. Deliberately, no: there's no interface for it, no permissions, and both would see everything.
+
+**What if I lose all my devices at once?**
+The notes are gone, unless exported. Keep two devices paired and export the pages that matter. See [Where your notes live](/docs/how-it-works/where-notes-live).
+
+**Does it work offline?**
+Entirely. Offline is the normal state. Sync happens when two devices happen to be online and open together.
+
+**Why doesn't my phone sync while it's in my pocket?**
+iOS suspends web apps in the background. It catches up within seconds of being opened. See [Limits by design](/docs/how-it-works/limits).
+
+**Where is the server?**
+There isn't one. The only third parties involved are public relays that introduce your devices to each other and see a random room name and your IP. See [How devices find each other](/docs/how-it-works/discovery).
+
+**Is there a Windows or Linux app?**
+The web app, in Chrome or Edge, installed or in a tab.
+
+**Can I import from Notion, Apple Notes, Obsidian?**
+Not yet. Paste works; import is planned.
+
+**Who made this?**
+One person, for themselves, and it's open source. It is finished when it's good enough, then it's left alone.

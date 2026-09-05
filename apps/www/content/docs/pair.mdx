@@ -1,0 +1,30 @@
+---
+title: Pair a second device
+description: Twelve words, or a QR code. Both devices open. That's it.
+---
+
+Pairing is how your devices agree to sync. It takes one minute and you do it once per device.
+
+## Steps
+
+1. On the first device, open **Devices** and press **Create pairing code**. You'll see twelve words, a QR code, and a link.
+2. On the second device, open **Devices**, and either:
+   - press **Scan** and point the camera at the QR code, or
+   - paste the twelve words or the link into **Have a code?** and press **Pair**.
+3. Keep both devices open for a moment. They find each other and sync. The first sync carries everything; after that only changes travel.
+
+The Devices page shows each paired device that is currently online.
+
+## What the words are
+
+The twelve words *are* the pairing secret, written in a form you can read aloud or type. Every device that holds the same words is in the same private space. Nothing else identifies you: no email, no username.
+
+Treat them like a house key. Anyone with the words can join your space and read everything in it. See [The secret](/docs/how-it-works/secret) for what they are and what losing them means (very little).
+
+## Where the link goes
+
+The link carries the secret after a `#`. Browsers never send that part to a server, so the link is safe to send yourself over any channel you trust. Don't post it anywhere public.
+
+## Unpairing
+
+**Unpair this device** on the Devices page forgets the secret on that device only. Its notes stay on it. Other devices keep syncing with each other. To lock a lost device out of the space, unpair every remaining device and create a fresh code; the lost one still has the old notes it already had, but receives nothing new.

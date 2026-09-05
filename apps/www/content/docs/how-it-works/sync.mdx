@@ -1,0 +1,28 @@
+---
+title: How sync works
+description: Every device keeps the full history, so changes merge without a referee.
+---
+
+Sync without a server has one hard problem: two devices edit the same page while apart, then meet. Who wins? Rune's answer is that nobody has to win, because of how a page is stored.
+
+## Pages are histories, not files
+
+A page in Rune is not a text file that gets overwritten. It is a **log of every change ever made to it**: this character inserted here, that block moved there. Each change is stamped with which device made it and in what order. This structure is called a CRDT, a conflict-free replicated data type. Rune uses [Yjs](https://yjs.dev), which is what most collaborative editors are built on.
+
+Two logs from two devices can always be combined into one, and every device that combines them arrives at exactly the same result. No conflicts, no "which version do you want to keep". If you edited paragraph two on the phone and paragraph five on the Mac, you get both. If you both changed the same word, you get one deterministic outcome and nothing is silently lost.
+
+## What travels
+
+When two devices connect, each tells the other how much of the history it already has. That summary is tiny. The other side replies with only the changes that are missing. After that, while both are open, every keystroke is sent as it happens, so a page open on two devices updates live.
+
+All pages share one connection. Each message carries the id of the page it belongs to, so the index and every page ride the same link instead of opening a connection per page.
+
+## What "synced" means
+
+- **Online** on the Devices page means a direct connection to that device exists right now.
+- Changes made while apart are exchanged within a few seconds of both devices being open.
+- Deleting a page permanently on one device removes its content on the others the next time they meet.
+
+## What sync is not
+
+It is not continuous. Rune does not run in the background on iOS; see [Limits by design](/docs/how-it-works/limits). And it is not a backup: a mistake syncs as faithfully as a good edit. The 30-day [Trash](/docs/using/trash) is the safety net for deletions.

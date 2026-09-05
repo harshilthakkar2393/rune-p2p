@@ -1,0 +1,30 @@
+---
+title: Where your notes live
+description: One full copy per device, inside the browser's own database. No server copy exists.
+---
+
+Most notes apps keep the real copy on a server and give your devices a cache of it. Rune is the other way round. **Each device holds the full, real copy.** There is no server copy, because there is no server.
+
+## On the device
+
+Every page is a document stored in the browser's database, IndexedDB, under the app's own origin. One more document, the *index*, lists your folders, your pages, their titles and timestamps, and what you opened recently. Opening a page loads its document; typing writes to it immediately.
+
+Installed as an app, this storage is separate from any browser tab, and Rune asks the system to mark it persistent so the browser won't clear it to free space.
+
+## Between devices
+
+When two paired devices are open at the same time, they connect directly and exchange whatever the other is missing. Afterwards both hold identical copies. Neither is primary. If one device is off for a month, it catches up the next time both are open.
+
+This is what "local-first" means in practice: the app works fully offline because offline is the normal state. The network is an occasional courtesy between your own devices.
+
+## What this buys you
+
+- Nobody can read your notes, because nobody has them.
+- No outage. There is nothing to be down.
+- No limits, no plans, nothing to cancel.
+
+## What it costs you
+
+- **Your devices are the backup.** If every device is lost at once, the notes are gone. Two paired devices is the minimum sensible setup. Three is comfortable.
+- **Export is your insurance.** Any page can be exported as Markdown from the page inspector. See [Export and backup](/docs/using/export).
+- **Browser storage has rules.** Install the app and grant persistent storage. See [Install](/docs/install).

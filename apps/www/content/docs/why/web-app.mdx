@@ -1,0 +1,16 @@
+---
+title: Why a web app
+description: Installable, everywhere, and nothing to trust but a page whose source you can read.
+---
+
+Rune is a web app you install, not a native app from a store. Three reasons.
+
+**Every device, one build.** iPhone, iPad, Mac, a Windows laptop, all from the same page. No store, no per-platform port that lags behind.
+
+**Nothing hidden.** A native app is a binary. A web app is source your browser downloads and runs; you can read it. For a tool whose whole promise is "no one else has your notes", being inspectable matters more than being in a store.
+
+**The browser already has what's needed.** A database that survives restarts, a way to open direct connections between devices, an installable shell that runs offline. Rune is small because it uses those instead of rebuilding them.
+
+## What it costs
+
+Browsers are stricter hosts than operating systems. On iOS, a web app can't run in the background, so sync only happens while it's open. Storage has to be asked for. Some things a native app does for free, Rune has to work around. These docs are honest about each one; see [Limits by design](/docs/how-it-works/limits).
