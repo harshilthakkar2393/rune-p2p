@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { healViewport, onViewportChange, resetWindowScroll } from "@/lib/viewport";
+import { onViewportChange, resetWindowScroll } from "@/lib/viewport";
 
 /**
  * Height of the on-screen keyboard (plus Safari's form bar) in CSS px, 0 when
@@ -19,14 +19,7 @@ export function useKeyboardInset(): number {
       const covered = window.innerHeight - viewport.height - viewport.offsetTop;
       setInset(covered > 80 ? Math.round(covered) : 0);
     });
-    // The keyboard closing is the classic trigger for the shrunk viewport;
-    // WebKit needs a beat after blur before the re-measure sticks.
-    const onBlur = () => window.setTimeout(healViewport, 140);
-    document.addEventListener("focusout", onBlur);
-    return () => {
-      stop();
-      document.removeEventListener("focusout", onBlur);
-    };
+    return stop;
   }, []);
   return inset;
 }

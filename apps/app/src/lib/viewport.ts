@@ -39,52 +39,8 @@ export function resetWindowScroll() {
   if (window.scrollY !== 0 || window.scrollX !== 0) window.scrollTo(0, 0);
 }
 
-/**
- * Standalone iOS PWAs shrink the viewport and never grow it back: after a
- * keyboard session or a trip to the background, window.innerHeight,
- * visualViewport.height and 100dvh all come back smaller and stay that way
- * until the app is force-quit or rotated. Bottom-anchored fixed elements
- * then float above the real bottom. Scroll resets do not touch this; the
- * viewport itself is mis-measured. What does work is forcing WebKit to
- * re-measure by hiding and re-showing a full-height element with a
- * synchronous reflow in between (a route change has the same effect).
- * See https://dev.to/cederhook/fixing-the-ios-standalone-pwa-keyboard-bug-that-shrinks-your-viewport-for-good-63d
- */
-let probe: HTMLElement | null = null;
-
-/** The screen-true height. 100lvh keeps reporting the full height even when
- * iOS has shrunk the layout viewport (measured: innerHeight 793 vs lvh 852). */
-export function fullViewportHeight(): number {
-  if (!probe) {
-    probe = document.createElement("div");
-    probe.setAttribute("aria-hidden", "true");
-    probe.style.cssText =
-      "position:fixed;top:0;left:0;width:1px;height:100lvh;visibility:hidden;pointer-events:none";
-    document.body.appendChild(probe);
-  }
-  return probe.getBoundingClientRect().height;
-}
-
-export function viewportIsShrunk(): boolean {
-  return fullViewportHeight() - window.innerHeight > 4;
-}
-
-export function healViewport(force = false) {
-  if (!force && !viewportIsShrunk()) return;
-  const root = document.getElementById("app");
-  if (!root) return;
-  // display:none drops descendant scroll offsets; keep them.
-  const scrollers = Array.from(
-    root.querySelectorAll<HTMLElement>('[data-slot="scroll-area-viewport"]'),
-  ).map((el) => [el, el.scrollTop] as const);
-  root.style.display = "none";
-  void root.offsetHeight; // synchronous reflow
-  root.style.display = "";
-  for (const [el, top] of scrollers) el.scrollTop = top;
-}
-
-/** Everything a resume needs: scroll pinned, viewport re-measured. */
+/** Everything a resume needs: the layout viewport pinned at the top. The
+ * shrunk-viewport bug itself is handled in CSS (--app-h = lvh in standalone). */
 export function settleViewport() {
   resetWindowScroll();
-  healViewport();
 }

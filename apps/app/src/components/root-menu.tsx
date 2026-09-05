@@ -71,11 +71,6 @@ export function RootMenu({ action, children }: { action?: ReactNode; children?: 
               <HugeiconsIcon icon={dark ? Sun03Icon : Moon02Icon} strokeWidth={1.75} />
               {dark ? "Light theme" : "Dark theme"}
             </DropdownMenuItem>
-            {/* TEMPORARY: viewport diagnostic; remove once the dock drift is settled. */}
-            <DropdownMenuItem onClick={() => void navigate({ to: "/viewport" })}>
-              <span className="font-mono text-tiny">vp</span>
-              Viewport probe
-            </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
