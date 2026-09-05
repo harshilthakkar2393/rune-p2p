@@ -7,6 +7,7 @@ import { TanStackDevtools } from "@tanstack/react-devtools";
 import { AppSidebar } from "@/components/app-sidebar";
 import { InspectorSlot } from "@/components/inspector-slot";
 import { MobileDock, useDockVisible } from "@/components/mobile-dock";
+import { SearchDock } from "@/components/search-dock";
 import { SearchPalette } from "@/components/search-palette";
 import { Shortcuts } from "@/components/shortcuts";
 import { UpdatePrompt } from "@/components/update-prompt";
@@ -54,6 +55,7 @@ function RootComponent() {
           </SidebarInset>
           <InspectorSlot />
           {isMobile && <MobileDock />}
+          {isMobile && <SearchDock />}
         </SidebarProvider>
       </TooltipProvider>
       <SearchPalette />

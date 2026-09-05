@@ -10,6 +10,7 @@ import {
 } from "@hugeicons/core-free-icons";
 
 import { useComposePage } from "@/hooks/use-compose-page";
+import { focusSearchInput } from "@/lib/search-state";
 import { Button } from "@rune/ui/components/button";
 import { cn } from "@rune/ui/lib/utils";
 
@@ -34,15 +35,18 @@ function Tab({
   icon,
   label,
   active,
+  onClick,
 }: {
   to: "/" | "/folders" | "/search";
   icon: IconSvgElement;
   label: string;
   active: boolean;
+  onClick?: () => void;
 }) {
   return (
     <Link
       to={to}
+      onClick={onClick}
       aria-label={label}
       aria-current={active ? "page" : undefined}
       data-status={active ? "active" : undefined}
@@ -87,7 +91,14 @@ export function MobileDock() {
           label="Folders"
           active={pathname.startsWith("/folders") || pathname.startsWith("/pages")}
         />
-        <Tab to="/search" icon={Search01Icon} label="Search" active={false} />
+        {/* Focus the always-mounted field inside the tap so iOS opens the keyboard. */}
+        <Tab
+          to="/search"
+          icon={Search01Icon}
+          label="Search"
+          active={false}
+          onClick={focusSearchInput}
+        />
       </nav>
       <Button
         variant="outline"

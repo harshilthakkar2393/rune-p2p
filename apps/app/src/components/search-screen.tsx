@@ -1,34 +1,34 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useMemo, type ReactNode } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Cancel01Icon, File02Icon, Search01Icon } from "@hugeicons/core-free-icons";
+import { File02Icon } from "@hugeicons/core-free-icons";
 
 import { FolderGlyph } from "@/components/folder-glyph";
 import { RootMenu } from "@/components/root-menu";
 import { useNodes } from "@/hooks/use-index";
+import { useKeyboardInset } from "@/hooks/use-keyboard-inset";
 import { useRecents } from "@/hooks/use-recents";
 import { folderColorValue } from "@/lib/folder-colors";
 import { humanTime } from "@/lib/human-time";
 import { pageTitle, searchNodes, type Match } from "@/lib/search";
+import { useSearchQuery } from "@/lib/search-state";
 import type { Folder, Page } from "@/lib/schema";
-import { Button } from "@rune/ui/components/button";
 import { ScrollArea } from "@rune/ui/components/scroll-area";
 import { cn } from "@rune/ui/lib/utils";
 
 /**
- * Phone search (`/search`): a full screen with the field at the bottom, on
- * the keyboard, where the thumb is (Linear, Apple News, iOS 26). Empty query
- * shows recently viewed pages; typing shows Pages then Folders with the hit
- * underlined. The dock hides on this route and the field carries the dock's
- * view-transition name, so the pill morphs into the field on the way in and
- * back on the way out. Desktop keeps the ⌘K palette.
+ * Phone search (`/search`): the results half. The field itself is
+ * `SearchDock` in the root layout, a fixed layer this screen never touches;
+ * this screen only reads the shared query and pads its bottom so the last
+ * row scrolls clear of the field and the keyboard. Empty query shows
+ * recently viewed pages; typing shows Pages then Folders with the hit
+ * underlined. Desktop keeps the ⌘K palette.
  */
 export function SearchScreen() {
   const nodes = useNodes();
   const recents = useRecents();
   const navigate = useNavigate();
-  const router = useRouter();
-  const [query, setQuery] = useState("");
+  const query = useSearchQuery();
   const keyboard = useKeyboardInset();
 
   const folderById = useMemo(
@@ -58,10 +58,6 @@ export function SearchScreen() {
   const results = useMemo(() => searchNodes(nodes, query), [nodes, query]);
   const searching = query.trim() !== "";
 
-  const close = () => {
-    if (window.history.length > 1) router.history.back();
-    else void navigate({ to: "/" });
-  };
   const openPage = (pageId: string) => void navigate({ to: "/page/$pageId", params: { pageId } });
   const openFolder = (folderId: string) =>
     void navigate({ to: "/folders/$folderId", params: { folderId } });
@@ -158,47 +154,6 @@ export function SearchScreen() {
           )}
         </main>
       </ScrollArea>
-
-      {/* The field sits on the keyboard: bottom offset tracks the visual viewport. */}
-      <div
-        className="fixed inset-x-4 z-40 flex items-center gap-2.5"
-        style={{
-          bottom: keyboard > 0 ? keyboard + 12 : "max(env(safe-area-inset-bottom), 1rem)",
-        }}
-      >
-        <label className="flex h-12 flex-1 items-center gap-2.5 rounded-full border bg-card px-4 shadow-lg [view-transition-name:dock]">
-          <HugeiconsIcon
-            icon={Search01Icon}
-            strokeWidth={1.75}
-            className="size-5 shrink-0 text-muted-foreground"
-          />
-          <input
-            autoFocus
-            type="search"
-            enterKeyHint="search"
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck={false}
-            placeholder="Search pages and folders"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") close();
-              if (event.key === "Enter" && results.pages[0]) openPage(results.pages[0].page.id);
-            }}
-            className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground"
-          />
-        </label>
-        <Button
-          variant="outline"
-          size="icon-lg"
-          aria-label="Close search"
-          onClick={close}
-          className="size-12 rounded-full shadow-lg [view-transition-name:dock-action]"
-        >
-          <HugeiconsIcon icon={Cancel01Icon} strokeWidth={1.75} className="size-5!" />
-        </Button>
-      </div>
     </div>
   );
 }
@@ -248,26 +203,4 @@ function Highlight({ text, match }: { text: string; match: Match }) {
       {text.slice(match.end)}
     </>
   );
-}
-
-/** Height of the on-screen keyboard in CSS px (0 when hidden). iOS does not
- * resize the layout viewport for the keyboard; the visual viewport shrinks. */
-function useKeyboardInset(): number {
-  const [inset, setInset] = useState(0);
-  useEffect(() => {
-    const viewport = window.visualViewport;
-    if (!viewport) return;
-    const update = () => {
-      const covered = window.innerHeight - viewport.height - viewport.offsetTop;
-      setInset(covered > 80 ? Math.round(covered) : 0);
-    };
-    update();
-    viewport.addEventListener("resize", update);
-    viewport.addEventListener("scroll", update);
-    return () => {
-      viewport.removeEventListener("resize", update);
-      viewport.removeEventListener("scroll", update);
-    };
-  }, []);
-  return inset;
 }
