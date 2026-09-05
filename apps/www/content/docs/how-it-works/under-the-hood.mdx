@@ -1,0 +1,67 @@
+---
+title: Under the hood
+description: The whole sync stack, one layer at a time, with the name of each tool and the reason it's there.
+---
+
+The other pages in this section explain sync in plain terms. This one names the parts. Read it bottom to top: each layer only knows about the one below it.
+
+## 1. A page is a Yjs document
+
+A page in Rune is not a file that gets saved. It is a [Yjs](https://yjs.dev) document, a kind of data structure called a CRDT. Instead of holding the current text, it holds every change ever made to the text, each one stamped with which device made it and in what order. Two devices can each add changes on their own, and when the two histories are put together, every device ends up with the exact same page. Nobody has to decide whose version wins.
+
+The editor, [BlockNote](https://www.blocknotejs.org), writes straight into this document. Typing a letter *is* creating a change that can later be sent to another device.
+
+One extra Yjs document, the **index**, holds the things that aren't page content: folders, page titles, timestamps, which pages are in the trash, what you opened recently. Each page is its own document so a device only loads the pages it opens.
+
+**Why this and not a file per page?** Files have to be merged by hand when two copies diverge, or one copy has to lose. CRDTs merge on their own, every time. It is the only way to sync with no server to referee.
+
+## 2. Documents live in the browser's database
+
+Every document is mirrored into IndexedDB, the database every browser ships with, using [y-indexeddb](https://github.com/yjs/y-indexeddb). Every change is written as it happens. When the app opens, it rebuilds each document from IndexedDB before doing anything else.
+
+This is the whole reason the app works offline: offline isn't a special mode. The network comes later, if at all.
+
+## 3. Two devices exchange only what's missing
+
+When two devices connect, they speak the standard Yjs sync protocol, [y-protocols](https://github.com/yjs/y-protocols). Each sends a tiny summary of how much history it already has. The other replies with just the changes the first one lacks. After that first exchange, while both are open, every new change is sent the moment it happens, so a page open on both updates live.
+
+**Why not send the whole page?** Because a page is a history, and histories only grow. Sending the difference keeps the first sync after a month apart quick.
+
+## 4. Everything shares one connection
+
+Out of the box, each document would want its own network connection. Rune adds a small layer of its own, a multiplexer, that tags every message with the id of the document it belongs to. The index and every open page then ride a single connection.
+
+A second, separate channel carries **presence**: which devices are online and what each is looking at. Presence uses Yjs Awareness, and it's kept off the document channel so it can never get in the way of sync.
+
+## 5. Finding each other: Trystero over Nostr
+
+Before two devices can talk directly, something has to introduce them. Rune uses [Trystero](https://github.com/dmotz/trystero), a library built for exactly this: connecting browsers to each other without running a server, by borrowing public infrastructure for the introduction.
+
+The infrastructure Rune borrows is the [Nostr](https://nostr.com) relay network, thousands of small public servers built for a social protocol. Both devices post a short message to five relays under a **room name**. The room name comes from the pairing secret through a one-way function (HKDF with SHA-256, if you want to look it up), so every device with the same secret computes the same name, and the name reveals nothing about the secret. A second one-way function on the same secret produces a password that Trystero uses to encrypt the introduction itself.
+
+A relay therefore sees: a room name that looks like random hex, your IP address, and an encrypted blob. Nothing else.
+
+**Why Nostr?** Trystero can also introduce over BitTorrent trackers or MQTT brokers. Nostr relays are more numerous and more reliable, and Rune can switch without changing anything above this layer.
+
+## 6. The direct line: WebRTC
+
+Once introduced, the devices open a [WebRTC](https://webrtc.org) data channel to each other, the same technology browsers use for video calls. Finding a path is called ICE: each device asks a public STUN server "what does my address look like from outside?", the two swap answers through the relay, and they try the combinations until one connects. On the same Wi-Fi the winning path is the local one and traffic never leaves the router.
+
+Everything on this channel is encrypted with DTLS. No one between the two devices, relay included, can read it.
+
+**What's missing on purpose.** There is no TURN server, the fallback that relays traffic when a direct path can't be found. So two devices both behind the strictest kind of network address translation, which some mobile carriers use, can't connect to each other. A TURN server is a server that sees your traffic. Rune doesn't run one.
+
+## 7. Staying connected on a phone
+
+iOS suspends a web app's connections the moment it leaves the foreground or the screen locks, and tells the app nothing when it comes back. A small piece of Rune watches the browser's own signals (the page becoming visible, the network returning, the page being restored) and rejoins the room, but only if no device is currently connected, and with a pause that grows after each failed try so a dead network doesn't get hammered.
+
+## 8. Deleting across devices
+
+Trashing a page sets a flag in the index; the flag syncs like any other change, so the page shows up in Trash everywhere. Deleting forever leaves a marker in the index saying the page existed and is gone. When another device sees that marker, it removes its own copy of the page's content. Without the marker, a device that was offline would bring the page back.
+
+## What isn't in the stack
+
+- No server of Rune's own, anywhere.
+- No relay for traffic (TURN). See layer 6.
+- No encryption at rest. See [Encryption and the threat model](/docs/how-it-works/encryption).
+- No trimming of history. Documents keep every change. At the size of a personal journal this doesn't matter; it's the thing to revisit if it ever does.
