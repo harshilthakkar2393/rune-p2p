@@ -8,6 +8,7 @@ import { humanTime } from "@/lib/human-time";
 import type { Folder } from "@/lib/schema";
 import { Button } from "@rune/ui/components/button";
 import { ScrollArea, ScrollBar } from "@rune/ui/components/scroll-area";
+import { useIsMobile } from "@rune/ui/hooks/use-mobile";
 import { EmptyState } from "@/components/empty-state";
 import { PageCard } from "@/components/page-card";
 
@@ -43,6 +44,7 @@ function greeting(): string {
 function Home() {
   const nodes = useNodes();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const folderById = new Map(
     nodes
       .filter((node): node is Folder => node.type === "folder" && node.deletedAt === undefined)
@@ -71,6 +73,19 @@ function Home() {
 
   const newPage = useComposePage();
 
+  const card = ({ page, openedAt }: (typeof recents)[number]) => (
+    <PageCard
+      page={page}
+      folder={page.folderId !== null ? folderById.get(page.folderId) : undefined}
+      trailing={
+        <span className="font-mono text-tiny leading-4 text-muted-foreground">
+          {humanTime(openedAt)}
+        </span>
+      }
+      onActivate={() => void navigate({ to: "/page/$pageId", params: { pageId: page.id } })}
+    />
+  );
+
   return (
     <div className="flex h-full flex-col">
       <header className="mx-auto flex h-14 w-full max-w-3xl shrink-0 items-center px-4 md:px-8">
@@ -98,30 +113,27 @@ function Home() {
                     </span>
                     <span className="grow border-t border-dashed border-foreground/10" />
                   </div>
-                  {/* Bleed to the gutter edges so the row scrolls edge to edge. */}
-                  <ScrollArea className="-mx-4 -my-2 md:-mx-8">
-                    <div className="flex w-max gap-3 px-4 py-2 md:px-8">
-                      {group.items.map(({ page, openedAt }) => (
-                        <div key={page.id} className="w-64 shrink-0">
-                          <PageCard
-                            page={page}
-                            folder={
-                              page.folderId !== null ? folderById.get(page.folderId) : undefined
-                            }
-                            trailing={
-                              <span className="font-mono text-tiny leading-4 text-muted-foreground">
-                                {humanTime(openedAt)}
-                              </span>
-                            }
-                            onActivate={() =>
-                              void navigate({ to: "/page/$pageId", params: { pageId: page.id } })
-                            }
-                          />
-                        </div>
+                  {isMobile ? (
+                    /* Phone: one row per day, scrolled sideways, bleeding to the
+                       gutters. Cards are the two-up width Pages and Folders use. */
+                    <ScrollArea className="-mx-4 -my-2">
+                      <div className="flex w-max gap-3 px-4 py-2">
+                        {group.items.map((entry) => (
+                          <div key={entry.page.id} className="w-[calc(50vw-1.375rem)] shrink-0">
+                            {card(entry)}
+                          </div>
+                        ))}
+                      </div>
+                      <ScrollBar orientation="horizontal" />
+                    </ScrollArea>
+                  ) : (
+                    /* Desktop: the same grid as Pages. */
+                    <div className="grid grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4">
+                      {group.items.map((entry) => (
+                        <div key={entry.page.id}>{card(entry)}</div>
                       ))}
                     </div>
-                    <ScrollBar orientation="horizontal" />
-                  </ScrollArea>
+                  )}
                 </div>
               ))
             )}
