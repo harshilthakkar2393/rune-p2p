@@ -11,7 +11,7 @@ import {
 
 import { useComposePage } from "@/hooks/use-compose-page";
 import { focusSearchInput } from "@/lib/search-state";
-import { onViewportChange, resetWindowScroll } from "@/lib/viewport";
+import { onViewportChange, settleViewport } from "@/lib/viewport";
 import { Button } from "@rune/ui/components/button";
 import { cn } from "@rune/ui/lib/utils";
 
@@ -69,8 +69,8 @@ export function MobileDock() {
   // that the viewport may have changed (keyboard, resume, rotation).
   useEffect(() => {
     if (!visible) return;
-    resetWindowScroll();
-    return onViewportChange(resetWindowScroll);
+    settleViewport();
+    return onViewportChange(settleViewport);
   }, [visible, pathname]);
 
   if (!visible) return null;

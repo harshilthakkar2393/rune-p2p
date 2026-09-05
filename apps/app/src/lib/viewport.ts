@@ -38,3 +38,24 @@ export function onViewportChange(callback: () => void): () => void {
 export function resetWindowScroll() {
   if (window.scrollY !== 0 || window.scrollX !== 0) window.scrollTo(0, 0);
 }
+
+/**
+ * Force iOS to re-lay out the page. After a keyboard session or a background
+ * resume, standalone Safari can keep the layout viewport at a stale height
+ * until something like a rotation forces it to recompute; bottom-anchored
+ * fixed elements then sit too high. Nudging the root's height across two
+ * frames is the smallest change that makes it recompute.
+ */
+export function nudgeLayout() {
+  const root = document.documentElement;
+  root.style.height = "100.01%";
+  requestAnimationFrame(() => {
+    root.style.height = "";
+  });
+}
+
+/** Everything a resume needs: scroll pinned, layout recomputed. */
+export function settleViewport() {
+  resetWindowScroll();
+  nudgeLayout();
+}
