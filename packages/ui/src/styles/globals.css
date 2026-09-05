@@ -182,6 +182,26 @@ h6 {
   font-synthesis-weight: none;
 }
 
+/* rune: view transitions — no whole-page crossfade; only named pairs move
+   (phone dock pill ↔ search field). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-group(dock),
+::view-transition-group(dock-action) {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
+  }
+}
+
 /* rune: empty-state glyphs — one 1.5px stroke in the text neutral, faces filled
    with the page ground so the slab contour occludes what sits behind it. */
 [data-slot="empty-glyph"] :is(path, rect) {

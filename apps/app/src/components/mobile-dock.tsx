@@ -10,11 +10,10 @@ import {
 } from "@hugeicons/core-free-icons";
 
 import { useComposePage } from "@/hooks/use-compose-page";
-import { setPaletteOpen } from "@/lib/palette";
 import { Button } from "@rune/ui/components/button";
 import { cn } from "@rune/ui/lib/utils";
 
-/** Phone nav: tabs pill left (Home · Folders · Search), New page right. Hidden while a page is open.
+/** Phone nav: tabs pill left (Home · Folders · Search), New page right. Hidden while a page is open and on /search, where the pill morphs into the search field (shared view-transition names).
  * Folders is the phone's way to every list: its screen carries "All pages" first, so the
  * tab also lights up on /pages (Apple Files' Browse, Todoist's Browse). */
 
@@ -23,7 +22,11 @@ const TAB_CLASS =
 
 /** True on phones for routes that show the dock; the editor and pair flow do not. */
 export function useDockVisible(pathname: string): boolean {
-  return !pathname.startsWith("/page/") && !pathname.startsWith("/pair");
+  return (
+    !pathname.startsWith("/page/") &&
+    !pathname.startsWith("/pair") &&
+    !pathname.startsWith("/search")
+  );
 }
 
 function Tab({
@@ -32,7 +35,7 @@ function Tab({
   label,
   active,
 }: {
-  to: "/" | "/folders";
+  to: "/" | "/folders" | "/search";
   icon: IconSvgElement;
   label: string;
   active: boolean;
@@ -76,7 +79,7 @@ export function MobileDock() {
         "pb-[max(env(safe-area-inset-bottom),--spacing(4))]",
       )}
     >
-      <nav className="pointer-events-auto flex items-center gap-0.5 rounded-full border bg-card p-1 shadow-lg">
+      <nav className="pointer-events-auto flex items-center gap-0.5 rounded-full border bg-card p-1 shadow-lg [view-transition-name:dock]">
         <Tab to="/" icon={Home04Icon} label="Home" active={pathname === "/"} />
         <Tab
           to="/folders"
@@ -84,21 +87,14 @@ export function MobileDock() {
           label="Folders"
           active={pathname.startsWith("/folders") || pathname.startsWith("/pages")}
         />
-        <button
-          type="button"
-          aria-label="Search"
-          className={TAB_CLASS}
-          onClick={() => setPaletteOpen(true)}
-        >
-          <HugeiconsIcon icon={Search01Icon} strokeWidth={1.75} className="size-6" />
-        </button>
+        <Tab to="/search" icon={Search01Icon} label="Search" active={false} />
       </nav>
       <Button
         variant="outline"
         size="icon-lg"
         aria-label="New page"
         onClick={compose}
-        className="pointer-events-auto size-14.5 rounded-full shadow-lg"
+        className="pointer-events-auto size-14.5 rounded-full shadow-lg [view-transition-name:dock-action]"
       >
         <HugeiconsIcon icon={PencilEdit02Icon} strokeWidth={1.75} className="size-6!" />
       </Button>

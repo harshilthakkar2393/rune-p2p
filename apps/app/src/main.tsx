@@ -6,6 +6,10 @@ const router = createRouter({
   routeTree,
   defaultPreload: "intent",
   scrollRestoration: true,
+  // Navigations run inside document.startViewTransition where supported.
+  // globals.css turns the root crossfade off, so only elements that share a
+  // view-transition-name (the phone dock ↔ search field) actually animate.
+  defaultViewTransition: true,
 });
 
 declare module "@tanstack/react-router" {
