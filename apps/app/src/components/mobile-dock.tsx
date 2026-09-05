@@ -11,6 +11,7 @@ import {
 
 import { useComposePage } from "@/hooks/use-compose-page";
 import { focusSearchInput } from "@/lib/search-state";
+import { onViewportChange, resetWindowScroll } from "@/lib/viewport";
 import { Button } from "@rune/ui/components/button";
 import { cn } from "@rune/ui/lib/utils";
 
@@ -62,16 +63,14 @@ export function MobileDock() {
   const compose = useComposePage();
   const visible = useDockVisible(pathname);
 
-  // iOS scrolls the page under the keyboard while editing and can leave that
-  // offset behind on navigation, which mispositions position:fixed. Reset it
-  // whenever the dock (re)appears and whenever the keyboard goes away.
+  // iOS scrolls the page under the keyboard and can hand the window back
+  // from the background with that offset still applied, which mispositions
+  // position:fixed. Reset whenever the dock (re)appears and on every signal
+  // that the viewport may have changed (keyboard, resume, rotation).
   useEffect(() => {
     if (!visible) return;
-    const reset = () => window.scrollTo(0, 0);
-    reset();
-    const viewport = window.visualViewport;
-    viewport?.addEventListener("resize", reset);
-    return () => viewport?.removeEventListener("resize", reset);
+    resetWindowScroll();
+    return onViewportChange(resetWindowScroll);
   }, [visible, pathname]);
 
   if (!visible) return null;
