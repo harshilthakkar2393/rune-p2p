@@ -80,20 +80,21 @@ export function SearchDock() {
           }}
           className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
         />
-        {/* Clear addon: a primary pill inside the field; keeps focus so the keyboard stays. */}
+        {/* Clear addon, Apple's xmark.circle.fill: small gray disc, glyph cut out.
+            Keeps focus so the keyboard stays. */}
         <Button
-          variant="default"
-          size="icon-sm"
+          variant="secondary"
+          size="icon-xs"
           aria-label="Clear search"
           tabIndex={-1}
           onPointerDown={(event) => event.preventDefault()}
           onClick={() => setSearchQuery("")}
           className={cn(
-            "-mr-1.5 shrink-0 rounded-full transition-opacity",
+            "-mr-1 shrink-0 rounded-full bg-muted-foreground/60 text-background transition-opacity hover:bg-muted-foreground/80",
             query === "" && "pointer-events-none opacity-0",
           )}
         >
-          <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-3.5!" />
+          <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2.5} className="size-2.5!" />
         </Button>
       </label>
       <Button
