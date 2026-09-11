@@ -4,7 +4,35 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Rune</title>
-    <meta name="theme-color" content="#000000" />
+    <!-- Chrome colour = the app's ground: --background on phones, --sidebar from
+         md up (the content inset floats on the sidebar ground). Hex from globals.css;
+         the app rewrites the meta after boot. -->
+    <meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light) and (max-width: 767px)" />
+    <meta name="theme-color" content="#0d0c0b" media="(prefers-color-scheme: dark) and (max-width: 767px)" />
+    <meta name="theme-color" content="#f4f3f1" media="(prefers-color-scheme: light) and (min-width: 768px)" />
+    <meta name="theme-color" content="#080807" media="(prefers-color-scheme: dark) and (min-width: 768px)" />
+    <!-- Theme before first paint: the stored choice (rune-theme) or the system one.
+         Without this the first frame is the UA's white canvas. -->
+    <script>
+      (function () {
+        var stored = null;
+        try {
+          stored = localStorage.getItem("rune-theme");
+        } catch (e) {}
+        var dark =
+          stored === "dark" ||
+          (stored !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
+        if (dark) document.documentElement.classList.add("dark");
+      })();
+    </script>
+    <style>
+      html { background: #fafaf9; color-scheme: light; }
+      html.dark { background: #0d0c0b; color-scheme: dark; }
+      @media (min-width: 768px) {
+        html { background: #f4f3f1; }
+        html.dark { background: #080807; }
+      }
+    </style>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

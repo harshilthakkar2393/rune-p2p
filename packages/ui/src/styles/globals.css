@@ -223,6 +223,16 @@ h6 {
   * {
     @apply border-border outline-ring/50;
   }
+  /* The document itself carries the theme: browser chrome that is translucent
+     over the page (iOS Safari), overscroll, and the first frame all show html,
+     not body. color-scheme keeps UA canvas, scrollbars and form controls in step. */
+  html {
+    background: var(--chrome, var(--background));
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
   body {
     @apply bg-background text-foreground;
   }

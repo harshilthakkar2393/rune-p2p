@@ -16,6 +16,28 @@ type ThemeProviderState = {
 
 const ThemeProviderContext = createContext<ThemeProviderState | null>(null);
 
+/**
+ * Browser chrome follows <meta name="theme-color">: iOS Safari tints its
+ * bars from it, macOS web apps paint the title bar with it. The static
+ * pair in index.html only follows the OS; a manual theme rewrites it.
+ * Reads --chrome (the app's ground colour), falling back to --background.
+ */
+function syncThemeColor(root: HTMLElement) {
+  const styles = getComputedStyle(root);
+  const background = (
+    styles.getPropertyValue("--chrome") ||
+    styles.getPropertyValue("--background")
+  ).trim();
+  if (background === "") return;
+  const metas = document.querySelectorAll<HTMLMetaElement>(
+    'meta[name="theme-color"]',
+  );
+  for (const meta of metas) {
+    meta.removeAttribute("media");
+    meta.content = background;
+  }
+}
+
 function getSystemTheme(): "dark" | "light" {
   return window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
@@ -57,6 +79,7 @@ export function ThemeProvider({
   useEffect(() => {
     const root = document.documentElement;
     root.classList.toggle("dark", resolvedTheme === "dark");
+    syncThemeColor(root);
   }, [resolvedTheme]);
 
   const value = useMemo<ThemeProviderState>(
