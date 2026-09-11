@@ -1,4 +1,4 @@
-import { cn } from "@rune/ui/lib/utils";
+import { cn } from "cn";
 
 /**
  * ᚱune — the real Elder Futhark raidō (U+16B1) as the R, set in Noto Sans

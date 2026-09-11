@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode } from "react";
 
 import { Button } from "@rune/ui/components/button";
-import { cn } from "@rune/ui/lib/utils";
+import { cn } from "cn";
 
 /** Floating pill toolbar for grid selections (Pages / Folder / Trash).
  * Renders nothing at count 0. Children are the page-specific actions;

@@ -24,7 +24,7 @@ import { setPaletteOpen } from "@/lib/palette";
 import type { Folder } from "@/lib/schema";
 import { useSyncStatus } from "@/lib/sync/status";
 import { Button } from "@rune/ui/components/button";
-import { cn } from "@rune/ui/lib/utils";
+import { cn } from "cn";
 import { Kbd } from "@rune/ui/components/kbd";
 import {
   Sidebar,

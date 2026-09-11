@@ -11,7 +11,7 @@ import {
 
 import { useSyncStatus } from "@/lib/sync/status";
 import { Button } from "@rune/ui/components/button";
-import { cn } from "@rune/ui/lib/utils";
+import { cn } from "cn";
 import {
   DropdownMenu,
   DropdownMenuContent,

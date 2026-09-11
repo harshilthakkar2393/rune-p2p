@@ -15,7 +15,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@rune/ui/components/context-menu";
-import { cn } from "@rune/ui/lib/utils";
+import { cn } from "cn";
 
 export type CardAction =
   | {

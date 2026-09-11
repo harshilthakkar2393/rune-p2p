@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@rune/ui": "workspace:*",
-    "cnfast": "^0.1.0",
+    "cn": "^0.2.6",
     "fumadocs-core": "16.15.4",
     "fumadocs-mdx": "15.4.0",
     "fumadocs-ui": "npm:@fumadocs/base-ui@16.15.4",

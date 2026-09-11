@@ -50,7 +50,7 @@ import {
   DropdownMenuTrigger,
 } from "@rune/ui/components/dropdown-menu";
 import { ScrollArea } from "@rune/ui/components/scroll-area";
-import { cn } from "@rune/ui/lib/utils";
+import { cn } from "cn";
 
 export const Route = createFileRoute("/trash")({
   head: () => ({ meta: [{ title: "Trash — Rune" }] }),

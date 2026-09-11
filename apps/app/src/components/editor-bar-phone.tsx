@@ -32,7 +32,7 @@ import { useKeyboardInset } from "@/hooks/use-keyboard-inset";
 import { useActiveEditor } from "@/lib/editor-ref";
 import { Button } from "@rune/ui/components/button";
 import { useIsMobile } from "@rune/ui/hooks/use-mobile";
-import { cn } from "@rune/ui/lib/utils";
+import { cn } from "cn";
 
 /**
  * The phone editor's one control surface: a capsule on the keyboard, the

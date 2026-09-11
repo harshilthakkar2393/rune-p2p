@@ -3,7 +3,7 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
-import { cn } from "@rune/ui/lib/utils"
+import { cn } from "cn"
 import { Button } from "@rune/ui/components/button"
 import { Input } from "@rune/ui/components/input"
 import { Textarea } from "@rune/ui/components/textarea"

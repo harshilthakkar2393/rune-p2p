@@ -1,7 +1,7 @@
 import * as React from "react"
 import { AlertDialog as AlertDialogPrimitive } from "@base-ui/react/alert-dialog"
 
-import { cn } from "@rune/ui/lib/utils"
+import { cn } from "cn"
 import { Button } from "@rune/ui/components/button"
 
 function AlertDialog({ ...props }: AlertDialogPrimitive.Root.Props) {

@@ -1,5 +1,5 @@
 import { isMac, modLabel } from "@/lib/platform";
-import { cn } from "@rune/ui/lib/utils";
+import { cn } from "cn";
 
 /** Shortcut label. One size for glyph and letter: Geist lacks ⌘, so the font
  * stack falls to system-ui for it (see globals.css), which draws it to cap

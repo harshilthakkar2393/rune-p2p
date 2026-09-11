@@ -14,7 +14,7 @@ import { pageTitle, searchNodes, type Match } from "@/lib/search";
 import { useSearchQuery } from "@/lib/search-state";
 import type { Folder, Page } from "@/lib/schema";
 import { ScrollArea } from "@rune/ui/components/scroll-area";
-import { cn } from "@rune/ui/lib/utils";
+import { cn } from "cn";
 
 /**
  * Phone search (`/search`): the results half. The field itself is

@@ -11,7 +11,7 @@ import {
   useSearchQuery,
 } from "@/lib/search-state";
 import { Button } from "@rune/ui/components/button";
-import { cn } from "@rune/ui/lib/utils";
+import { cn } from "cn";
 
 /**
  * The phone search field. Lives in the root layout, always mounted, on its

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { correction, generate } from "lean-qr";
 import { toSvgSource } from "lean-qr/extras/svg";
-import { cn } from "@rune/ui/lib/utils";
+import { cn } from "cn";
 
 import { buildPairLink } from "@/lib/sync/pair-link";
 

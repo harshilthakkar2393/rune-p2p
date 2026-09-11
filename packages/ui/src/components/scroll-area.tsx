@@ -4,7 +4,7 @@ import * as React from "react";
 
 import { ScrollArea as ScrollAreaPrimitive } from "@base-ui-components/react/scroll-area";
 
-import { cn } from "@rune/ui/lib/utils";
+import { cn } from "cn";
 
 import { useTouchPrimary } from "@rune/ui/hooks/use-has-primary-touch";
 
