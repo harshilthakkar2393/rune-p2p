@@ -47,8 +47,9 @@ function RootComponent() {
           <SidebarInset
             className={cn(
               "h-(--app-h) overflow-hidden pt-[env(safe-area-inset-top)] md:h-[calc(var(--app-h)-16px)] md:pt-0",
-              // Room for the phone dock so the last card scrolls clear of it.
-              dockVisible && "pb-24",
+              // Content scrolls under the phone dock; each screen's <main>
+              // gets bottom room so the last item clears it, no blank band.
+              dockVisible && "[&_main]:pb-[calc(var(--dock-h)+var(--dock-inset)+1rem)]",
             )}
           >
             <Outlet />

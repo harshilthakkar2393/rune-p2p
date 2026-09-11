@@ -14,20 +14,16 @@ import { focusSearchInput } from "@/lib/search-state";
 import { onViewportChange, settleViewport } from "@/lib/viewport";
 import { Button } from "@rune/ui/components/button";
 
-/** Phone nav: tabs pill left (Home · Folders · Search), New page right. Hidden while a page is open and on /search, where the pill morphs into the search field (shared view-transition names).
+/** Phone nav: tabs pill left (Home · Folders · Search), New page right. On every screen including an open page; hidden on /search, where the pill morphs into the search field (shared view-transition names), and in the pair flow.
  * Folders is the phone's way to every list: its screen carries "All pages" first, so the
  * tab also lights up on /pages (Apple Files' Browse, Todoist's Browse). */
 
 const TAB_CLASS =
   "flex size-12 items-center justify-center rounded-full text-muted-foreground transition-colors data-[status=active]:bg-accent data-[status=active]:text-foreground";
 
-/** True on phones for routes that show the dock; the editor and pair flow do not. */
+/** True on phones for routes that show the dock; the pair flow and /search do not. */
 export function useDockVisible(pathname: string): boolean {
-  return (
-    !pathname.startsWith("/page/") &&
-    !pathname.startsWith("/pair") &&
-    !pathname.startsWith("/search")
-  );
+  return !pathname.startsWith("/pair") && !pathname.startsWith("/search");
 }
 
 function Tab({
@@ -79,7 +75,7 @@ export function MobileDock() {
       // Anchored from the top via --app-h (lvh in standalone): bottom:0 would
       // follow the layout viewport, which iOS gets 59px short after a resume.
       className="pointer-events-none fixed inset-x-0 z-40 flex h-14.5 items-center justify-between px-4 md:hidden"
-      style={{ top: "calc(var(--app-h) - 3.625rem - var(--dock-inset))" }}
+      style={{ top: "calc(var(--app-h) - var(--dock-h) - var(--dock-inset))" }}
     >
       <nav className="pointer-events-auto flex items-center gap-0.5 rounded-full border bg-card p-1 shadow-lg [view-transition-name:dock]">
         <Tab to="/" icon={Home04Icon} label="Home" active={pathname === "/"} />
