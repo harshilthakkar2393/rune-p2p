@@ -6,6 +6,7 @@ import { TanStackDevtools } from "@tanstack/react-devtools";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { InspectorSlot } from "@/components/inspector-slot";
+import { PageInfoDrawer } from "@/components/page-info-drawer";
 import { MobileDock, useDockVisible } from "@/components/mobile-dock";
 import { SearchDock } from "@/components/search-dock";
 import { SearchPalette } from "@/components/search-palette";
@@ -17,7 +18,7 @@ import { SidebarInset, SidebarProvider } from "@rune/ui/components/sidebar";
 import { useIsMobile } from "@rune/ui/hooks/use-mobile";
 import { TooltipProvider } from "@rune/ui/components/tooltip";
 
-import { cn } from "@rune/ui/lib/utils";
+import { cn } from "cn";
 
 import "../styles.css";
 
@@ -55,6 +56,7 @@ function RootComponent() {
             <Outlet />
           </SidebarInset>
           <InspectorSlot />
+          {isMobile && <PageInfoDrawer />}
           {isMobile && <MobileDock />}
           {isMobile && <SearchDock />}
         </SidebarProvider>

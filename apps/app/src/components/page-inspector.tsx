@@ -11,6 +11,7 @@ import {
   TextAlignJustifyCenterIcon,
 } from "@hugeicons/core-free-icons";
 
+import { Tip } from "@/components/tip";
 import { getActiveEditor } from "@/lib/editor-ref";
 import { getPageWordCount } from "@/lib/excerpt";
 import { folderColorValue } from "@/lib/folder-colors";
@@ -18,6 +19,16 @@ import { humanTime } from "@/lib/human-time";
 import { getNodesMap } from "@/lib/index-doc";
 import { trashNode } from "@/lib/nodes";
 import type { Folder, Page } from "@/lib/schema";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@rune/ui/components/alert-dialog";
 import { Badge } from "@rune/ui/components/badge";
 import { Button } from "@rune/ui/components/button";
 import { ScrollArea } from "@rune/ui/components/scroll-area";
@@ -46,9 +57,19 @@ async function exportMarkdown(page: Page) {
   URL.revokeObjectURL(url);
 }
 
-export function PageInspector({ page, folder }: { page: Page; folder: Folder | undefined }) {
+export function PageInspector({
+  page,
+  folder,
+  phone = false,
+}: {
+  page: Page;
+  folder: Folder | undefined;
+  /** In the phone drawer: touch-sized actions, no tooltips. */
+  phone?: boolean;
+}) {
   const navigate = useNavigate();
   const [words, setWords] = useState<number | null>(null);
+  const [confirming, setConfirming] = useState(false);
   const folderTint = folderColorValue(folder?.color);
 
   useEffect(() => {
@@ -117,27 +138,59 @@ export function PageInspector({ page, folder }: { page: Page; folder: Folder | u
           <span className="font-mono text-tiny text-muted-foreground">local only</span>
         </section>
 
-        <section className="mt-auto -mx-2 flex flex-col gap-0.5 border-t pt-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="justify-start font-normal text-foreground/85"
-            onClick={() => void exportMarkdown(page)}
-          >
-            <HugeiconsIcon icon={Download04Icon} strokeWidth={1.75} />
-            Export Markdown
-          </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            className="justify-start font-normal"
-            onClick={sendToTrash}
-          >
-            <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
-            Move to trash
-          </Button>
+        <section className="mt-auto flex items-center justify-end gap-2">
+          <MaybeTip label="Export Markdown" enabled={!phone}>
+            <Button
+              variant="secondary"
+              size={phone ? "icon-lg" : "icon"}
+              aria-label="Export Markdown"
+              onClick={() => void exportMarkdown(page)}
+            >
+              <HugeiconsIcon icon={Download04Icon} strokeWidth={1.75} />
+            </Button>
+          </MaybeTip>
+          <MaybeTip label="Move to trash" enabled={!phone}>
+            <Button
+              variant="destructive"
+              size={phone ? "icon-lg" : "icon"}
+              aria-label="Move to trash"
+              onClick={() => setConfirming(true)}
+            >
+              <HugeiconsIcon icon={Delete02Icon} strokeWidth={1.75} />
+            </Button>
+          </MaybeTip>
         </section>
       </div>
+      <AlertDialog open={confirming} onOpenChange={setConfirming}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Move to trash?</AlertDialogTitle>
+            <AlertDialogDescription>
+              “{page.title === "" ? "Untitled" : page.title}” goes to Trash, where it stays for 30
+              days before it is deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={sendToTrash}>
+              Move to trash
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </ScrollArea>
   );
+}
+
+/** Tooltips are for pointers; on touch the trigger wrapper only gets in the way. */
+function MaybeTip({
+  label,
+  enabled,
+  children,
+}: {
+  label: string;
+  enabled: boolean;
+  children: React.ReactElement;
+}) {
+  return enabled ? <Tip label={label}>{children}</Tip> : children;
 }

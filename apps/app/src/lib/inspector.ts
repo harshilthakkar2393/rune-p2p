@@ -17,9 +17,10 @@ function readOpen(): boolean {
   }
 }
 
-let state: { pageId: string | null; open: boolean } = {
+let state: { pageId: string | null; open: boolean; sheet: boolean } = {
   pageId: null,
   open: readOpen(),
+  sheet: false,
 };
 const listeners = new Set<() => void>();
 
@@ -29,7 +30,13 @@ function emit(next: typeof state) {
 }
 
 export function setInspectorPage(pageId: string | null) {
-  emit({ ...state, pageId });
+  emit({ ...state, pageId, sheet: false });
+}
+
+/** Phone: the inspector as a bottom sheet. Transient, never persisted — a
+ * sheet that reopened itself on every page would be a modal, not a panel. */
+export function setInspectorSheet(sheet: boolean) {
+  emit({ ...state, sheet });
 }
 
 export function toggleInspector() {
