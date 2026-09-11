@@ -19,6 +19,17 @@
 :root {
   --app-h: 100svh;
   --dock-inset: max(env(safe-area-inset-bottom), 1rem);
+  --dock-h: 3.625rem;
+  /* Ground behind everything: what browser chrome, overscroll and the first
+     frame show. Phones sit on --background; from md the sidebar-inset layout
+     floats the content card on --sidebar. Theme provider mirrors it into
+     <meta name="theme-color">. */
+  --chrome: var(--background);
+}
+@media (min-width: 768px) {
+  :root {
+    --chrome: var(--sidebar);
+  }
 }
 @media (display-mode: standalone) {
   :root {
@@ -63,6 +74,14 @@ body {
   --bn-colors-shadow: var(--border);
   --bn-colors-border: var(--border);
   --bn-colors-side-menu: var(--muted-foreground);
+}
+
+/* Phone gutter: BlockNote hardcodes padding-inline 54px for its hover side
+   menu; touch has no hover, so the editor sits on the app's 16px gutter. */
+@media (max-width: 767px) {
+  .bn-root[data-color-scheme] .bn-editor {
+    padding-inline: 1rem;
+  }
 }
 
 /* Editor is the typographic reference; only align its font family with the app. */

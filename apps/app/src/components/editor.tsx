@@ -14,7 +14,7 @@ import { useTheme } from "@rune/ui/components/theme-provider";
 
 const PAGE_FRAGMENT = "blocknote";
 
-function BoundEditor({ doc }: { doc: Y.Doc }) {
+function BoundEditor({ doc, phone }: { doc: Y.Doc; phone: boolean }) {
   const { resolvedTheme } = useTheme();
   const awareness = getSyncAwareness();
   const editor = useCreateBlockNote(
@@ -36,12 +36,25 @@ function BoundEditor({ doc }: { doc: Y.Doc }) {
     return () => setActiveEditor(null);
   }, [editor]);
 
-  return <BlockNoteView editor={editor} theme={resolvedTheme} />;
+  // Phones get none of BlockNote's pointer UI: the side menu fires on the
+  // mousemove iOS synthesises per tap, the floating toolbar fights the iOS
+  // selection callout, hover toolbars are unreachable. The keyboard bar
+  // (editor-bar-phone.tsx) is the phone's one control surface.
+  return (
+    <BlockNoteView
+      editor={editor}
+      theme={resolvedTheme}
+      sideMenu={!phone}
+      formattingToolbar={!phone}
+      linkToolbar={!phone}
+      tableHandles={!phone}
+    />
+  );
 }
 
-export function Editor({ pageId }: { pageId: string }) {
+export function Editor({ pageId, phone = false }: { pageId: string; phone?: boolean }) {
   const doc = usePageDoc(pageId);
   // Until IndexedDB has loaded, rendering would bind BlockNote to an empty doc.
   if (!doc) return null;
-  return <BoundEditor key={pageId} doc={doc} />;
+  return <BoundEditor key={pageId} doc={doc} phone={phone} />;
 }
