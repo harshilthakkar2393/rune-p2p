@@ -1,3 +1,5 @@
+> **DEPRECATED.** This project was renamed from `rune` to `rune-p2p` and is no longer maintained. The name "rune" is being reused for a different project.
+
 # Turborepo starter
 
 This Turborepo starter is maintained by the Turborepo core team.
